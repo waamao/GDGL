@@ -3,8 +3,6 @@
 <head>
     <link rel="icon" type="image/x-icon" href="./favicon.png">
     <link rel="apple-touch-icon" href="./favicon.png">
-<!-- 如果你使用的是 PNG 格式，請用下方這行 -->
-<!-- <link rel="icon" type="image/png" href="./assets/images/favicon.png"> -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>工地材料訂購系統</title>
@@ -15,18 +13,18 @@
         body { background-color: #f3f4f6; color: #1f2937; margin: 0; padding-bottom: 96px; -webkit-tap-highlight-color: transparent; }
         .max-w-md { max-width: 448px; margin: 0 auto; padding: 16px; }
         
-        /* 頁首樣式 */
-        header { background-color: #2563eb; color: #ffffff; padding: 16px; position: sticky; top: 0; display: flex; justify-content: space-between; items-center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        /* 頁首樣式：換成深灰色調 */
+        header { background-color: #1f2937; color: #ffffff; padding: 16px; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .header-title { font-size: 16px; font-weight: bold; margin: 0 8px; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: center; }
         
-        /* 通用按鈕 */
+        /* 通用按鈕：全數換成黑白灰階風格 */
         button { border: none; cursor: pointer; border-radius: 8px; font-weight: bold; padding: 8px 12px; font-size: 12px; transition: background-color 0.2s; }
         button:active { opacity: 0.8; }
-        .btn-blue { background-color: #1d4ed8; color: white; }
-        .btn-red { background-color: #ef4444; color: white; }
-        .btn-green { background-color: #16a34a; color: white; }
-        .btn-amber { background-color: #f59e0b; color: white; }
-        .btn-slate { background-color: #334155; color: white; }
+        .btn-blue { background-color: #374151; color: white; }
+        .btn-red { background-color: #555555; color: white; }
+        .btn-green { background-color: #222222; color: white; }
+        .btn-amber { background-color: #777777; color: white; }
+        .btn-slate { background-color: #444444; color: white; }
         
         /* 加大返回鍵 */
         #btnBack { font-size: 20px; padding: 4px 16px; }
@@ -38,33 +36,33 @@
         /* 卡片與區塊樣式 */
         .card { background-color: #ffffff; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 12px; }
         .alert-box { padding: 12px; border-radius: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        .alert-amber { background-color: #fef3c7; border: 1px solid #fde68a; color: #78350f; }
-        .alert-blue { background-color: #dbeafe; border: 1px solid #bfdbfe; color: #1e40af; font-weight: 600; }
+        .alert-amber { background-color: #f3f4f6; border: 1px solid #cbd5e1; color: #333333; }
+        .alert-blue { background-color: #e5e7eb; border: 1px solid #cbd5e1; color: #111111; font-weight: 600; }
         
         /* 表單輸入框 */
         input[type="text"], select { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; background-color: white; }
-        input[type="text"]:focus, select:focus { border-color: #2563eb; }
+        input[type="text"]:focus, select:focus { border-color: #333333; }
         .flex-row { display: flex; gap: 8px; width: 100%; align-items: center; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         
         /* 清單列表物件 */
         .list-container { display: flex; flex-direction: column; gap: 8px; }
-        .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; items-center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; }
-        .list-item:active { border-color: #2563eb; }
+        .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; }
+        .list-item:active { border-color: #333333; }
         
         /* 前台材料品項勾選樣式 */
         .item-label { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; cursor: pointer; user-select: none; font-size: 14px; font-weight: 500; }
-        .item-checkbox { width: 20px; height: 20px; border-radius: 4px; accent-color: #2563eb; flex-shrink: 0; }
+        .item-checkbox { width: 20px; height: 20px; border-radius: 4px; accent-color: #333333; flex-shrink: 0; }
         .qty-input { width: 96px !important; text-align: center; font-weight: 600; background-color: #f8fafc !important; }
-        .cart-qty-input { width: 96px !important; text-align: center; font-weight: bold; background-color: #fef3c7 !important; color: #78350f; }
+        .cart-qty-input { width: 96px !important; text-align: center; font-weight: bold; background-color: #e5e7eb !important; color: #333333; }
         
         /* 後台管理列表縮緊樣式 */
         .scroll-box { max-height: 180px; overflow-y: auto; background-color: #f9fafb; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
-        .manage-item { background-color: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; justify-content: space-between; items-center; font-size: 13px; gap: 4px; }
+        .manage-item { background-color: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 4px; }
         .manage-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .manage-btns { display: flex; gap: 4px; flex-shrink: 0; }
-        .manage-btns button { padding: 4px 6px; font-size: 11px; font-weight: normal; background: none; color: #2563eb; }
-        .manage-btns .btn-del { color: #ef4444; }
+        .manage-btns button { padding: 4px 6px; font-size: 11px; font-weight: normal; background: none; color: #555555; }
+        .manage-btns .btn-del { color: #888888; }
         
         /* 大按鈕 */
         .btn-block-lg { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; display: block; text-decoration: none; box-sizing: border-box; margin-top: 16px; }
@@ -94,7 +92,7 @@
         <section id="pageSites" class="page active">
             <div class="alert-box alert-amber">
                 <div style="font-weight: bold;">💾 資料備份與手動匯入</div>
-                <div style="font-size: 11px; color: #92400e;">系統具備本機自動記憶功能，通常無須重複匯入。若欲更換手機或清除瀏覽器快取，可在此執行匯出/匯入。</div>
+                <div style="font-size: 11px; color: #666666;">系統具備本機自動記憶功能，通常無須重複匯入。若欲更換手機或清除瀏覽器快取，可在此執行匯出/匯入。</div>
                 <div class="flex-row">
                     <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
                     <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 8px;">📥 選擇並匯入資料備份檔 (JSON)</button>
@@ -177,6 +175,20 @@
                 <div id="manageListCategories" class="scroll-box"></div>
             </div>
 
+            <div class="card">
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📦 材料品項維護</h3>
+                <div style="margin-bottom: 8px;">
+                    <select id="manageSelectCategory" onchange="renderManageItems()" style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px; font-size: 13px;">
+                        <option value="">請先選擇分類...</option>
+                    </select>
+                </div>
+                <div class="flex-row">
+                    <input type="text" id="inputNewManageItem" placeholder="輸入新品項名稱">
+                    <button onclick="addManageItem()" class="btn-green" style="flex-shrink: 0;">新增</button>
+                </div>
+                <div id="manageListItems" class="scroll-box"></div>
+            </div>
+
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1;">
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">🔗 Apps Script 連動網址設定</h3>
                 <div style="font-size: 11px; color: #64748b; line-height: 1.4;">此處設定會同步記憶在手機中，且點擊最上方「匯出系統備份」時也會自動打包進 JSON 檔案。</div>
@@ -247,6 +259,17 @@
                     const parsed = JSON.parse(e.target.result);
                     if (parsed.sites && parsed.categories && parsed.items) {
                         db = parsed;
+                        
+                        if (Array.isArray(db.sites)) {
+                            db.sites.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+                        }
+                        if (Array.isArray(db.categories)) {
+                            db.categories.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+                        }
+                        if (Array.isArray(db.items)) {
+                            db.items.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+                        }
+
                         if (!db.config) db.config = { scriptUrl: '' };
                         saveToLocalStorage(); 
                         
@@ -254,7 +277,7 @@
                             document.getElementById('inputScriptUrl').value = db.config.scriptUrl || '';
                         }
 
-                        alert('🎉 全站基礎資料與連動網址已匯入成功，系統已自動儲存記憶！');
+                        alert('🎉 全站基礎資料與連動網址已匯入成功，並已自動排序儲存！');
                         navigateTo('sites');
                     } else { alert('匯入失敗：JSON 結構格式不正確。'); }
                 } catch (err) { alert('讀取檔案失敗。'); }
@@ -335,6 +358,7 @@
                 
                 renderManageSites();
                 renderManageCategories();
+                renderManageCategoryDropdown(); 
             }
             updateCartBadge();
         }
@@ -359,7 +383,7 @@
                 div.onclick = function() { currentState.siteId=site.id; currentState.siteName=site.name; navigateTo('categories'); };
                 div.innerHTML = `
                     <span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1f2937;">${site.name}</span> 
-                    <span style="color: #2563eb; font-size: 12px; font-weight: bold; flex-shrink: 0;">進入 →</span>
+                    <span style="color: #4b5563; font-size: 12px; font-weight: bold; flex-shrink: 0;">進入 →</span>
                 `;
                 list.appendChild(div);
             });
@@ -375,7 +399,7 @@
                 div.onclick = function() { currentState.catId=cat.id; currentState.catName=cat.name; navigateTo('items'); };
                 div.innerHTML = `
                     <span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1f2937;">${cat.name}</span> 
-                    <span style="color: #2563eb; font-size: 12px; font-weight: bold; flex-shrink: 0;">進入 →</span>
+                    <span style="color: #4b5563; font-size: 12px; font-weight: bold; flex-shrink: 0;">進入 →</span>
                 `;
                 list.appendChild(div);
             });
@@ -430,12 +454,13 @@
                 const div = document.createElement('div');
                 div.className = "list-item";
                 div.style.padding = "10px 12px";
+                
                 div.innerHTML = `
                     <label class="item-label">
                         <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="item-checkbox">
                         <span style="word-break: break-all; white-space: normal; padding-right: 4px;">${item.name}</span>
                     </label>
-                    <div style="flex-shrink: 0; display: flex; align-items: center;">
+                    <div style="flex-shrink: 0; display: flex; align-items: center; gap: 8px;">
                         <input type="text" inputmode="decimal" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
                     </div>
                 `;
@@ -479,7 +504,7 @@
                 div.className = "list-item";
                 div.innerHTML = `
                     <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
-                        <span style="font-size: 11px; font-weight: bold; color: #2563eb; margin-bottom: 2px;">[${catName}]</span>
+                        <span style="font-size: 11px; font-weight: bold; color: #4b5563; margin-bottom: 2px;">[${catName}]</span>
                         <span style="word-break: break-all; white-space: normal; padding-right: 4px; font-size: 14px;">${itemObj.name}</span>
                     </div>
                     <div style="display: flex; align-items: center; flex-shrink: 0; gap: 8px;">
@@ -685,6 +710,7 @@
                 if (currentState.catId === id) { currentState.catId = null; currentState.catName = ''; }
                 saveToLocalStorage(); 
                 renderManageCategories();
+                if (typeof renderManageCategoryDropdown === 'function') renderManageCategoryDropdown();
             }
         }
         function renderManageCategories() {
@@ -702,6 +728,95 @@
                 `;
                 list.appendChild(div);
             });
+            if (typeof renderManageCategoryDropdown === 'function') renderManageCategoryDropdown();
+        }
+
+        function renderManageCategoryDropdown() {
+            const select = document.getElementById('manageSelectCategory');
+            if (!select) return;
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">請先選擇分類...</option>';
+            db.categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.id;
+                opt.innerText = cat.name;
+                select.appendChild(opt);
+            });
+            
+            if (currentVal && db.categories.find(c => c.id === currentVal)) {
+                select.value = currentVal;
+            } else {
+                select.value = "";
+            }
+            renderManageItems();
+        }
+
+        function renderManageItems() {
+            const list = document.getElementById('manageListItems');
+            const catId = document.getElementById('manageSelectCategory').value;
+            
+            if (!catId) {
+                list.innerHTML = '<p style="color:#9ca3af; text-align:center; margin:8px 0;">請先從上方選擇分類。</p>';
+                return;
+            }
+
+            const items = db.items.filter(item => item.catId === catId);
+            list.innerHTML = items.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:8px 0;">此分類暫無品項。</p>' : '';
+            
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "manage-item";
+                const safeName = item.name.replace(/'/g, "\\'");
+                div.innerHTML = `
+                    <span class="manage-text">${item.name}</span>
+                    <div class="manage-btns">
+                        <button onclick="renameManageItem('${item.id}', '${safeName}')">✏️ 改名</button>
+                        <button onclick="deleteManageItem('${item.id}', '${safeName}')" class="btn-del">🗑️ 刪除</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function addManageItem() {
+            const catId = document.getElementById('manageSelectCategory').value;
+            if (!catId) return alert('請先選擇上方的材料分類');
+            const name = document.getElementById('inputNewManageItem').value.trim();
+            if (!name) return alert('請輸入品項名稱');
+            
+            const isDuplicate = db.items.some(item => item.catId === catId && item.name.toLowerCase() === name.toLowerCase());
+            if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
+
+            db.items.push({ id: Date.now().toString(), catId, name });
+            saveToLocalStorage();
+            document.getElementById('inputNewManageItem').value = '';
+            renderManageItems();
+        }
+
+        function renameManageItem(id, oldName) {
+            const newName = prompt(`請輸入品項「${oldName}」的新名稱：`, oldName);
+            if (newName === null) return;
+            const trimmed = newName.trim();
+            if (!trimmed) return alert('品項名稱不能為空！');
+
+            const item = db.items.find(i => i.id === id);
+            if (item) {
+                item.name = trimmed;
+                saveToLocalStorage();
+                renderManageItems();
+            }
+        }
+
+        function deleteManageItem(id, name) {
+            if (confirm(`確定要刪除材料品項「${name}」嗎？`)) {
+                db.items = db.items.filter(item => item.id !== id);
+                if (cart[id]) {
+                    delete cart[id];
+                    updateCartBadge();
+                }
+                saveToLocalStorage();
+                renderManageItems();
+            }
         }
 
         loadFromLocalStorage(); 
