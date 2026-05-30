@@ -81,6 +81,7 @@
         </div>
         <h1 id="appTitle" class="header-title">選擇工地</h1>
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
+            <button id="btnExportTop" onclick="exportJSON()" class="btn-slate">匯出系統備份</button>
             <button id="btnManage" onclick="navigateTo('manage')" class="btn-slate">⚙️ 設定後台</button>
             <button id="btnNavCart" onclick="navigateTo('cart')" class="hidden btn-amber">📋 訂單(<span id="cartCount">0</span>)</button>
         </div>
@@ -139,7 +140,6 @@
             </div>
 
             <button onclick="navigateTo('cart')" class="btn-amber btn-block-lg">📋 查看我的材料訂單 (<span id="cartCountBottom">0</span>)</button>
-            <button onclick="exportJSON()" class="btn-slate btn-block-sm">📤 匯出目前全站基礎資料備份 (JSON)</button>
         </section>
 
         <section id="pageCart" class="page">
@@ -274,6 +274,9 @@
             document.getElementById('btnNavCart').classList.add('hidden');
             document.getElementById('btnManage').classList.add('hidden');
 
+            // 確保每一頁均固定維持顯示此按鈕
+            document.getElementById('btnExportTop').classList.remove('hidden');
+
             if (page === 'sites') {
                 document.getElementById('pageSites').classList.add('active');
                 document.getElementById('appTitle').innerText = '選擇工地';
@@ -283,23 +286,34 @@
                 renderSites();
             } else if (page === 'categories') {
                 document.getElementById('pageCategories').classList.add('active');
-                document.getElementById('appTitle').innerText = '選擇分類';
-                document.getElementById('currentSiteName').innerText = currentState.siteName;
+                document.getElementById('appTitle').innerText = ''; 
                 document.getElementById('btnNavCart').classList.remove('hidden');
+                
+                if(document.getElementById('currentSiteName')) {
+                    document.getElementById('currentSiteName').innerText = currentState.siteName || '';
+                }
                 renderCategories();
             } else if (page === 'items') {
                 document.getElementById('pageItems').classList.add('active');
-                document.getElementById('appTitle').innerText = '選擇品項';
-                document.getElementById('currentSiteName2').innerText = currentState.siteName;
-                document.getElementById('currentCategoryName').innerText = currentState.catName;
+                document.getElementById('appTitle').innerText = ''; 
                 document.getElementById('btnNavCart').classList.remove('hidden');
                 document.getElementById('inputQuickItem').value = ''; 
+                
+                if(document.getElementById('currentSiteName2')) {
+                    document.getElementById('currentSiteName2').innerText = currentState.siteName || '';
+                }
+                if(document.getElementById('currentCategoryName')) {
+                    document.getElementById('currentCategoryName').innerText = currentState.catName || '';
+                }
                 renderItems();
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
                 document.getElementById('appTitle').innerText = '📋 訂單確認';
-                document.getElementById('cartSiteName').innerText = currentState.siteName || '未選擇工地';
                 document.getElementById('btnBack').dataset.backTo = prevPage === 'cart' ? 'items' : prevPage;
+                
+                if(document.getElementById('cartSiteName')) {
+                    document.getElementById('cartSiteName').innerText = currentState.siteName || '';
+                }
                 renderCart();
             } else if (page === 'manage') {
                 document.getElementById('pageManage').classList.add('active');
@@ -489,7 +503,6 @@
                 return;
             }
 
-            // 優化：日期自動補零 (例如：2026/05/30)
             const now = new Date();
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -499,7 +512,6 @@
             const grouped = {};
             selectedItems.forEach(item => {
                 if (!grouped[item.catName]) grouped[item.catName] = [];
-                // 🌟 核心修改：將原本的「：」改為「 *」號
                 grouped[item.catName].push(`${item.itemName} *${item.qty}`);
             });
 
@@ -700,6 +712,7 @@
             }
         }
 
+        // 渲染品項
         function renderManageItems() {
             const list = document.getElementById('manageListItems');
             const targetCatId = document.getElementById('selectManageCategory').value;
