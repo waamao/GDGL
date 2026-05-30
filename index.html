@@ -30,16 +30,12 @@
     <main class="p-4 max-w-md mx-auto">
 
         <section id="pageSites" class="page active space-y-4">
-            
             <div id="backupSection" class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs space-y-2 shadow-sm">
-                <div class="font-bold text-amber-800 flex items-center gap-1">💾 資料備份與匯入 (JSON)</div>
+                <div class="font-bold text-amber-800 flex items-center gap-1">💾 資料匯入 (JSON)</div>
                 <div class="flex gap-2">
                     <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
-                    <button onclick="document.getElementById('importFile').click()" class="flex-1 bg-amber-600 text-white py-1.5 rounded-md font-medium active:bg-amber-700 text-center">
-                        📥 匯入 JSON
-                    </button>
-                    <button onclick="exportJSON()" class="flex-1 bg-amber-700 text-white py-1.5 rounded-md font-medium active:bg-amber-800 text-center">
-                        📤 匯出備份
+                    <button onclick="document.getElementById('importFile').click()" class="w-full bg-amber-600 text-white py-1.5 rounded-md font-medium active:bg-amber-700 text-center">
+                        📥 匯入 JSON 基礎資料
                     </button>
                 </div>
             </div>
@@ -71,6 +67,14 @@
                 <input type="text" id="searchBar" oninput="renderItems()" class="w-full text-sm focus:outline-none" placeholder="搜尋此分類下的品項關鍵字...">
             </div>
 
+            <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl text-xs space-y-2 shadow-sm">
+                <div class="font-bold text-slate-700 flex items-center gap-1">➕ 快速新增材料品項 (至當前分類)</div>
+                <div class="flex gap-2">
+                    <input type="text" id="inputQuickItem" class="flex-1 border rounded-lg px-3 py-1.5 text-xs bg-white focus:outline-none focus:border-blue-500" placeholder="如：40kg 水泥">
+                    <button onclick="quickAddItem()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg font-medium active:bg-blue-700 shrink-0">新增</button>
+                </div>
+            </div>
+
             <div class="space-y-2">
                 <h3 class="font-bold text-gray-600 px-1 text-sm">品項清單 (請勾選並輸入數量)：</h3>
                 <div id="listItems" class="space-y-2"></div>
@@ -78,6 +82,10 @@
 
             <button onclick="navigateTo('cart')" class="w-full bg-amber-500 text-white py-3 rounded-xl font-bold text-base shadow-lg active:bg-amber-600 mt-6 block text-center">
                 🛒 查看我的材料購物車 (<span id="cartCountBottom">0</span>)
+            </button>
+
+            <button onclick="exportJSON()" class="w-full bg-slate-600 text-white py-2.5 rounded-xl font-bold text-xs shadow md active:bg-slate-700 mt-2 block text-center">
+                📤 匯出目前全站基礎資料備份 (JSON)
             </button>
         </section>
 
@@ -98,7 +106,6 @@
         </section>
 
         <section id="pageManage" class="page space-y-6">
-
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 space-y-3">
                 <h3 class="font-bold text-gray-700 border-b pb-1 text-sm flex items-center justify-between">
                     <span>🏢 工地基本資料維護</span>
@@ -127,7 +134,7 @@
                 </h3>
                 <div class="grid grid-cols-2 gap-2">
                     <select id="selectManageCategory" onchange="renderManageItems()" class="border rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-blue-500">
-                        </select>
+                    </select>
                     <input type="text" id="inputNewItem" class="border rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500" placeholder="如：40kg 水泥">
                 </div>
                 <button onclick="addItem()" class="w-full bg-green-600 text-white py-1.5 rounded-lg text-xs font-medium active:bg-green-700">新增品項至上方選定分類</button>
@@ -138,9 +145,7 @@
     </main>
 
     <script>
-        // 【狀態：乾淨空白】移除所有範例，方便直接匯入 JSON 或手動建立
         let db = { sites: [], categories: [], items: [] };
-        
         let currentState = { page: 'sites', siteId: null, siteName: '', catId: null, catName: '' };
         let cart = {};
 
@@ -150,7 +155,6 @@
             document.getElementById('cartCountBottom').innerText = count;
         }
 
-        // 一鍵清空訂單並回到首頁
         function clearOrderAndHome() {
             if (confirm('確定要「清除目前的訂購清單」並返回首頁嗎？（這不會刪除您的工地與材料基本資料）')) {
                 cart = {};
@@ -195,10 +199,8 @@
             const prevPage = currentState.page;
             currentState.page = page;
 
-            // 隱藏所有頁面
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             
-            // 預設開關狀態
             document.getElementById('btnBack').classList.remove('hidden');
             document.getElementById('btnClearOrder').classList.remove('hidden');
             document.getElementById('btnNavCart').classList.add('hidden');
@@ -208,8 +210,8 @@
                 document.getElementById('pageSites').classList.add('active');
                 document.getElementById('appTitle').innerText = '選擇工地';
                 document.getElementById('btnBack').classList.add('hidden');
-                document.getElementById('btnClearOrder').classList.add('hidden'); // 首頁不需要清除鍵
-                document.getElementById('btnManage').classList.remove('hidden');  // 首頁才能進後台
+                document.getElementById('btnClearOrder').classList.add('hidden');
+                document.getElementById('btnManage').classList.remove('hidden');
                 renderSites();
             } else if (page === 'categories') {
                 document.getElementById('pageCategories').classList.add('active');
@@ -223,6 +225,7 @@
                 document.getElementById('currentSiteName2').innerText = currentState.siteName;
                 document.getElementById('currentCategoryName').innerText = currentState.catName;
                 document.getElementById('btnNavCart').classList.remove('hidden');
+                document.getElementById('inputQuickItem').value = ''; // 切換分類時清空輸入框
                 renderItems();
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
@@ -233,7 +236,7 @@
             } else if (page === 'manage') {
                 document.getElementById('pageManage').classList.add('active');
                 document.getElementById('appTitle').innerText = '⚙️ 後台系統設定';
-                document.getElementById('btnClearOrder').classList.add('hidden'); // 後台不顯示清除訂單
+                document.getElementById('btnClearOrder').classList.add('hidden');
                 renderManageSites();
                 renderManageCategories();
                 initManageCategorySelect();
@@ -308,6 +311,21 @@
             updateCartBadge();
         }
 
+        // 品項選單內「快速新增品項」的邏輯
+        function quickAddItem() {
+            const catId = currentState.catId;
+            const name = document.getElementById('inputQuickItem').value.trim();
+            if (!catId) return alert('請先選取材料分類');
+            if (!name) return alert('請輸入品項名稱');
+            
+            const isDuplicate = db.items.some(item => item.catId === catId && item.name.toLowerCase() === name.toLowerCase());
+            if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
+
+            db.items.push({ id: Date.now().toString(), catId, name });
+            document.getElementById('inputQuickItem').value = '';
+            renderItems(); // 重新渲染列表
+        }
+
         function renderItems() {
             const list = document.getElementById('listItems');
             const keyword = document.getElementById('searchBar').value.toLowerCase().trim();
@@ -320,7 +338,6 @@
                 const qtyValue = inCart ? cart[item.id].qty : '';
                 const div = document.createElement('div');
                 div.className = "flex shadow-sm rounded-xl bg-white items-center justify-between p-3 gap-2 border border-gray-200";
-                // 【優化點】加入了 inputmode="decimal" 確保點擊時優先跳出包含小數點的數字鍵盤，且允許切換打中文單位
                 div.innerHTML = `
                     <label class="flex items-center gap-3 flex-1 min-w-0 cursor-pointer select-none">
                         <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0">
@@ -369,7 +386,6 @@
                 
                 const div = document.createElement('div');
                 div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch justify-between gap-2 p-3 border border-gray-200";
-                // 【優化點】購物車內修改數量同樣加入 inputmode="decimal"
                 div.innerHTML = `
                     <div class="flex-1 min-w-0 flex flex-col justify-center">
                         <span class="text-xs font-bold text-blue-500">[${catName}]</span>
@@ -451,11 +467,7 @@
             document.body.removeChild(textArea);
         }
 
-        // =================================================================
         // ================== 後台設定頁面維護邏輯 ==================
-        // =================================================================
-        
-        // 1. 工地管理
         function addSite() {
             const name = document.getElementById('inputNewSite').value.trim();
             if (!name) return alert('請輸入工地名稱');
@@ -483,7 +495,6 @@
             });
         }
 
-        // 2. 分類管理
         function addCategory() {
             const name = document.getElementById('inputNewCategory').value.trim();
             if (!name) return alert('請輸入分類名稱');
@@ -515,7 +526,6 @@
             });
         }
 
-        // 3. 品項管理
         function initManageCategorySelect() {
             const select = document.getElementById('selectManageCategory');
             select.innerHTML = '';
