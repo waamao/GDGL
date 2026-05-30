@@ -16,14 +16,14 @@
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen pb-24">
 
     <header class="bg-blue-600 text-white p-4 sticky top-0 shadow-md flex justify-between items-center z-50">
-        <div class="flex gap-1 shrink-0">
-            <button id="btnBack" class="hidden text-xs bg-blue-700 px-2.5 py-1.5 rounded-lg active:bg-blue-800">← 返回</button>
+        <div class="flex gap-1 shrink-0 items-center">
+            <button id="btnBack" class="hidden text-xl bg-blue-700 px-4 py-1 rounded-lg font-bold active:bg-blue-800 flex items-center justify-center">←</button>
             <button id="btnClearOrder" onclick="clearOrderAndHome()" class="hidden text-xs bg-red-500 px-2.5 py-1.5 rounded-lg font-bold active:bg-red-600">🧹 清除並回首頁</button>
         </div>
         <h1 id="appTitle" class="text-base font-bold mx-2 truncate text-center flex-1">選擇工地</h1>
         <div class="flex gap-1 shrink-0">
             <button id="btnManage" onclick="navigateTo('manage')" class="text-xs bg-slate-700 hover:bg-slate-800 px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1">⚙️ 設定後台</button>
-            <button id="btnNavCart" onclick="navigateTo('cart')" class="hidden text-xs bg-amber-500 hover:bg-amber-600 px-2.5 py-1.5 rounded-lg font-bold">🛒 購物車(<span id="cartCount">0</span>)</button>
+            <button id="btnNavCart" onclick="navigateTo('cart')" class="hidden text-xs bg-amber-500 hover:bg-amber-600 px-2.5 py-1.5 rounded-lg font-bold">📋 訂單(<span id="cartCount">0</span>)</button>
         </div>
     </header>
 
@@ -81,7 +81,7 @@
             </div>
 
             <button onclick="navigateTo('cart')" class="w-full bg-amber-500 text-white py-3 rounded-xl font-bold text-base shadow-lg active:bg-amber-600 mt-6 block text-center">
-                🛒 查看我的材料購物車 (<span id="cartCountBottom">0</span>)
+                📋 查看我的材料訂單 (<span id="cartCountBottom">0</span>)
             </button>
 
             <button onclick="exportJSON()" class="w-full bg-slate-600 text-white py-2.5 rounded-xl font-bold text-xs shadow md active:bg-slate-700 mt-2 block text-center">
@@ -174,7 +174,7 @@
                     if (parsed.sites && parsed.categories && parsed.items) {
                         db = parsed;
                         alert('🎉 全站基礎資料匯入成功！');
-                        initManageCategorySelect(); // 補上匯入後的下拉初始化同步
+                        initManageCategorySelect(); // 匯入時同步刷新後台下拉選單與列表
                         navigateTo('sites');
                     } else { alert('匯入失敗：JSON 結構格式不正確。'); }
                 } catch (err) { alert('讀取檔案失敗。'); }
@@ -230,7 +230,7 @@
                 renderItems();
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
-                document.getElementById('appTitle').innerText = '🛒 購物車確認';
+                document.getElementById('appTitle').innerText = '📋 訂單確認';
                 document.getElementById('cartSiteName').innerText = currentState.siteName || '未選擇工地';
                 document.getElementById('btnBack').dataset.backTo = prevPage === 'cart' ? 'items' : prevPage;
                 renderCart();
@@ -240,7 +240,7 @@
                 document.getElementById('btnClearOrder').classList.add('hidden');
                 renderManageSites();
                 renderManageCategories();
-                initManageCategorySelect(); // 內含品項清單渲染
+                initManageCategorySelect();
             }
             updateCartBadge();
         }
@@ -318,7 +318,7 @@
             if (!name) return alert('請輸入品項名稱');
             
             const isDuplicate = db.items.some(item => item.catId === catId && item.name.toLowerCase() === name.toLowerCase());
-            if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品项「${name}」。`);
+            if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
 
             db.items.push({ id: Date.now().toString(), catId, name });
             document.getElementById('inputQuickItem').value = '';
@@ -350,7 +350,7 @@
             });
         }
 
-        // ================= 購物車與資料複製邏輯 =================
+        // ================= 訂單明細與資料複製邏輯 =================
         function changeCartQty(itemId, qty) {
             if (qty.trim() === '') {
                 delete cart[itemId];
@@ -372,7 +372,7 @@
             const cartKeys = Object.keys(cart);
             
             if (cartKeys.length === 0) {
-                list.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">🛒 購物車空空如也，請先去挑選材料填寫數量。</p>';
+                list.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">📋 訂單空空如也，請先去挑選材料填寫數量。</p>';
                 return;
             }
             
@@ -416,7 +416,7 @@
             });
 
             if (selectedItems.length === 0) {
-                alert('購物車裡沒有材料，無法複製！');
+                alert('訂單裡沒有材料，無法複製！');
                 return;
             }
 
@@ -441,7 +441,7 @@
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(textOutput.trim()).then(() => {
-                    alert('📋 購物車清單已複製！趕快去 LINE 按下貼上傳送吧！');
+                    alert('📋 訂單明細已複製！趕快去 LINE 按下貼上傳送吧！');
                 }).catch(() => fallbackCopy(textOutput));
             } else {
                 fallbackCopy(textOutput);
@@ -459,7 +459,7 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                alert('📋 購物車清單已成功複製！');
+                alert('📋 訂單明細已成功複製！');
             } catch (err) {
                 alert('手機瀏覽器不支援自動複製，請手動全選複製。');
             }
@@ -559,14 +559,14 @@
             });
         }
 
-        // 核心同步優化區：不論下拉選單如何重建，最後一定要強制呼叫一次 renderManageItems()
+        // 核心修正：建立下拉選單時，必須連帶調用 renderManageItems()，使其強制重新綁定事件
         function initManageCategorySelect() {
             const select = document.getElementById('selectManageCategory');
             const currentVal = select.value; 
             select.innerHTML = '';
             if(db.categories.length === 0) {
                 select.innerHTML = '<option value="">- 請先新增分類 -</option>';
-                renderManageItems(); // 分類為空時，也同步清空底下的品項
+                renderManageItems(); // 沒分類時同步清空列表
                 return;
             }
             db.categories.forEach(cat => {
@@ -578,7 +578,7 @@
             if (currentVal && db.categories.some(c => c.id === currentVal)) {
                 select.value = currentVal;
             }
-            renderManageItems(); // 🌟 關鍵修正：確保選單重建或切換時，事件與列表 100% 刷新綁定
+            renderManageItems(); // 🌟 關鍵：強制刷新並重新繪製對應品項的按鈕與綁定
         }
 
         function addItem() {
@@ -636,8 +636,8 @@
                 div.innerHTML = `
                     <span class="font-medium truncate flex-1 pr-1">${item.name}</span>
                     <div class="flex gap-1 shrink-0">
-                        <button onclick="renameItem('${item.id}', '${item.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded cursor-pointer">✏️ 改名</button>
-                        <button onclick="deleteItem('${item.id}', '${item.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded cursor-pointer">🗑️ 刪除</button>
+                        <button onclick="renameItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded cursor-pointer">✏️ 改名</button>
+                        <button onclick="deleteItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:bg-red-50 p-1 rounded cursor-pointer">🗑️ 刪除</button>
                     </div>
                 `;
                 list.appendChild(div);
