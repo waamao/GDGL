@@ -319,7 +319,7 @@
             if (!name) return alert('請輸入品項名稱');
             
             const isDuplicate = db.items.some(item => item.catId === catId && item.name.toLowerCase() === name.toLowerCase());
-            if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
+            if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品项「${name}」。`);
 
             db.items.push({ id: Date.now().toString(), catId, name });
             document.getElementById('inputQuickItem').value = '';
@@ -347,7 +347,7 @@
                         <input type="text" inputmode="decimal" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="w-24 border rounded-lg px-2 py-1 text-center text-sm focus:outline-none focus:border-blue-500 bg-slate-50 font-semibold" placeholder="數量/單位">
                     </div>
                 `;
-                list.appendChild(div);
+                grid = list.appendChild(div);
             });
         }
 
@@ -475,9 +475,24 @@
             document.getElementById('inputNewSite').value = '';
             renderManageSites();
         }
+        function renameSite(id, oldName) {
+            const newName = prompt(`請輸入工地「${oldName}」的新名稱：`, oldName);
+            if (newName === null) return; // 使用者按取消
+            const trimmed = newName.trim();
+            if (!trimmed) return alert('工地名稱不能為空！');
+            
+            const site = db.sites.find(s => s.id === id);
+            if (site) {
+                site.name = trimmed;
+                // 如果目前剛好在前台選了這個工地，同步更新名稱
+                if (currentState.siteId === id) currentState.siteName = trimmed;
+                renderManageSites();
+            }
+        }
         function deleteSite(id, name) {
             if (confirm(`確定要刪除工地「${name}」嗎？`)) {
                 db.sites = db.sites.filter(site => site.id !== id);
+                if (currentState.siteId === id) { currentState.siteId = null; currentState.siteName = ''; }
                 renderManageSites();
             }
         }
@@ -486,10 +501,13 @@
             list.innerHTML = db.sites.length === 0 ? '<p class="text-gray-400 text-center py-2 text-xs">暫無工地資料。</p>' : '';
             db.sites.forEach(site => {
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs mb-1";
+                div.className = "flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs mb-1 gap-1";
                 div.innerHTML = `
-                    <span class="font-medium truncate flex-1 pr-2">${site.name}</span>
-                    <button onclick="deleteSite('${site.id}', '${site.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded shrink-0">🗑️ 刪除</button>
+                    <span class="font-medium truncate flex-1 pr-1">${site.name}</span>
+                    <div class="flex gap-1 shrink-0">
+                        <button onclick="renameSite('${site.id}', '${site.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded">✏️ 改名</button>
+                        <button onclick="deleteSite('${site.id}', '${site.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded">🗑️ 刪除</button>
+                    </div>
                 `;
                 list.appendChild(div);
             });
@@ -503,10 +521,25 @@
             renderManageCategories();
             initManageCategorySelect();
         }
+        function renameCategory(id, oldName) {
+            const newName = prompt(`請輸入分類「${oldName}」的新名稱：`, oldName);
+            if (newName === null) return;
+            const trimmed = newName.trim();
+            if (!trimmed) return alert('分類名稱不能為空！');
+
+            const cat = db.categories.find(c => c.id === id);
+            if (cat) {
+                cat.name = trimmed;
+                if (currentState.catId === id) currentState.catName = trimmed;
+                renderManageCategories();
+                initManageCategorySelect();
+            }
+        }
         function deleteCategory(id, name) {
             if (confirm(`確定要刪除分類「${name}」嗎？\n⚠️ 注意：此分類底下的所有材料品項也會一併被移除！`)) {
                 db.categories = db.categories.filter(cat => cat.id !== id);
                 db.items = db.items.filter(item => item.catId !== id);
+                if (currentState.catId === id) { currentState.catId = null; currentState.catName = ''; }
                 renderManageCategories();
                 initManageCategorySelect();
                 renderManageItems();
@@ -517,10 +550,13 @@
             list.innerHTML = db.categories.length === 0 ? '<p class="text-gray-400 text-center py-2 text-xs">暫無分類資料。</p>' : '';
             db.categories.forEach(cat => {
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs mb-1";
+                div.className = "flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs mb-1 gap-1";
                 div.innerHTML = `
-                    <span class="font-medium truncate flex-1 pr-2">${cat.name}</span>
-                    <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded shrink-0">🗑️ 刪除</button>
+                    <span class="font-medium truncate flex-1 pr-1">${cat.name}</span>
+                    <div class="flex gap-1 shrink-0">
+                        <button onclick="renameCategory('${cat.id}', '${cat.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded">✏️ 改名</button>
+                        <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded">🗑️ 刪除</button>
+                    </div>
                 `;
                 list.appendChild(div);
             });
@@ -528,6 +564,7 @@
 
         function initManageCategorySelect() {
             const select = document.getElementById('selectManageCategory');
+            const currentVal = select.value; // 保留原本選定的分類
             select.innerHTML = '';
             if(db.categories.length === 0) {
                 select.innerHTML = '<option value="">- 請先新增分類 -</option>';
@@ -539,6 +576,9 @@
                 opt.innerText = cat.name;
                 select.appendChild(opt);
             });
+            if (currentVal && db.categories.some(c => c.id === currentVal)) {
+                select.value = currentVal;
+            }
         }
 
         function addItem() {
@@ -554,7 +594,22 @@
             document.getElementById('inputNewItem').value = '';
             renderManageItems();
         }
+        function renameItem(id, oldName) {
+            const newName = prompt(`請輸入材料品項「${oldName}」的新名稱：`, oldName);
+            if (newName === null) return;
+            const trimmed = newName.trim();
+            if (!trimmed) return alert('品項名稱不能為空！');
 
+            const item = db.items.find(i => i.id === id);
+            if (item) {
+                // 檢查同分類下是否有名稱重複
+                const isDuplicate = db.items.some(i => i.catId === item.catId && i.id !== id && i.name.toLowerCase() === trimmed.toLowerCase());
+                if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${trimmed}」。`);
+
+                item.name = trimmed;
+                renderManageItems();
+            }
+        }
         function deleteItem(id, name) {
             if (confirm(`確定要刪除基本材料「${name}」嗎？`)) {
                 db.items = db.items.filter(item => item.id !== id);
@@ -577,10 +632,13 @@
             
             filtered.forEach(item => {
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs mb-1";
+                div.className = "flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs mb-1 gap-1";
                 div.innerHTML = `
-                    <span class="font-medium truncate flex-1 pr-2">${item.name}</span>
-                    <button onclick="deleteItem('${item.id}', '${item.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded shrink-0">🗑️ 刪除</button>
+                    <span class="font-medium truncate flex-1 pr-1">${item.name}</span>
+                    <div class="flex gap-1 shrink-0">
+                        <button onclick="renameItem('${item.id}', '${item.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded">✏️ 改名</button>
+                        <button onclick="deleteItem('${item.id}', '${item.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded">🗑️ 刪除</button>
+                    </div>
                 `;
                 list.appendChild(div);
             });
