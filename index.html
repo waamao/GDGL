@@ -64,10 +64,8 @@
         
         /* 大按鈕 */
         .btn-block-lg { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; display: block; text-decoration: none; box-sizing: border-box; margin-top: 16px; }
-        .btn-block-sm { width: 100%; padding: 10px; font-size: 12px; border-radius: 12px; text-align: center; display: block; margin-top: 8px; }
         
         .hidden { display: none !important; }
-        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .text-center { text-align: center; }
         .text-muted { color: #9ca3af; font-size: 13px; padding: 16px 0; }
     </style>
@@ -153,7 +151,7 @@
                 <div id="listCartItems"></div>
             </div>
 
-            <button onclick="copyCartToClipboard()" class="btn-green btn-block-lg">📋 確認並複製純文字訂購單</button>
+            <button id="btnSubmitCart" onclick="copyCartToClipboard()" class="btn-green btn-block-lg">📋 確認並複製純文字訂購單</button>
         </section>
 
         <section id="pageManage" class="page">
@@ -175,21 +173,19 @@
                 <div id="manageListCategories" class="scroll-box"></div>
             </div>
 
-            <div class="card">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📦 材料品項維護</h3>
-                <div class="grid-2">
-                    <select id="selectManageCategory" onchange="renderManageItems()"></select>
-                    <input type="text" id="inputNewItem" placeholder="如：40kg 水泥">
+            <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1;">
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">🔗 Apps Script 連動網址設定</h3>
+                <div style="font-size: 11px; color: #64748b; line-height: 1.4;">此處設定會同步記憶在手機中，且點擊最上方「匯出系統備份」時也會自動打包進 JSON 檔案。</div>
+                <div class="flex-row">
+                    <input type="text" id="inputScriptUrl" oninput="saveScriptUrl()" placeholder="請貼上 https://script.google.com/... 網址">
                 </div>
-                <button onclick="addItem()" class="btn-green" style="width: 100%;">新增品項至上方選定分類</button>
-                <div id="manageListItems" class="scroll-box"></div>
             </div>
         </section>
 
     </main>
 
     <script>
-        let db = { sites: [], categories: [], items: [] };
+        let db = { sites: [], categories: [], items: [], config: { scriptUrl: '' } };
         let currentState = { page: 'sites', siteId: null, siteName: '', catId: null, catName: '' };
         let cart = {};
 
@@ -200,6 +196,7 @@
                     const parsed = JSON.parse(localData);
                     if (parsed.sites && parsed.categories && parsed.items) {
                         db = parsed;
+                        if (!db.config) db.config = { scriptUrl: '' };
                     }
                 }
             } catch (e) {
@@ -213,6 +210,13 @@
             } catch (e) {
                 console.error("寫入本機存檔失敗", e);
             }
+        }
+
+        function saveScriptUrl() {
+            const url = document.getElementById('inputScriptUrl').value.trim();
+            if(!db.config) db.config = { scriptUrl: '' };
+            db.config.scriptUrl = url;
+            saveToLocalStorage();
         }
 
         function updateCartBadge() {
@@ -239,9 +243,14 @@
                     const parsed = JSON.parse(e.target.result);
                     if (parsed.sites && parsed.categories && parsed.items) {
                         db = parsed;
+                        if (!db.config) db.config = { scriptUrl: '' };
                         saveToLocalStorage(); 
-                        alert('🎉 全站基礎資料匯入成功，系統已自動儲存記憶！');
-                        initManageCategorySelect(); 
+                        
+                        if(document.getElementById('inputScriptUrl')) {
+                            document.getElementById('inputScriptUrl').value = db.config.scriptUrl || '';
+                        }
+
+                        alert('🎉 全站基礎資料與連動網址已匯入成功，系統已自動儲存記憶！');
                         navigateTo('sites');
                     } else { alert('匯入失敗：JSON 結構格式不正確。'); }
                 } catch (err) { alert('讀取檔案失敗。'); }
@@ -273,8 +282,6 @@
             document.getElementById('btnClearOrder').classList.remove('hidden');
             document.getElementById('btnNavCart').classList.add('hidden');
             document.getElementById('btnManage').classList.add('hidden');
-
-            // 確保每一頁均固定維持顯示此按鈕
             document.getElementById('btnExportTop').classList.remove('hidden');
 
             if (page === 'sites') {
@@ -319,17 +326,17 @@
                 document.getElementById('pageManage').classList.add('active');
                 document.getElementById('appTitle').innerText = '⚙️ 後台系統設定';
                 document.getElementById('btnClearOrder').classList.add('hidden');
+                
+                document.getElementById('inputScriptUrl').value = (db.config && db.config.scriptUrl) ? db.config.scriptUrl : '';
+                
                 renderManageSites();
                 renderManageCategories();
-                initManageCategorySelect();
             }
             updateCartBadge();
         }
 
         document.getElementById('btnBack').addEventListener('click', (e) => {
-            if (currentState.page === 'manage') {
-                navigateTo('sites');
-            }
+            if (currentState.page === 'manage') navigateTo('sites');
             else if (currentState.page === 'cart') {
                 const target = e.target.dataset.backTo || 'items';
                 navigateTo(target === 'sites' ? 'categories' : target);
@@ -338,7 +345,6 @@
             else if (currentState.page === 'categories') navigateTo('sites');
         });
 
-        // ================= 前台填單流線邏輯 =================
         function renderSites() {
             const list = document.getElementById('listSites');
             list.innerHTML = db.sites.length === 0 ? '<p class="text-muted text-center">目前無資料。<br>請先點擊上方匯入 JSON，<br>或點擊右上角「設定後台」手動建立。</p>' : '';
@@ -433,7 +439,6 @@
             });
         }
 
-        // ================= 訂單明細與資料複製邏輯 =================
         function changeCartQty(itemId, qty) {
             if (qty.trim() === '') {
                 delete cart[itemId];
@@ -525,9 +530,11 @@
             }
             textOutput += `--------------------`;
 
+            sendOrderToGoogleSheet(selectedItems);
+
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(textOutput.trim()).then(() => {
-                    alert('📋 訂單明細已複製！趕快去 LINE 按下貼上傳送吧！');
+                    alert('📋 訂單已傳送至試算表，且文字明細已複製！快去 LINE 貼上傳送吧！');
                 }).catch(() => fallbackCopy(textOutput));
             } else {
                 fallbackCopy(textOutput);
@@ -545,14 +552,59 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                alert('📋 訂單明細已成功複製！');
+                alert('📋 訂單已傳送至試算表，且明細已成功複製！');
             } catch (err) {
                 alert('手機瀏覽器不支援自動複製，請手動全選複製。');
             }
             document.body.removeChild(textArea);
         }
 
-        // ================== 後台設定頁面維護邏輯 ==================
+        function sendOrderToGoogleSheet(selectedItems) {
+            const SCRIPT_URL = (db.config && db.config.scriptUrl) ? db.config.scriptUrl.trim() : '';
+            
+            if (!SCRIPT_URL) {
+                console.warn('未設定 Apps Script URL，無法執行試算表上傳。請至後台設定。');
+                alert('⚠️ 系統提示：因尚未設定或匯入「Apps Script連動網址」，本次訂單將只會複製純文字，無法上傳試算表。請到「設定後台」底部進行設定。');
+                return;
+            }
+
+            const payload = {
+                AM: currentState.siteName || '未指定',
+                items: selectedItems.map(item => ({
+                    cat: item.catName,
+                    PX: item.itemName,
+                    SL: item.qty
+                }))
+            };
+
+            const btn = document.getElementById('btnSubmitCart');
+            if(btn) {
+                btn.innerText = '⏳ 正在同步傳送至試算表...';
+                btn.disabled = true;
+            }
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                console.log('訂單傳送請求已發出');
+            })
+            .catch(error => {
+                console.error('傳送訂單時發生錯誤:', error);
+            })
+            .finally(() => {
+                if(btn) {
+                    btn.innerText = '📋 確認並複製純文字訂購單';
+                    btn.disabled = false;
+                }
+            });
+        }
+
         function addSite() {
             const name = document.getElementById('inputNewSite').value.trim();
             if (!name) return alert('請輸入工地名稱');
@@ -607,7 +659,6 @@
             saveToLocalStorage(); 
             document.getElementById('inputNewCategory').value = '';
             renderManageCategories();
-            initManageCategorySelect();
         }
         function renameCategory(id, oldName) {
             const newName = prompt(`請輸入分類「${oldName}」的新名稱：`, oldName);
@@ -621,7 +672,6 @@
                 if (currentState.catId === id) currentState.catName = trimmed;
                 saveToLocalStorage(); 
                 renderManageCategories();
-                initManageCategorySelect();
             }
         }
         function deleteCategory(id, name) {
@@ -631,7 +681,6 @@
                 if (currentState.catId === id) { currentState.catId = null; currentState.catName = ''; }
                 saveToLocalStorage(); 
                 renderManageCategories();
-                initManageCategorySelect();
             }
         }
         function renderManageCategories() {
@@ -645,94 +694,6 @@
                     <div class="manage-btns">
                         <button onclick="renameCategory('${cat.id}', '${cat.name}')">✏️ 改名</button>
                         <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="btn-del">🗑️ 刪除</button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        function initManageCategorySelect() {
-            const select = document.getElementById('selectManageCategory');
-            const currentVal = select.value; 
-            select.innerHTML = '';
-            if(db.categories.length === 0) {
-                select.innerHTML = '<option value="">- 請先新增分類 -</option>';
-                renderManageItems(); 
-                return;
-            }
-            db.categories.forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat.id;
-                opt.innerText = cat.name;
-                select.appendChild(opt);
-            });
-            if (currentVal && db.categories.some(c => c.id === currentVal)) {
-                select.value = currentVal;
-            }
-            renderManageItems(); 
-        }
-
-        function addItem() {
-            const catId = document.getElementById('selectManageCategory').value;
-            const name = document.getElementById('inputNewItem').value.trim();
-            if (!catId) return alert('請先建立或選取材料分類');
-            if (!name) return alert('請輸入品項名稱');
-            
-            const isDuplicate = db.items.some(item => item.catId === catId && item.name.toLowerCase() === name.toLowerCase());
-            if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
-
-            db.items.push({ id: Date.now().toString(), catId, name });
-            saveToLocalStorage(); 
-            document.getElementById('inputNewItem').value = '';
-            renderManageItems();
-        }
-        function renameItem(id, oldName) {
-            const newName = prompt(`請輸入材料品項「${oldName}」的新名稱：`, oldName);
-            if (newName === null) return;
-            const trimmed = newName.trim();
-            if (!trimmed) return alert('品項名稱不能為空！');
-
-            const item = db.items.find(i => i.id === id);
-            if (item) {
-                const isDuplicate = db.items.some(i => i.catId === item.catId && i.id !== id && i.name.toLowerCase() === trimmed.toLowerCase());
-                if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${trimmed}」。`);
-
-                item.name = trimmed;
-                saveToLocalStorage(); 
-                renderManageItems();
-            }
-        }
-        function deleteItem(id, name) {
-            if (confirm(`確定要刪除基本材料「${name}」嗎？`)) {
-                db.items = db.items.filter(item => item.id !== id);
-                delete cart[id]; 
-                saveToLocalStorage(); 
-                renderManageItems();
-                updateCartBadge();
-            }
-        }
-
-        // 渲染品項
-        function renderManageItems() {
-            const list = document.getElementById('manageListItems');
-            const targetCatId = document.getElementById('selectManageCategory').value;
-            
-            if(!targetCatId) {
-                list.innerHTML = '<p style="color:#9ca3af; text-align:center; margin:16px 0;">請選擇上方分類以檢視品項。</p>';
-                return;
-            }
-            
-            const filtered = db.items.filter(item => item.catId === targetCatId);
-            list.innerHTML = filtered.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:16px 0;">此分類下目前沒有材料。</p>' : '';
-            
-            filtered.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "manage-item";
-                div.innerHTML = `
-                    <span class="manage-text">${item.name}</span>
-                    <div class="manage-btns">
-                        <button onclick="renameItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')">✏️ 改名</button>
-                        <button onclick="deleteItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="btn-del">🗑️ 刪除</button>
                     </div>
                 `;
                 list.appendChild(div);
