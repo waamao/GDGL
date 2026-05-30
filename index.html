@@ -6,139 +6,183 @@
     <title>工地材料訂購系統</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        body { background-color: #f3f4f6; color: #1f2937; margin: 0; padding-bottom: 96px; -webkit-tap-highlight-color: transparent; }
+        .max-w-md { max-width: 448px; margin: 0 auto; padding: 16px; }
+        
+        /* 頁首樣式 */
+        header { background-color: #2563eb; color: #ffffff; padding: 16px; position: sticky; top: 0; display: flex; justify-content: space-between; items-center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header-title { font-size: 16px; font-weight: bold; margin: 0 8px; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: center; }
+        
+        /* 通用按鈕 */
+        button { border: none; cursor: pointer; border-radius: 8px; font-weight: bold; padding: 8px 12px; font-size: 12px; transition: background-color 0.2s; }
+        button:active { opacity: 0.8; }
+        .btn-blue { background-color: #1d4ed8; color: white; }
+        .btn-red { background-color: #ef4444; color: white; }
+        .btn-green { background-color: #16a34a; color: white; }
+        .btn-amber { background-color: #f59e0b; color: white; }
+        .btn-slate { background-color: #334155; color: white; }
+        
+        /* 加大返回鍵 */
+        #btnBack { font-size: 20px; padding: 4px 16px; }
+        
+        /* 頁面切換機制 */
         .page { display: none; }
-        .page.active { display: block; }
+        .page.active { display: block; display: flex; flex-direction: column; gap: 16px; }
+        
+        /* 卡片與區塊樣式 */
+        .card { background-color: #ffffff; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 12px; }
+        .alert-box { padding: 12px; border-radius: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .alert-amber { background-color: #fef3c7; border: 1px solid #fde68a; color: #78350f; }
+        .alert-blue { background-color: #dbeafe; border: 1px solid #bfdbfe; color: #1e40af; font-weight: 600; }
+        
+        /* 表單輸入框 */
+        input[type="text"], select { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; background-color: white; }
+        input[type="text"]:focus, select:focus { border-color: #2563eb; }
+        .flex-row { display: flex; gap: 8px; width: 100%; align-items: center; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        /* 清單列表物件 */
+        .list-container { display: flex; flex-direction: column; gap: 8px; }
+        .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; items-center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; }
+        .list-item:active { border-color: #2563eb; }
+        
+        /* 前台材料品項勾選樣式 */
+        .item-label { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; cursor: pointer; user-select: none; font-size: 14px; font-weight: 500; }
+        .item-checkbox { width: 20px; height: 20px; border-radius: 4px; accent-color: #2563eb; flex-shrink: 0; }
+        .qty-input { width: 96px !important; text-align: center; font-weight: 600; background-color: #f8fafc !important; }
+        .cart-qty-input { width: 96px !important; text-align: center; font-weight: bold; background-color: #fef3c7 !important; color: #78350f; }
+        
+        /* 後台管理列表縮緊樣式 */
+        .scroll-box { max-height: 180px; overflow-y: auto; background-color: #f9fafb; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
+        .manage-item { background-color: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; justify-content: space-between; items-center; font-size: 13px; gap: 4px; }
+        .manage-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .manage-btns { display: flex; gap: 4px; flex-shrink: 0; }
+        .manage-btns button { padding: 4px 6px; font-size: 11px; font-weight: normal; background: none; color: #2563eb; }
+        .manage-btns .btn-del { color: #ef4444; }
+        
+        /* 大按鈕 */
+        .btn-block-lg { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; display: block; text-decoration: none; box-sizing: border-box; margin-top: 16px; }
+        .btn-block-sm { width: 100%; padding: 10px; font-size: 12px; border-radius: 12px; text-align: center; display: block; margin-top: 8px; }
+        
+        .hidden { display: none !important; }
+        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .text-center { text-align: center; }
+        .text-muted { color: #9ca3af; font-size: 13px; padding: 16px 0; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen pb-24">
+<body>
 
-    <header class="bg-blue-600 text-white p-4 sticky top-0 shadow-md flex justify-between items-center z-50">
-        <div class="flex gap-1 shrink-0 items-center">
-            <button id="btnBack" class="hidden text-xl bg-blue-700 px-4 py-1 rounded-lg font-bold active:bg-blue-800 flex items-center justify-center">←</button>
-            <button id="btnClearOrder" onclick="clearOrderAndHome()" class="hidden text-xs bg-red-500 px-2.5 py-1.5 rounded-lg font-bold active:bg-red-600">🧹 清除並回首頁</button>
+    <header>
+        <div style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
+            <button id="btnBack" class="hidden btn-blue">←</button>
+            <button id="btnClearOrder" onclick="clearOrderAndHome()" class="hidden btn-red">🧹 清除並回首頁</button>
         </div>
-        <h1 id="appTitle" class="text-base font-bold mx-2 truncate text-center flex-1">選擇工地</h1>
-        <div class="flex gap-1 shrink-0">
-            <button id="btnManage" onclick="navigateTo('manage')" class="text-xs bg-slate-700 hover:bg-slate-800 px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1">⚙️ 設定後台</button>
-            <button id="btnNavCart" onclick="navigateTo('cart')" class="hidden text-xs bg-amber-500 hover:bg-amber-600 px-2.5 py-1.5 rounded-lg font-bold">📋 訂單(<span id="cartCount">0</span>)</button>
+        <h1 id="appTitle" class="header-title">選擇工地</h1>
+        <div style="display: flex; gap: 4px; flex-shrink: 0;">
+            <button id="btnManage" onclick="navigateTo('manage')" class="btn-slate">⚙️ 設定後台</button>
+            <button id="btnNavCart" onclick="navigateTo('cart')" class="hidden btn-amber">📋 訂單(<span id="cartCount">0</span>)</button>
         </div>
     </header>
 
-    <main class="p-4 max-w-md mx-auto">
+    <main class="max-w-md">
 
-        <section id="pageSites" class="page active space-y-4">
-            <div id="backupSection" class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs space-y-2 shadow-sm">
-                <div class="font-bold text-amber-800 flex items-center gap-1">💾 資料匯入 (JSON)</div>
-                <div class="flex gap-2">
+        <section id="pageSites" class="page active">
+            <div class="alert-box alert-amber">
+                <div style="font-weight: bold;">💾 資料備份與手動匯入</div>
+                <div style="font-size: 11px; color: #92400e;">系統具備本機自動記憶功能，通常無須重複匯入。若欲更換手機或清除瀏覽器快取，可在此執行匯出/匯入。</div>
+                <div class="flex-row">
                     <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
-                    <button onclick="document.getElementById('importFile').click()" class="w-full bg-amber-600 text-white py-1.5 rounded-md font-medium active:bg-amber-700 text-center">
-                        📥 匯入 JSON 基礎資料
-                    </button>
+                    <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 8px;">📥 選擇並匯入資料備份檔 (JSON)</button>
                 </div>
             </div>
 
-            <div class="space-y-2">
-                <h3 class="font-bold text-gray-600 px-1 text-sm">請選擇要填單的工地：</h3>
-                <div id="listSites" class="space-y-2"></div>
+            <div class="list-container">
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">請選擇要填單的工地：</h3>
+                <div id="listSites"></div>
             </div>
         </section>
 
-        <section id="pageCategories" class="page space-y-4">
-            <div class="bg-blue-50 p-3 rounded-lg text-sm font-semibold text-blue-800 shadow-inner">
+        <section id="pageCategories" class="page">
+            <div class="alert-box alert-blue">
                 目前工地：<span id="currentSiteName"></span>
             </div>
-            <div class="space-y-2">
-                <h3 class="font-bold text-gray-600 px-1 text-sm">請選擇材料大類：</h3>
-                <div id="listCategories" class="space-y-2"></div>
+            <div class="list-container">
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">請選擇材料大類：</h3>
+                <div id="listCategories"></div>
             </div>
         </section>
 
-        <section id="pageItems" class="page space-y-4">
-            <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-800 space-y-1 shadow-inner">
+        <section id="pageItems" class="page">
+            <div class="alert-box alert-blue" style="font-weight: normal; line-height: 1.6;">
                 <div><strong>工地：</strong> <span id="currentSiteName2"></span></div>
                 <div><strong>分類：</strong> <span id="currentCategoryName"></span></div>
             </div>
 
-            <div class="bg-white p-3 rounded-xl shadow-sm flex items-center gap-2 border border-gray-200">
-                <span class="text-gray-400 text-sm">🔍</span>
-                <input type="text" id="searchBar" oninput="renderItems()" class="w-full text-sm focus:outline-none" placeholder="搜尋此分類下的品項關鍵字...">
+            <div class="card" style="padding: 12px; flex-direction: row; align-items: center; gap: 8px;">
+                <span style="color: #9ca3af;">🔍</span>
+                <input type="text" id="searchBar" oninput="renderItems()" style="border: none; padding: 4px; font-size: 14px; width: 100%; outline: none;" placeholder="搜尋此分類下的品項關鍵字...">
             </div>
 
-            <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl text-xs space-y-2 shadow-sm">
-                <div class="font-bold text-slate-700 flex items-center gap-1">➕ 快速新增材料品項 (至當前分類)</div>
-                <div class="flex gap-2">
-                    <input type="text" id="inputQuickItem" class="flex-1 border rounded-lg px-3 py-1.5 text-xs bg-white focus:outline-none focus:border-blue-500" placeholder="如：40kg 水泥">
-                    <button onclick="quickAddItem()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg font-medium active:bg-blue-700 shrink-0">新增</button>
+            <div class="alert-box" style="background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #334155;">
+                <div style="font-weight: bold;">➕ 快速新增材料品項 (至當前分類)</div>
+                <div class="flex-row">
+                    <input type="text" id="inputQuickItem" placeholder="如：40kg 水泥">
+                    <button onclick="quickAddItem()" class="btn-blue" style="flex-shrink: 0; padding: 8px 16px;">新增</button>
                 </div>
             </div>
 
-            <div class="space-y-2">
-                <h3 class="font-bold text-gray-600 px-1 text-sm">品項清單 (請勾選並輸入數量)：</h3>
-                <div id="listItems" class="space-y-2"></div>
+            <div class="list-container">
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">品項清單 (請勾選並輸入數量)：</h3>
+                <div id="listItems"></div>
             </div>
 
-            <button onclick="navigateTo('cart')" class="w-full bg-amber-500 text-white py-3 rounded-xl font-bold text-base shadow-lg active:bg-amber-600 mt-6 block text-center">
-                📋 查看我的材料訂單 (<span id="cartCountBottom">0</span>)
-            </button>
-
-            <button onclick="exportJSON()" class="w-full bg-slate-600 text-white py-2.5 rounded-xl font-bold text-xs shadow md active:bg-slate-700 mt-2 block text-center">
-                📤 匯出目前全站基礎資料備份 (JSON)
-            </button>
+            <button onclick="navigateTo('cart')" class="btn-amber btn-block-lg">📋 查看我的材料訂單 (<span id="cartCountBottom">0</span>)</button>
+            <button onclick="exportJSON()" class="btn-slate btn-block-sm">📤 匯出目前全站基礎資料備份 (JSON)</button>
         </section>
 
-        <section id="pageCart" class="page space-y-4">
-            <div class="bg-amber-50 p-3 rounded-lg text-sm text-amber-900 space-y-1 border border-amber-200 shadow-inner">
+        <section id="pageCart" class="page">
+            <div class="alert-box alert-amber" style="line-height: 1.6;">
                 <div><strong>預計送貨工地：</strong> <span id="cartSiteName"></span></div>
-                <div class="text-xs text-gray-500">提示：您可以在這裡修改最終數量，或點擊 ❌ 取消該品項。</div>
+                <div style="color: #6b7280; font-size: 11px;">提示：您可以在這裡修改最終數量，或點擊 ❌ 取消該品項。</div>
             </div>
 
-            <div class="space-y-2">
-                <h3 class="font-bold text-gray-600 px-1 text-sm">已選材料明細：</h3>
-                <div id="listCartItems" class="space-y-2"></div>
+            <div class="list-container">
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">已選材料明細：</h3>
+                <div id="listCartItems"></div>
             </div>
 
-            <button onclick="copyCartToClipboard()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold text-base shadow-lg active:bg-green-700 mt-6 block">
-                📋 確認並複製純文字訂購單
-            </button>
+            <button onclick="copyCartToClipboard()" class="btn-green btn-block-lg">📋 確認並複製純文字訂購單</button>
         </section>
 
-        <section id="pageManage" class="page space-y-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 space-y-3">
-                <h3 class="font-bold text-gray-700 border-b pb-1 text-sm flex items-center justify-between">
-                    <span>🏢 工地基本資料維護</span>
-                </h3>
-                <div class="flex gap-2">
-                    <input type="text" id="inputNewSite" class="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" placeholder="輸入新工地名稱">
-                    <button onclick="addSite()" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium active:bg-green-700">新增</button>
+        <section id="pageManage" class="page">
+            <div class="card">
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">🏢 工地基本資料維護</h3>
+                <div class="flex-row">
+                    <input type="text" id="inputNewSite" placeholder="輸入新工地名稱">
+                    <button onclick="addSite()" class="btn-green" style="flex-shrink: 0;">新增</button>
                 </div>
-                <div id="manageListSites" class="max-h-40 overflow-y-auto space-y-1 bg-gray-50 p-2 rounded-lg text-sm"></div>
+                <div id="manageListSites" class="scroll-box"></div>
             </div>
 
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 space-y-3">
-                <h3 class="font-bold text-gray-700 border-b pb-1 text-sm flex items-center justify-between">
-                    <span>📁 材料分類維護</span>
-                </h3>
-                <div class="flex gap-2">
-                    <input type="text" id="inputNewCategory" class="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" placeholder="如：水泥類、五金類">
-                    <button onclick="addCategory()" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium active:bg-green-700">新增</button>
+            <div class="card">
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📁 材料分類維護</h3>
+                <div class="flex-row">
+                    <input type="text" id="inputNewCategory" placeholder="如：水泥類、五金類">
+                    <button onclick="addCategory()" class="btn-green" style="flex-shrink: 0;">新增</button>
                 </div>
-                <div id="manageListCategories" class="max-h-40 overflow-y-auto space-y-1 bg-gray-50 p-2 rounded-lg text-sm"></div>
+                <div id="manageListCategories" class="scroll-box"></div>
             </div>
 
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 space-y-3">
-                <h3 class="font-bold text-gray-700 border-b pb-1 text-sm">
-                    <span>📦 材料品項維護</span>
-                </h3>
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="selectManageCategory" onchange="renderManageItems()" class="border rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-blue-500">
-                    </select>
-                    <input type="text" id="inputNewItem" class="border rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500" placeholder="如：40kg 水泥">
+            <div class="card">
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📦 材料品項維護</h3>
+                <div class="grid-2">
+                    <select id="selectManageCategory" onchange="renderManageItems()"></select>
+                    <input type="text" id="inputNewItem" placeholder="如：40kg 水泥">
                 </div>
-                <button onclick="addItem()" class="w-full bg-green-600 text-white py-1.5 rounded-lg text-xs font-medium active:bg-green-700">新增品項至上方選定分類</button>
-                <div id="manageListItems" class="max-h-48 overflow-y-auto space-y-1 bg-gray-50 p-2 rounded-lg text-sm"></div>
+                <button onclick="addItem()" class="btn-green" style="width: 100%;">新增品項至上方選定分類</button>
+                <div id="manageListItems" class="scroll-box"></div>
             </div>
         </section>
 
@@ -148,6 +192,28 @@
         let db = { sites: [], categories: [], items: [] };
         let currentState = { page: 'sites', siteId: null, siteName: '', catId: null, catName: '' };
         let cart = {};
+
+        function loadFromLocalStorage() {
+            try {
+                const localData = localStorage.getItem('construction_order_db');
+                if (localData) {
+                    const parsed = JSON.parse(localData);
+                    if (parsed.sites && parsed.categories && parsed.items) {
+                        db = parsed;
+                    }
+                }
+            } catch (e) {
+                console.error("讀取本機存檔失敗", e);
+            }
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('construction_order_db', JSON.stringify(db));
+            } catch (e) {
+                console.error("寫入本機存檔失敗", e);
+            }
+        }
 
         function updateCartBadge() {
             const count = Object.keys(cart).length;
@@ -173,8 +239,9 @@
                     const parsed = JSON.parse(e.target.result);
                     if (parsed.sites && parsed.categories && parsed.items) {
                         db = parsed;
-                        alert('🎉 全站基礎資料匯入成功！');
-                        initManageCategorySelect(); // 匯入時同步刷新後台下拉選單與列表
+                        saveToLocalStorage(); 
+                        alert('🎉 全站基礎資料匯入成功，系統已自動儲存記憶！');
+                        initManageCategorySelect(); 
                         navigateTo('sites');
                     } else { alert('匯入失敗：JSON 結構格式不正確。'); }
                 } catch (err) { alert('讀取檔案失敗。'); }
@@ -260,15 +327,15 @@
         // ================= 前台填單流線邏輯 =================
         function renderSites() {
             const list = document.getElementById('listSites');
-            list.innerHTML = db.sites.length === 0 ? '<p class="text-gray-400 text-center py-8 text-sm">目前無資料。<br>請先點擊上方匯入 JSON，<br>或點擊右上角「設定後台」手動建立。</p>' : '';
+            list.innerHTML = db.sites.length === 0 ? '<p class="text-muted text-center">目前無資料。<br>請先點擊上方匯入 JSON，<br>或點擊右上角「設定後台」手動建立。</p>' : '';
             db.sites.forEach(site => {
                 const div = document.createElement('div');
-                div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch border border-gray-200 active:border-blue-500";
+                div.className = "list-item";
+                div.style.cursor = "pointer";
+                div.onclick = function() { currentState.siteId=site.id; currentState.siteName=site.name; navigateTo('categories'); };
                 div.innerHTML = `
-                    <div class="flex-1 p-4 flex justify-between items-center cursor-pointer min-w-0" onclick="currentState.siteId='${site.id}'; currentState.siteName='${site.name}'; navigateTo('categories')">
-                        <span class="font-medium truncate mr-2 text-gray-800">${site.name}</span> 
-                        <span class="text-blue-500 text-xs shrink-0 font-bold">進入 →</span>
-                    </div>
+                    <span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1f2937;">${site.name}</span> 
+                    <span style="color: #2563eb; font-size: 12px; font-weight: bold; flex-shrink: 0;">進入 →</span>
                 `;
                 list.appendChild(div);
             });
@@ -276,15 +343,15 @@
 
         function renderCategories() {
             const list = document.getElementById('listCategories');
-            list.innerHTML = db.categories.length === 0 ? '<p class="text-gray-400 text-center py-6 text-sm">目前無分類，請先至後台新增分類。</p>' : '';
+            list.innerHTML = db.categories.length === 0 ? '<p class="text-muted text-center">目前無分類，請先至後台新增分類。</p>' : '';
             db.categories.forEach(cat => {
                 const div = document.createElement('div');
-                div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch border border-gray-200 active:border-blue-500";
+                div.className = "list-item";
+                div.style.cursor = "pointer";
+                div.onclick = function() { currentState.catId=cat.id; currentState.catName=cat.name; navigateTo('items'); };
                 div.innerHTML = `
-                    <div class="flex-1 p-4 flex justify-between items-center cursor-pointer min-w-0" onclick="currentState.catId='${cat.id}'; currentState.catName='${cat.name}'; navigateTo('items')">
-                        <span class="font-medium truncate mr-2 text-gray-800">${cat.name}</span> 
-                        <span class="text-blue-500 text-xs shrink-0 font-bold">進入 →</span>
-                    </div>
+                    <span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1f2937;">${cat.name}</span> 
+                    <span style="color: #2563eb; font-size: 12px; font-weight: bold; flex-shrink: 0;">進入 →</span>
                 `;
                 list.appendChild(div);
             });
@@ -321,6 +388,7 @@
             if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
 
             db.items.push({ id: Date.now().toString(), catId, name });
+            saveToLocalStorage(); 
             document.getElementById('inputQuickItem').value = '';
             renderItems(); 
         }
@@ -330,20 +398,21 @@
             const keyword = document.getElementById('searchBar').value.toLowerCase().trim();
             const filteredItems = db.items.filter(item => item.catId === currentState.catId && item.name.toLowerCase().includes(keyword));
             
-            list.innerHTML = filteredItems.length === 0 ? '<p class="text-gray-400 text-center py-6 text-sm">無符合的材料品項。</p>' : '';
+            list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">無符合的材料品項。</p>' : '';
             
             filteredItems.forEach(item => {
                 const inCart = !!cart[item.id];
                 const qtyValue = inCart ? cart[item.id].qty : '';
                 const div = document.createElement('div');
-                div.className = "flex shadow-sm rounded-xl bg-white items-center justify-between p-3 gap-2 border border-gray-200";
+                div.className = "list-item";
+                div.style.padding = "10px 12px";
                 div.innerHTML = `
-                    <label class="flex items-center gap-3 flex-1 min-w-0 cursor-pointer select-none">
-                        <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0">
-                        <span class="font-medium text-sm text-gray-800 break-all whitespace-normal pr-1">${item.name}</span>
+                    <label class="item-label">
+                        <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="item-checkbox">
+                        <span style="word-break: break-all; white-space: normal; padding-right: 4px;">${item.name}</span>
                     </label>
-                    <div class="shrink-0 flex items-center">
-                        <input type="text" inputmode="decimal" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="w-24 border rounded-lg px-2 py-1 text-center text-sm focus:outline-none focus:border-blue-500 bg-slate-50 font-semibold" placeholder="數量/單位">
+                    <div style="flex-shrink: 0; display: flex; align-items: center;">
+                        <input type="text" inputmode="decimal" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
                     </div>
                 `;
                 list.appendChild(div);
@@ -372,7 +441,7 @@
             const cartKeys = Object.keys(cart);
             
             if (cartKeys.length === 0) {
-                list.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">📋 訂單空空如也，請先去挑選材料填寫數量。</p>';
+                list.innerHTML = '<p class="text-muted text-center">📋 訂單空空如也，請先去挑選材料填寫數量。</p>';
                 return;
             }
             
@@ -384,15 +453,15 @@
                 const catName = catObj ? catObj.name : '未分類';
                 
                 const div = document.createElement('div');
-                div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch justify-between gap-2 p-3 border border-gray-200";
+                div.className = "list-item";
                 div.innerHTML = `
-                    <div class="flex-1 min-w-0 flex flex-col justify-center">
-                        <span class="text-xs font-bold text-blue-500">[${catName}]</span>
-                        <span class="font-medium text-sm text-gray-800 break-all whitespace-normal pr-1">${itemObj.name}</span>
+                    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
+                        <span style="font-size: 11px; font-weight: bold; color: #2563eb; margin-bottom: 2px;">[${catName}]</span>
+                        <span style="word-break: break-all; white-space: normal; padding-right: 4px; font-size: 14px;">${itemObj.name}</span>
                     </div>
-                    <div class="flex items-center shrink-0 gap-2">
-                        <input type="text" inputmode="decimal" value="${cart[itemId].qty}" oninput="changeCartQty('${itemId}', this.value)" class="w-24 border rounded-lg px-2 py-1 text-center text-sm focus:border-blue-500 focus:outline-none bg-amber-50 font-bold text-amber-900" placeholder="數量/單位">
-                        <button onclick="removeCartItem('${itemId}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg text-sm">❌</button>
+                    <div style="display: flex; align-items: center; flex-shrink: 0; gap: 8px;">
+                        <input type="text" inputmode="decimal" value="${cart[itemId].qty}" oninput="changeCartQty('${itemId}', this.value)" class="cart-qty-input" placeholder="數量/單位">
+                        <button onclick="removeCartItem('${itemId}')" style="background: none; color: #ef4444; padding: 4px; font-size: 14px;">❌</button>
                     </div>
                 `;
                 list.appendChild(div);
@@ -420,13 +489,18 @@
                 return;
             }
 
+            // 優化：日期自動補零 (例如：2026/05/30)
             const now = new Date();
-            const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const dateStr = `${year}/${month}/${date}`;
 
             const grouped = {};
             selectedItems.forEach(item => {
                 if (!grouped[item.catName]) grouped[item.catName] = [];
-                grouped[item.catName].push(`${item.itemName}：${item.qty}`);
+                // 🌟 核心修改：將原本的「：」改為「 *」號
+                grouped[item.catName].push(`${item.itemName} *${item.qty}`);
             });
 
             let textOutput = `送貨工地：${currentState.siteName || '未指定'}\n`;
@@ -471,6 +545,7 @@
             const name = document.getElementById('inputNewSite').value.trim();
             if (!name) return alert('請輸入工地名稱');
             db.sites.push({ id: Date.now().toString(), name });
+            saveToLocalStorage(); 
             document.getElementById('inputNewSite').value = '';
             renderManageSites();
         }
@@ -484,6 +559,7 @@
             if (site) {
                 site.name = trimmed;
                 if (currentState.siteId === id) currentState.siteName = trimmed;
+                saveToLocalStorage(); 
                 renderManageSites();
             }
         }
@@ -491,20 +567,21 @@
             if (confirm(`確定要刪除工地「${name}」嗎？`)) {
                 db.sites = db.sites.filter(site => site.id !== id);
                 if (currentState.siteId === id) { currentState.siteId = null; currentState.siteName = ''; }
+                saveToLocalStorage(); 
                 renderManageSites();
             }
         }
         function renderManageSites() {
             const list = document.getElementById('manageListSites');
-            list.innerHTML = db.sites.length === 0 ? '<p class="text-gray-400 text-center py-2 text-xs">暫無工地資料。</p>' : '';
+            list.innerHTML = db.sites.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:8px 0;">暫無工地資料。</p>' : '';
             db.sites.forEach(site => {
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs mb-1 gap-1";
+                div.className = "manage-item";
                 div.innerHTML = `
-                    <span class="font-medium truncate flex-1 pr-1">${site.name}</span>
-                    <div class="flex gap-1 shrink-0">
-                        <button onclick="renameSite('${site.id}', '${site.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded cursor-pointer">✏️ 改名</button>
-                        <button onclick="deleteSite('${site.id}', '${site.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded cursor-pointer">🗑️ 刪除</button>
+                    <span class="manage-text">${site.name}</span>
+                    <div class="manage-btns">
+                        <button onclick="renameSite('${site.id}', '${site.name}')">✏️ 改名</button>
+                        <button onclick="deleteSite('${site.id}', '${site.name}')" class="btn-del">🗑️ 刪除</button>
                     </div>
                 `;
                 list.appendChild(div);
@@ -515,6 +592,7 @@
             const name = document.getElementById('inputNewCategory').value.trim();
             if (!name) return alert('請輸入分類名稱');
             db.categories.push({ id: Date.now().toString(), name });
+            saveToLocalStorage(); 
             document.getElementById('inputNewCategory').value = '';
             renderManageCategories();
             initManageCategorySelect();
@@ -529,6 +607,7 @@
             if (cat) {
                 cat.name = trimmed;
                 if (currentState.catId === id) currentState.catName = trimmed;
+                saveToLocalStorage(); 
                 renderManageCategories();
                 initManageCategorySelect();
             }
@@ -538,35 +617,35 @@
                 db.categories = db.categories.filter(cat => cat.id !== id);
                 db.items = db.items.filter(item => item.catId !== id);
                 if (currentState.catId === id) { currentState.catId = null; currentState.catName = ''; }
+                saveToLocalStorage(); 
                 renderManageCategories();
                 initManageCategorySelect();
             }
         }
         function renderManageCategories() {
             const list = document.getElementById('manageListCategories');
-            list.innerHTML = db.categories.length === 0 ? '<p class="text-gray-400 text-center py-2 text-xs">暫無分類資料。</p>' : '';
+            list.innerHTML = db.categories.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:8px 0;">暫無分類資料。</p>' : '';
             db.categories.forEach(cat => {
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs mb-1 gap-1";
+                div.className = "manage-item";
                 div.innerHTML = `
-                    <span class="font-medium truncate flex-1 pr-1">${cat.name}</span>
-                    <div class="flex gap-1 shrink-0">
-                        <button onclick="renameCategory('${cat.id}', '${cat.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded cursor-pointer">✏️ 改名</button>
-                        <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded cursor-pointer">🗑️ 刪除</button>
+                    <span class="manage-text">${cat.name}</span>
+                    <div class="manage-btns">
+                        <button onclick="renameCategory('${cat.id}', '${cat.name}')">✏️ 改名</button>
+                        <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="btn-del">🗑️ 刪除</button>
                     </div>
                 `;
                 list.appendChild(div);
             });
         }
 
-        // 核心修正：建立下拉選單時，必須連帶調用 renderManageItems()，使其強制重新綁定事件
         function initManageCategorySelect() {
             const select = document.getElementById('selectManageCategory');
             const currentVal = select.value; 
             select.innerHTML = '';
             if(db.categories.length === 0) {
                 select.innerHTML = '<option value="">- 請先新增分類 -</option>';
-                renderManageItems(); // 沒分類時同步清空列表
+                renderManageItems(); 
                 return;
             }
             db.categories.forEach(cat => {
@@ -578,7 +657,7 @@
             if (currentVal && db.categories.some(c => c.id === currentVal)) {
                 select.value = currentVal;
             }
-            renderManageItems(); // 🌟 關鍵：強制刷新並重新繪製對應品項的按鈕與綁定
+            renderManageItems(); 
         }
 
         function addItem() {
@@ -591,6 +670,7 @@
             if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
 
             db.items.push({ id: Date.now().toString(), catId, name });
+            saveToLocalStorage(); 
             document.getElementById('inputNewItem').value = '';
             renderManageItems();
         }
@@ -606,6 +686,7 @@
                 if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${trimmed}」。`);
 
                 item.name = trimmed;
+                saveToLocalStorage(); 
                 renderManageItems();
             }
         }
@@ -613,6 +694,7 @@
             if (confirm(`確定要刪除基本材料「${name}」嗎？`)) {
                 db.items = db.items.filter(item => item.id !== id);
                 delete cart[id]; 
+                saveToLocalStorage(); 
                 renderManageItems();
                 updateCartBadge();
             }
@@ -623,28 +705,28 @@
             const targetCatId = document.getElementById('selectManageCategory').value;
             
             if(!targetCatId) {
-                list.innerHTML = '<p class="text-gray-400 text-center py-4 text-xs">請選擇上方分類以檢視品項。</p>';
+                list.innerHTML = '<p style="color:#9ca3af; text-align:center; margin:16px 0;">請選擇上方分類以檢視品項。</p>';
                 return;
             }
             
             const filtered = db.items.filter(item => item.catId === targetCatId);
-            list.innerHTML = filtered.length === 0 ? '<p class="text-gray-400 text-center py-4 text-xs">此分類下目前沒有材料。請在上方輸入並點擊新增。</p>' : '';
+            list.innerHTML = filtered.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:16px 0;">此分類下目前沒有材料。</p>' : '';
             
             filtered.forEach(item => {
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs mb-1 gap-1";
+                div.className = "manage-item";
                 div.innerHTML = `
-                    <span class="font-medium truncate flex-1 pr-1">${item.name}</span>
-                    <div class="flex gap-1 shrink-0">
-                        <button onclick="renameItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded cursor-pointer">✏️ 改名</button>
-                        <button onclick="deleteItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:bg-red-50 p-1 rounded cursor-pointer">🗑️ 刪除</button>
+                    <span class="manage-text">${item.name}</span>
+                    <div class="manage-btns">
+                        <button onclick="renameItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')">✏️ 改名</button>
+                        <button onclick="deleteItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="btn-del">🗑️ 刪除</button>
                     </div>
                 `;
                 list.appendChild(div);
             });
         }
 
-        // 初始化啟動
+        loadFromLocalStorage(); 
         navigateTo('sites');
     </script>
 </body>
