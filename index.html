@@ -174,6 +174,7 @@
                     if (parsed.sites && parsed.categories && parsed.items) {
                         db = parsed;
                         alert('🎉 全站基礎資料匯入成功！');
+                        initManageCategorySelect(); // 補上匯入後的下拉初始化同步
                         navigateTo('sites');
                     } else { alert('匯入失敗：JSON 結構格式不正確。'); }
                 } catch (err) { alert('讀取檔案失敗。'); }
@@ -225,7 +226,7 @@
                 document.getElementById('currentSiteName2').innerText = currentState.siteName;
                 document.getElementById('currentCategoryName').innerText = currentState.catName;
                 document.getElementById('btnNavCart').classList.remove('hidden');
-                document.getElementById('inputQuickItem').value = ''; // 切換分類時清空輸入框
+                document.getElementById('inputQuickItem').value = ''; 
                 renderItems();
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
@@ -239,8 +240,7 @@
                 document.getElementById('btnClearOrder').classList.add('hidden');
                 renderManageSites();
                 renderManageCategories();
-                initManageCategorySelect();
-                renderManageItems();
+                initManageCategorySelect(); // 內含品項清單渲染
             }
             updateCartBadge();
         }
@@ -311,7 +311,6 @@
             updateCartBadge();
         }
 
-        // 品項選單內「快速新增品項」的邏輯
         function quickAddItem() {
             const catId = currentState.catId;
             const name = document.getElementById('inputQuickItem').value.trim();
@@ -323,7 +322,7 @@
 
             db.items.push({ id: Date.now().toString(), catId, name });
             document.getElementById('inputQuickItem').value = '';
-            renderItems(); // 重新渲染列表
+            renderItems(); 
         }
 
         function renderItems() {
@@ -347,7 +346,7 @@
                         <input type="text" inputmode="decimal" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="w-24 border rounded-lg px-2 py-1 text-center text-sm focus:outline-none focus:border-blue-500 bg-slate-50 font-semibold" placeholder="數量/單位">
                     </div>
                 `;
-                grid = list.appendChild(div);
+                list.appendChild(div);
             });
         }
 
@@ -477,14 +476,13 @@
         }
         function renameSite(id, oldName) {
             const newName = prompt(`請輸入工地「${oldName}」的新名稱：`, oldName);
-            if (newName === null) return; // 使用者按取消
+            if (newName === null) return; 
             const trimmed = newName.trim();
             if (!trimmed) return alert('工地名稱不能為空！');
             
             const site = db.sites.find(s => s.id === id);
             if (site) {
                 site.name = trimmed;
-                // 如果目前剛好在前台選了這個工地，同步更新名稱
                 if (currentState.siteId === id) currentState.siteName = trimmed;
                 renderManageSites();
             }
@@ -505,8 +503,8 @@
                 div.innerHTML = `
                     <span class="font-medium truncate flex-1 pr-1">${site.name}</span>
                     <div class="flex gap-1 shrink-0">
-                        <button onclick="renameSite('${site.id}', '${site.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded">✏️ 改名</button>
-                        <button onclick="deleteSite('${site.id}', '${site.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded">🗑️ 刪除</button>
+                        <button onclick="renameSite('${site.id}', '${site.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded cursor-pointer">✏️ 改名</button>
+                        <button onclick="deleteSite('${site.id}', '${site.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded cursor-pointer">🗑️ 刪除</button>
                     </div>
                 `;
                 list.appendChild(div);
@@ -542,7 +540,6 @@
                 if (currentState.catId === id) { currentState.catId = null; currentState.catName = ''; }
                 renderManageCategories();
                 initManageCategorySelect();
-                renderManageItems();
             }
         }
         function renderManageCategories() {
@@ -554,20 +551,22 @@
                 div.innerHTML = `
                     <span class="font-medium truncate flex-1 pr-1">${cat.name}</span>
                     <div class="flex gap-1 shrink-0">
-                        <button onclick="renameCategory('${cat.id}', '${cat.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded">✏️ 改名</button>
-                        <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded">🗑️ 刪除</button>
+                        <button onclick="renameCategory('${cat.id}', '${cat.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded cursor-pointer">✏️ 改名</button>
+                        <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded cursor-pointer">🗑️ 刪除</button>
                     </div>
                 `;
                 list.appendChild(div);
             });
         }
 
+        // 核心同步優化區：不論下拉選單如何重建，最後一定要強制呼叫一次 renderManageItems()
         function initManageCategorySelect() {
             const select = document.getElementById('selectManageCategory');
-            const currentVal = select.value; // 保留原本選定的分類
+            const currentVal = select.value; 
             select.innerHTML = '';
             if(db.categories.length === 0) {
                 select.innerHTML = '<option value="">- 請先新增分類 -</option>';
+                renderManageItems(); // 分類為空時，也同步清空底下的品項
                 return;
             }
             db.categories.forEach(cat => {
@@ -579,6 +578,7 @@
             if (currentVal && db.categories.some(c => c.id === currentVal)) {
                 select.value = currentVal;
             }
+            renderManageItems(); // 🌟 關鍵修正：確保選單重建或切換時，事件與列表 100% 刷新綁定
         }
 
         function addItem() {
@@ -602,7 +602,6 @@
 
             const item = db.items.find(i => i.id === id);
             if (item) {
-                // 檢查同分類下是否有名稱重複
                 const isDuplicate = db.items.some(i => i.catId === item.catId && i.id !== id && i.name.toLowerCase() === trimmed.toLowerCase());
                 if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${trimmed}」。`);
 
@@ -615,6 +614,7 @@
                 db.items = db.items.filter(item => item.id !== id);
                 delete cart[id]; 
                 renderManageItems();
+                updateCartBadge();
             }
         }
 
@@ -636,8 +636,8 @@
                 div.innerHTML = `
                     <span class="font-medium truncate flex-1 pr-1">${item.name}</span>
                     <div class="flex gap-1 shrink-0">
-                        <button onclick="renameItem('${item.id}', '${item.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded">✏️ 改名</button>
-                        <button onclick="deleteItem('${item.id}', '${item.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded">🗑️ 刪除</button>
+                        <button onclick="renameItem('${item.id}', '${item.name}')" class="text-blue-500 hover:bg-blue-50 p-1 rounded cursor-pointer">✏️ 改名</button>
+                        <button onclick="deleteItem('${item.id}', '${item.name}')" class="text-red-500 hover:bg-red-50 p-1 rounded cursor-pointer">🗑️ 刪除</button>
                     </div>
                 `;
                 list.appendChild(div);
