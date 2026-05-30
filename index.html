@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>工地材料訂購系統 (格式精簡版)</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+        .page { display: none; }
+        .page.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen pb-24">
+
+    <header class="bg-blue-600 text-white p-4 sticky top-0 shadow-md flex justify-between items-center z-50">
+        <button id="btnBack" class="hidden text-sm bg-blue-700 px-3 py-1.5 rounded-lg active:bg-blue-800">← 返回</button>
+        <h1 id="appTitle" class="text-lg font-bold mx-auto">選擇工地</h1>
+        <button id="btnNavCart" onclick="navigateTo('cart')" class="hidden text-sm bg-amber-500 hover:bg-amber-600 px-3 py-1.5 rounded-lg font-bold">🛒 購物車(<span id="cartCount">0</span>)</button>
+    </header>
+
+    <main class="p-4 max-w-md mx-auto">
+
+        <div id="backupSection" class="bg-amber-50 border border-amber-200 p-3 rounded-xl mb-4 text-xs space-y-2 shadow-sm">
+            <div class="font-bold text-amber-800 flex items-center gap-1">💾 資料備份與匯入 (JSON)</div>
+            <div class="flex gap-2">
+                <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
+                <button onclick="document.getElementById('importFile').click()" class="flex-1 bg-amber-600 text-white py-1.5 rounded-md font-medium active:bg-amber-700 text-center">
+                    📥 匯入 JSON
+                </button>
+                <button onclick="exportJSON()" class="flex-1 bg-amber-700 text-white py-1.5 rounded-md font-medium active:bg-amber-800 text-center">
+                    📤 匯出備份
+                </button>
+            </div>
+        </div>
+
+        <section id="pageSites" class="page active space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+                <h3 class="font-bold text-gray-600 mb-2">新增工地</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="inputNewSite" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" placeholder="輸入新工地名稱">
+                    <button onclick="addSite()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium active:bg-green-700">新增</button>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <h3 class="font-bold text-gray-600 px-1">工地列表</h3>
+                <div id="listSites" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <section id="pageCategories" class="page space-y-4">
+            <div class="bg-blue-50 p-3 rounded-lg text-sm font-semibold text-blue-800">
+                目前工地：<span id="currentSiteName"></span>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+                <h3 class="font-bold text-gray-600 mb-2">新增材料分類</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="inputNewCategory" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" placeholder="如：水泥類、五金類">
+                    <button onclick="addCategory()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium active:bg-green-700">新增</button>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <h3 class="font-bold text-gray-600 px-1">分類列表</h3>
+                <div id="listCategories" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <section id="pageItems" class="page space-y-4">
+            <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-800 space-y-1">
+                <div><strong>工地：</strong> <span id="currentSiteName2"></span></div>
+                <div><strong>分類：</strong> <span id="currentCategoryName"></span></div>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl shadow-sm flex items-center gap-2">
+                <span class="text-gray-400 text-sm">🔍</span>
+                <input type="text" id="searchBar" oninput="renderItems()" class="w-full text-sm focus:outline-none" placeholder="搜尋此分類下的品項關鍵字...">
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+                <h3 class="font-bold text-gray-600 mb-2">新增材料品項</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="inputNewItem" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" placeholder="如：40kg 水泥、3分螺絲">
+                    <button onclick="addItem()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium active:bg-green-700">新增</button>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h3 class="font-bold text-gray-600 px-1">品項清單 (可複選並填寫數量)</h3>
+                <div id="listItems" class="space-y-2"></div>
+            </div>
+
+            <button onclick="navigateTo('cart')" class="w-full bg-amber-500 text-white py-3 rounded-xl font-bold text-lg shadow-lg active:bg-amber-600 mt-6 block text-center">
+                🛒 查看我的材料購物車 (<span id="cartCountBottom">0</span>)
+            </button>
+        </section>
+
+        <section id="pageCart" class="page space-y-4">
+            <div class="bg-amber-50 p-3 rounded-lg text-sm text-amber-900 space-y-1 border border-amber-200">
+                <div><strong>預計送貨工地：</strong> <span id="cartSiteName"></span></div>
+                <div class="text-xs text-gray-500">提示：您可以在這裡修改最終數量，或刪除不要的品項。</div>
+            </div>
+
+            <div class="space-y-2">
+                <h3 class="font-bold text-gray-600 px-1">已選材料清單</h3>
+                <div id="listCartItems" class="space-y-2"></div>
+            </div>
+
+            <button onclick="copyCartToClipboard()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold text-lg shadow-lg active:bg-green-700 mt-6 block">
+                📋 確認並複製純文字訂購單
+            </button>
+        </section>
+
+    </main>
+
+    <script>
+        let db = { sites: [], categories: [], items: [] };
+        let currentState = { page: 'sites', siteId: null, siteName: '', catId: null, catName: '' };
+        let cart = {};
+
+        function updateCartBadge() {
+            const count = Object.keys(cart).length;
+            document.getElementById('cartCount').innerText = count;
+            document.getElementById('cartCountBottom').innerText = count;
+        }
+
+        function importJSON(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.sites && parsed.categories && parsed.items) {
+                        db = parsed;
+                        alert('🎉 資料匯入成功！');
+                        navigateTo('sites');
+                    } else { alert('匯入失敗：格式不正確。'); }
+                } catch (err) { alert('讀取檔案失敗。'); }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+            const downloadAnchorLine = document.createElement('a');
+            downloadAnchorLine.setAttribute("href", dataStr);
+            downloadAnchorLine.setAttribute("download", "construction_data.json");
+            document.body.appendChild(downloadAnchorLine);
+            downloadAnchorLine.click();
+            downloadAnchorLine.remove();
+        }
+
+        function navigateTo(page) {
+            const prevPage = currentState.page;
+            currentState.page = page;
+
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('btnBack').classList.remove('hidden');
+            document.getElementById('btnNavCart').classList.add('hidden');
+            document.getElementById('backupSection').classList.add('hidden');
+
+            if (page === 'sites') {
+                document.getElementById('pageSites').classList.add('active');
+                document.getElementById('appTitle').innerText = '選擇工地';
+                document.getElementById('btnBack').classList.add('hidden');
+                document.getElementById('backupSection').classList.remove('hidden');
+                renderSites();
+            } else if (page === 'categories') {
+                document.getElementById('pageCategories').classList.add('active');
+                document.getElementById('appTitle').innerText = '選擇分類';
+                document.getElementById('currentSiteName').innerText = currentState.siteName;
+                document.getElementById('btnNavCart').classList.remove('hidden');
+                renderCategories();
+            } else if (page === 'items') {
+                document.getElementById('pageItems').classList.add('active');
+                document.getElementById('appTitle').innerText = '選擇品項';
+                document.getElementById('currentSiteName2').innerText = currentState.siteName;
+                document.getElementById('currentCategoryName').innerText = currentState.catName;
+                document.getElementById('btnNavCart').classList.remove('hidden');
+                renderItems();
+            } else if (page === 'cart') {
+                document.getElementById('pageCart').classList.add('active');
+                document.getElementById('appTitle').innerText = '🛒 購物車確認';
+                document.getElementById('cartSiteName').innerText = currentState.siteName || '未選擇工地';
+                document.getElementById('btnBack').dataset.backTo = prevPage === 'cart' ? 'items' : prevPage;
+                renderCart();
+            }
+            updateCartBadge();
+        }
+
+        document.getElementById('btnBack').addEventListener('click', (e) => {
+            if (currentState.page === 'cart') {
+                const target = e.target.dataset.backTo || 'items';
+                navigateTo(target === 'sites' ? 'categories' : target);
+            }
+            else if (currentState.page === 'items') navigateTo('categories');
+            else if (currentState.page === 'categories') navigateTo('sites');
+        });
+
+        // --- 工地邏輯 ---
+        function addSite() {
+            const name = document.getElementById('inputNewSite').value.trim();
+            if (!name) return alert('請輸入工地名稱');
+            db.sites.push({ id: Date.now().toString(), name });
+            document.getElementById('inputNewSite').value = '';
+            renderSites();
+        }
+        function deleteSite(id, name, event) {
+            event.stopPropagation();
+            if (confirm(`確定要刪除工地「${name}」嗎？`)) {
+                db.sites = db.sites.filter(site => site.id !== id);
+                renderSites();
+            }
+        }
+        function renderSites() {
+            const list = document.getElementById('listSites');
+            list.innerHTML = db.sites.length === 0 ? '<p class="text-gray-400 text-center py-4 text-sm">目前無資料，請先新增工地。</p>' : '';
+            db.sites.forEach(site => {
+                const div = document.createElement('div');
+                div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch";
+                div.innerHTML = `
+                    <div class="flex-1 p-4 flex justify-between items-center border border-transparent active:border-blue-500 cursor-pointer min-w-0" onclick="currentState.siteId='${site.id}'; currentState.siteName='${site.name}'; navigateTo('categories')">
+                        <span class="font-medium truncate mr-2">${site.name}</span> <span class="text-gray-400 text-xs shrink-0">進入 →</span>
+                    </div>
+                    <button onclick="deleteSite('${site.id}', '${site.name}', event)" class="bg-red-50 px-4 text-red-500 text-lg border-l border-red-100 active:bg-red-100 shrink-0">🗑️</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- 分類邏輯 ---
+        function addCategory() {
+            const name = document.getElementById('inputNewCategory').value.trim();
+            if (!name) return alert('請輸入分類名稱');
+            db.categories.push({ id: Date.now().toString(), name });
+            document.getElementById('inputNewCategory').value = '';
+            renderCategories();
+        }
+        function deleteCategory(id, name, event) {
+            event.stopPropagation();
+            if (confirm(`確定要刪除分類「${name}」嗎？（連同品項會一併刪除）`)) {
+                db.categories = db.categories.filter(cat => cat.id !== id);
+                db.items = db.items.filter(item => item.catId !== id);
+                renderCategories();
+            }
+        }
+        function renderCategories() {
+            const list = document.getElementById('listCategories');
+            list.innerHTML = db.categories.length === 0 ? '<p class="text-gray-400 text-center py-4 text-sm">目前無分類，請先新增。</p>' : '';
+            db.categories.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch";
+                div.innerHTML = `
+                    <div class="flex-1 p-4 flex justify-between items-center border border-transparent active:border-blue-500 cursor-pointer min-w-0" onclick="currentState.catId='${cat.id}'; currentState.catName='${cat.name}'; navigateTo('items')">
+                        <span class="font-medium truncate mr-2">${cat.name}</span> <span class="text-gray-400 text-xs shrink-0">進入 →</span>
+                    </div>
+                    <button onclick="deleteCategory('${cat.id}', '${cat.name}', event)" class="bg-red-50 px-4 text-red-500 text-lg border-l border-red-100 active:bg-red-100 shrink-0">🗑️</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- 品項邏輯 ---
+        function addItem() {
+            const name = document.getElementById('inputNewItem').value.trim();
+            if (!name) return alert('請輸入品項名稱');
+            
+            const isDuplicate = db.items.some(item => item.catId === currentState.catId && item.name.toLowerCase() === name.toLowerCase());
+            if (isDuplicate) {
+                return alert(`⚠️ 新增失敗！此分類下已經有叫作「${name}」的材料品項了。`);
+            }
+
+            db.items.push({ id: Date.now().toString(), catId: currentState.catId, name });
+            document.getElementById('inputNewItem').value = '';
+            renderItems();
+        }
+        function deleteItem(id, name) {
+            if (confirm(`確定要刪除材料「${name}」嗎？`)) {
+                db.items = db.items.filter(item => item.id !== id);
+                delete cart[id];
+                renderItems();
+                updateCartBadge();
+            }
+        }
+
+        function handleItemCheck(itemId, checked) {
+            if (checked) {
+                if (!cart[itemId]) cart[itemId] = { qty: '' };
+            } else {
+                delete cart[itemId];
+            }
+            updateCartBadge();
+        }
+
+        function handleItemQty(itemId, qty) {
+            if (qty.trim() !== '') {
+                if (!cart[itemId]) cart[itemId] = { qty: '' };
+                cart[itemId].qty = qty;
+                const chk = document.getElementById(`chk-${itemId}`);
+                if (chk) chk.checked = true;
+            } else {
+                if (cart[itemId]) cart[itemId].qty = '';
+            }
+            updateCartBadge();
+        }
+
+        function renderItems() {
+            const list = document.getElementById('listItems');
+            const keyword = document.getElementById('searchBar').value.toLowerCase().trim();
+            const filteredItems = db.items.filter(item => item.catId === currentState.catId && item.name.toLowerCase().includes(keyword));
+            
+            list.innerHTML = filteredItems.length === 0 ? '<p class="text-gray-400 text-center py-4 text-sm">無符合的材料品項。</p>' : '';
+            
+            filteredItems.forEach(item => {
+                const inCart = !!cart[item.id];
+                const qtyValue = inCart ? cart[item.id].qty : '';
+                const div = document.createElement('div');
+                div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch justify-between gap-2";
+                div.innerHTML = `
+                    <label class="flex items-center gap-3 flex-1 min-w-0 p-3 cursor-pointer select-none">
+                        <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0">
+                        <span class="font-medium text-sm text-gray-800 break-all whitespace-normal pr-1">${item.name}</span>
+                    </label>
+                    <div class="flex items-stretch shrink-0">
+                        <div class="flex items-center px-1">
+                            <input type="text" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="w-20 border rounded-lg px-2 py-1 text-center text-sm focus:outline-none focus:border-blue-500" placeholder="數量/單位">
+                        </div>
+                        <button onclick="deleteItem('${item.id}', '${item.name}')" class="bg-red-50 px-3 text-red-500 border-l border-red-100 flex items-center justify-center active:bg-red-100 ml-2">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- 購物車功能邏輯 ---
+        function changeCartQty(itemId, qty) {
+            if (qty.trim() === '') {
+                delete cart[itemId];
+                renderCart();
+            } else {
+                cart[itemId].qty = qty;
+            }
+            updateCartBadge();
+        }
+
+        function removeCartItem(itemId) {
+            delete cart[itemId];
+            renderCart();
+            updateCartBadge();
+        }
+
+        function renderCart() {
+            const list = document.getElementById('listCartItems');
+            const cartKeys = Object.keys(cart);
+            
+            if (cartKeys.length === 0) {
+                list.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">🛒 購物車空空如也，請先去挑選材料填寫數量。</p>';
+                return;
+            }
+            
+            list.innerHTML = '';
+            
+            cartKeys.forEach(itemId => {
+                const itemObj = db.items.find(i => i.id === itemId);
+                if (!itemObj) return;
+                const catObj = db.categories.find(c => c.id === itemObj.catId);
+                const catName = catObj ? catObj.name : '未分類';
+                
+                const div = document.createElement('div');
+                div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch justify-between gap-2 p-3 bg-white";
+                div.innerHTML = `
+                    <div class="flex-1 min-w-0 flex flex-col justify-center">
+                        <span class="text-xs font-bold text-blue-500">[${catName}]</span>
+                        <span class="font-medium text-sm text-gray-800 break-all whitespace-normal pr-1">${itemObj.name}</span>
+                    </div>
+                    <div class="flex items-center shrink-0 gap-2">
+                        <input type="text" value="${cart[itemId].qty}" oninput="changeCartQty('${itemId}', this.value)" class="w-24 border rounded-lg px-2 py-1 text-center text-sm focus:border-blue-500 focus:outline-none bg-amber-50 font-bold" placeholder="數量/單位">
+                        <button onclick="removeCartItem('${itemId}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg text-sm">❌</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- 複製到剪貼簿最終端 (格式優化) ---
+        function copyCartToClipboard() {
+            const cartKeys = Object.keys(cart);
+            const selectedItems = [];
+
+            cartKeys.forEach(itemId => {
+                const itemObj = db.items.find(i => i.id === itemId);
+                if (itemObj) {
+                    const catObj = db.categories.find(c => c.id === itemObj.catId);
+                    selectedItems.push({
+                        catName: catObj ? catObj.name : '未分類',
+                        itemName: itemObj.name,
+                        qty: cart[itemId].qty || '未填數量'
+                    });
+                }
+            });
+
+            if (selectedItems.length === 0) {
+                alert('購物車裡沒有材料，無法複製！');
+                return;
+            }
+
+            // 只取得日期 YYYY/M/D
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
+
+            const grouped = {};
+            selectedItems.forEach(item => {
+                if (!grouped[item.catName]) grouped[item.catName] = [];
+                // 【修正點】移除材料前方的小方塊符號 ▪️
+                grouped[item.catName].push(`${item.itemName}：${item.qty}`);
+            });
+
+            // 【修正點】重新排版：拿掉標題標籤、拿掉時分、對調工地與日期
+            let textOutput = `送貨工地：${currentState.siteName || '未指定'}\n`;
+            textOutput += `填單日期：${dateStr}\n`;
+            textOutput += `--------------------\n`;
+
+            for (const catName in grouped) {
+                textOutput += `【${catName}】\n`;
+                textOutput += grouped[catName].join('\n') + `\n\n`;
+            }
+            textOutput += `--------------------`;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textOutput.trim()).then(() => {
+                    alert('📋 購物車清單已複製！趕快去 LINE 按下貼上傳送吧！');
+                }).catch(() => fallbackCopy(textOutput));
+            } else {
+                fallbackCopy(textOutput);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text.trim();
+            textArea.style.position = "fixed"; 
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.width = "2em";
+            textArea.style.height = "2em";
+            textArea.style.padding = "0";
+            textArea.style.border = "none";
+            textArea.style.outline = "none";
+            textArea.style.boxShadow = "none";
+            textArea.style.background = "transparent";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            textArea.setSelectionRange(0, 99999); 
+            try {
+                const successful = document.execCommand('copy');
+                if(successful) {
+                    alert('📋 購物車清單已成功複製！');
+                } else {
+                    alert('複製失敗，可能需要您手動全選文字複製。');
+                }
+            } catch (err) {
+                alert('手機瀏覽器不支援自動複製，請手動全選複製。');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        navigateTo('sites');
+    </script>
+</body>
+</html>
