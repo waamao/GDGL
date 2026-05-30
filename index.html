@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>工地材料訂購系統 (格式精簡版)</title>
+    <title>工地材料訂購系統 (數字鍵盤優化版)</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -125,6 +125,7 @@
             document.getElementById('cartCountBottom').innerText = count;
         }
 
+        // 修正快取問題，確保能抓到最新狀態
         function importJSON(input) {
             const file = input.files[0];
             if (!file) return;
@@ -319,6 +320,7 @@
                 const qtyValue = inCart ? cart[item.id].qty : '';
                 const div = document.createElement('div');
                 div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch justify-between gap-2";
+                // 【優化點】加入 inputmode="decimal" 觸發手機數字鍵盤
                 div.innerHTML = `
                     <label class="flex items-center gap-3 flex-1 min-w-0 p-3 cursor-pointer select-none">
                         <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0">
@@ -326,7 +328,7 @@
                     </label>
                     <div class="flex items-stretch shrink-0">
                         <div class="flex items-center px-1">
-                            <input type="text" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="w-20 border rounded-lg px-2 py-1 text-center text-sm focus:outline-none focus:border-blue-500" placeholder="數量/單位">
+                            <input type="text" inputmode="decimal" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="w-20 border rounded-lg px-2 py-1 text-center text-sm focus:outline-none focus:border-blue-500" placeholder="數量/單位">
                         </div>
                         <button onclick="deleteItem('${item.id}', '${item.name}')" class="bg-red-50 px-3 text-red-500 border-l border-red-100 flex items-center justify-center active:bg-red-100 ml-2">🗑️</button>
                     </div>
@@ -371,13 +373,14 @@
                 
                 const div = document.createElement('div');
                 div.className = "flex shadow-sm rounded-xl overflow-hidden bg-white items-stretch justify-between gap-2 p-3 bg-white";
+                // 【優化點】加入 inputmode="decimal" 觸發手機數字鍵盤
                 div.innerHTML = `
                     <div class="flex-1 min-w-0 flex flex-col justify-center">
                         <span class="text-xs font-bold text-blue-500">[${catName}]</span>
                         <span class="font-medium text-sm text-gray-800 break-all whitespace-normal pr-1">${itemObj.name}</span>
                     </div>
                     <div class="flex items-center shrink-0 gap-2">
-                        <input type="text" value="${cart[itemId].qty}" oninput="changeCartQty('${itemId}', this.value)" class="w-24 border rounded-lg px-2 py-1 text-center text-sm focus:border-blue-500 focus:outline-none bg-amber-50 font-bold" placeholder="數量/單位">
+                        <input type="text" inputmode="decimal" value="${cart[itemId].qty}" oninput="changeCartQty('${itemId}', this.value)" class="w-24 border rounded-lg px-2 py-1 text-center text-sm focus:border-blue-500 focus:outline-none bg-amber-50 font-bold" placeholder="數量/單位">
                         <button onclick="removeCartItem('${itemId}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg text-sm">❌</button>
                     </div>
                 `;
@@ -407,18 +410,15 @@
                 return;
             }
 
-            // 只取得日期 YYYY/M/D
             const now = new Date();
             const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
 
             const grouped = {};
             selectedItems.forEach(item => {
                 if (!grouped[item.catName]) grouped[item.catName] = [];
-                // 【修正點】移除材料前方的小方塊符號 ▪️
                 grouped[item.catName].push(`${item.itemName}：${item.qty}`);
             });
 
-            // 【修正點】重新排版：拿掉標題標籤、拿掉時分、對調工地與日期
             let textOutput = `送貨工地：${currentState.siteName || '未指定'}\n`;
             textOutput += `填單日期：${dateStr}\n`;
             textOutput += `--------------------\n`;
