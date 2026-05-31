@@ -39,7 +39,7 @@
         #btnBack { font-size: 20px; padding: 4px 16px; }
         
         /* 頁面切換機制：改為撐滿主區塊高度，方便內部做獨立捲動 */
-        .page { display: none; height: 100%; min-height: 0; }
+        .page { display: none; height: 100%; min-height: 0; padding-bottom: 80px; } /* 新增 padding-bottom 避免內容被底部固定按鈕擋住 */
         .page.active { display: flex; flex-direction: column; gap: 16px; }
         
         /* 卡片與區塊樣式 */
@@ -58,7 +58,7 @@
         /* 清單列表物件：改為可獨立內部滑動 */
         .list-container { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
         /* 真正的滾動容器區 */
-        .scroll-list-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 16px; }
+        .scroll-list-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 24px; }
         
         .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; }
         .list-item:active { border-color: #333333; }
@@ -87,12 +87,12 @@
         .manage-btns button { padding: 4px 6px; font-size: 11px; font-weight: normal; background: none; color: #555555; }
         .manage-btns .btn-del { color: #888888; }
         
-        /* 大按鈕 */
-        .btn-block-lg { width: 100%; height: 54px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; display: flex; align-items: center; justify-content: center; text-decoration: none; box-sizing: border-box; margin-top: 16px; flex-shrink: 0; font-weight: bold; }
+        /* 大按鈕：修改為固定在底部 */
+        .btn-block-lg { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 -4px 10px rgba(0,0,0,0.08); text-align: center; display: block; text-decoration: none; box-sizing: border-box; z-index: 100; margin-top: 0 !important; }
         
-        /* 修正與統一：底部所有按鈕群組的尺寸與外觀，使其高度、字級與首頁放大後的按鈕群組完美一致 */
-        .bottom-btn-group { display: flex; gap: 8px; width: 100%; margin-top: 16px; flex-shrink: 0; }
-        .bottom-btn-group button { flex: 1; margin: 0 !important; height: 54px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 0 4px; font-weight: bold; }
+        /* 修改：將底部按鈕群組改為 position: fixed 固定在螢幕最下方，確保所有頁面基準線完全一致 */
+        .bottom-btn-group { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; gap: 8px; margin-top: 0 !important; flex-shrink: 0; z-index: 100; background-color: transparent; }
+        .bottom-btn-group button { flex: 1; margin: 0 !important; height: 96px; font-size: 14px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0 4px; }
 
         .hidden { display: none !important; }
         .text-center { text-align: center; }
@@ -136,7 +136,7 @@
                 <div id="listSites" class="scroll-list-body"></div>
             </div>
 
-            <div id="homeMenuZone" class="hidden" style="margin-top: 8px; padding-top: 12px; border-top: 2px dashed #e5e7eb; flex-shrink: 0; margin-bottom: 30px;">
+            <div id="homeMenuZone" class="hidden">
                 <div class="bottom-btn-group">
                     <button onclick="navigateTo('log')" class="btn-slate">施工日誌</button>
                     <button onclick="navigateTo('notes')" class="btn-amber">工地記事</button>
@@ -145,15 +145,17 @@
             </div>
         </section>
 
-        <section id="pageLog" class="page" style="overflow-y: auto;">
+        <section id="pageLog" class="page">
             <div class="alert-box alert-blue">
                 目前工地：<span id="logSiteName"></span>
             </div>
-            <div class="card">
-                <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">📝 施工日誌內容填寫</h3>
-                <div id="logItemsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
+            <div class="scroll-list-body" style="flex: 1;">
+                <div class="card">
+                    <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">📝 施工日誌內容填寫</h3>
+                    <div id="logItemsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
+                    </div>
+                    <button onclick="addLogItemRow()" class="btn-slate" style="width: 100%; padding: 10px; margin-top: 4px;">➕ 新增施工項目</button>
                 </div>
-                <button onclick="addLogItemRow()" class="btn-slate" style="width: 100%; padding: 10px; margin-top: 4px;">➕ 新增施工項目</button>
             </div>
             <div class="bottom-btn-group">
                 <button onclick="copyLogToClipboard()" class="btn-green">複製日誌文字</button>
@@ -161,13 +163,15 @@
             </div>
         </section>
 
-        <section id="pageNotes" class="page" style="overflow-y: auto;">
+        <section id="pageNotes" class="page">
             <div class="alert-box alert-blue">
                 目前工地：<span id="notesSiteName"></span>
             </div>
-            <div class="card">
-                <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">工地事項紀錄</h3>
-                <textarea id="txtSiteNotes" rows="12" placeholder="在此輸入各種工地重要記事、備忘或交代事項..." style="width: 100%; resize: none; line-height: 1.6;"></textarea>
+            <div class="scroll-list-body" style="flex: 1;">
+                <div class="card">
+                    <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">工地事項紀錄</h3>
+                    <textarea id="txtSiteNotes" rows="12" placeholder="在此輸入各種工地重要記事、備忘或交代事項..." style="width: 100%; resize: none; line-height: 1.6;"></textarea>
+                </div>
             </div>
             <div class="bottom-btn-group">
                 <button onclick="copyNotesToClipboard()" class="btn-green">複製記事文字</button>
@@ -1028,7 +1032,7 @@
             .catch(error => { console.error('傳送訂單時發生錯誤:', error); })
             .finally(() => {
                 if(btn) {
-                    btn.innerText = '上傳至試算表';
+                    btn.innerText = '複製並上傳';
                     btn.disabled = false;
                 }
             });
@@ -1225,7 +1229,6 @@
             loadRegulationsFromStorage();
             navigateTo('sites');
 
-            // 1. 初始化 工地後台 拖曳 (加入 handle)
             new Sortable(document.getElementById('manageListSites'), {
                 animation: 150,
                 handle: '.drag-handle',
@@ -1242,7 +1245,6 @@
                 }
             });
 
-            // 2. 初始化 材料分類後台 拖曳 (加入 handle)
             new Sortable(document.getElementById('manageListCategories'), {
                 animation: 150,
                 handle: '.drag-handle',
@@ -1259,7 +1261,6 @@
                 }
             });
 
-            // 3. 初始化 材料品項後台 拖曳 (加入 handle)
             new Sortable(document.getElementById('manageListItems'), {
                 animation: 150,
                 handle: '.drag-handle',
