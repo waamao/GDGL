@@ -5,7 +5,7 @@
     <link rel="apple-touch-icon" href="./favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>工地材料訂購系統</title>
+    <title>工地管理系統</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
@@ -25,6 +25,7 @@
         .btn-green { background-color: #222222; color: white; }
         .btn-amber { background-color: #777777; color: white; }
         .btn-slate { background-color: #444444; color: white; }
+        .btn-line { background-color: #06C755; color: white; }
         
         /* 加大返回鍵 */
         #btnBack { font-size: 20px; padding: 4px 16px; }
@@ -79,7 +80,7 @@
             <button id="btnBack" class="hidden btn-blue">←</button>
             <button id="btnClearOrder" onclick="clearOrderAndHome()" class="hidden btn-red">🧹 清除並回首頁</button>
         </div>
-        <h1 id="appTitle" class="header-title">選擇工地</h1>
+        <h1 id="appTitle" class="header-title"></h1>
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
             <button id="btnExportTop" onclick="exportJSON()" class="btn-slate">匯出系統備份</button>
             <button id="btnManage" onclick="navigateTo('manage')" class="btn-slate">⚙️ 設定後台</button>
@@ -102,6 +103,7 @@
             <div class="list-container">
                 <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">請選擇要填單的工地：</h3>
                 <div id="listSites"></div>
+                <button onclick="window.open('https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0120029', '_blank')" class="btn-amber btn-block-lg" style="margin-top: 16px; padding: 18px; font-size: 16px;">🚒 各類場所消防安全設備設置標準</button>
             </div>
         </section>
 
@@ -180,7 +182,7 @@
         <section id="pageCart" class="page">
             <div class="alert-box alert-amber" style="line-height: 1.6;">
                 <div><strong>預計送貨工地：</strong> <span id="cartSiteName"></span></div>
-                <div style="color: #6b7280; font-size: 11px;">提示：您可以在這裡修改最終數量，或點擊 ❌ 取消該品項。</div>
+                <div style="color: #6b7280; font-size: 11px;">提示：您可以在這裡修改最終數量，或點擊 ❌ 取Cancel該品項。</div>
             </div>
 
             <div class="list-container">
@@ -190,6 +192,32 @@
 
             <button id="btnSubmitCart" onclick="copyAndUploadCart()" class="btn-green btn-block-lg">📋 確認並複製、上傳至試算表</button>
             <button onclick="copyOnlyCart()" class="btn-slate btn-block-lg" style="margin-top: 8px;">📝 僅複製純文字訂購單</button>
+            <button onclick="shareToLine()" class="btn-line btn-block-lg" style="margin-top: 8px;">💬 直接傳送到 LINE 群組/個人</button>
+        </section>
+
+        <section id="pageRegulations" class="page">
+            <div class="alert-box alert-blue">
+                目前工地：<span id="regSiteName"></span>
+            </div>
+
+            <div class="alert-box alert-amber">
+                <div style="font-weight: bold;">📥 匯入消防法規 JSON</div>
+                <div style="font-size: 11px; color: #666666;">格式說明：請準備一組包含 title（法條標題）與 content（法條內容）的 JSON 陣列。</div>
+                <div class="flex-row">
+                    <input type="file" id="importRegFile" accept=".json" onchange="importRegulationsJSON(this)" class="hidden">
+                    <button onclick="document.getElementById('importRegFile').click()" class="btn-amber" style="width: 100%; padding: 8px;">📥 選擇並匯入法規 JSON 檔案</button>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 12px; flex-direction: row; align-items: center; gap: 8px;">
+                <span style="color: #9ca3af;">🔍</span>
+                <input type="text" id="regSearchBar" oninput="renderRegulations()" style="border: none; padding: 4px; font-size: 14px; width: 100%; outline: none;" placeholder="輸入條號、關鍵字進行全法規搜尋...">
+            </div>
+
+            <div class="list-container">
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">法規搜尋結果：</h3>
+                <div id="listRegulations" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 2px;"></div>
+            </div>
         </section>
 
         <section id="pageManage" class="page">
@@ -238,6 +266,7 @@
 
     <script>
         let db = { sites: [], categories: [], items: [], config: { scriptUrl: '' } };
+        let regulationsDb = [];
         let currentState = { page: 'sites', siteId: null, siteName: '', catId: null, catName: '' };
         let cart = {};
 
@@ -261,6 +290,25 @@
                 localStorage.setItem('construction_order_db', JSON.stringify(db));
             } catch (e) {
                 console.error("寫入本機存檔失敗", e);
+            }
+        }
+
+        function loadRegulationsFromStorage() {
+            try {
+                const localReg = localStorage.getItem('construction_regulations_db');
+                if (localReg) {
+                    regulationsDb = JSON.parse(localReg);
+                }
+            } catch (e) {
+                console.error("讀取法規資料失敗", e);
+            }
+        }
+
+        function saveRegulationsToStorage() {
+            try {
+                localStorage.setItem('construction_regulations_db', JSON.stringify(regulationsDb));
+            } catch (e) {
+                console.error("寫入法規資料失敗", e);
             }
         }
 
@@ -337,6 +385,30 @@
             downloadAnchorLine.remove();
         }
 
+        // 匯入消防法規 JSON
+        function importRegulationsJSON(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed)) {
+                        regulationsDb = parsed;
+                        saveRegulationsToStorage();
+                        alert(`🎉 成功匯入 ${parsed.length} 條消防法規資料！`);
+                        renderRegulations();
+                    } else {
+                        alert('匯入失敗：格式不正確。請確保檔案為 JSON 陣列結構。例如：\n[\n  {"title": "第一條", "content": "法規內容..."}\n]');
+                    }
+                } catch (err) {
+                    alert('讀取法規 JSON 檔案失敗，請檢查檔案格式。');
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
         // 頁面導覽機制
         function navigateTo(page) {
             const prevPage = currentState.page;
@@ -352,7 +424,7 @@
 
             if (page === 'sites') {
                 document.getElementById('pageSites').classList.add('active');
-                document.getElementById('appTitle').innerText = '選擇工地';
+                document.getElementById('appTitle').innerText = '';
                 document.getElementById('btnBack').classList.add('hidden');
                 document.getElementById('btnClearOrder').classList.add('hidden');
                 document.getElementById('btnManage').classList.remove('hidden');
@@ -397,6 +469,15 @@
                     document.getElementById('currentCategoryName').innerText = currentState.catName || '';
                 }
                 renderItems();
+            } else if (page === 'regulations') {
+                document.getElementById('pageRegulations').classList.add('active');
+                document.getElementById('appTitle').innerText = '🚒 消防法規查詢';
+                document.getElementById('btnClearOrder').classList.add('hidden');
+                if(document.getElementById('regSiteName')) {
+                    document.getElementById('regSiteName').innerText = currentState.siteName || '';
+                }
+                document.getElementById('regSearchBar').value = '';
+                renderRegulations();
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
                 document.getElementById('appTitle').innerText = '📋 訂單確認';
@@ -427,6 +508,7 @@
             else if (currentState.page === 'log') navigateTo('menu');
             else if (currentState.page === 'categories') navigateTo('menu');
             else if (currentState.page === 'items') navigateTo('categories');
+            else if (currentState.page === 'regulations') navigateTo('menu');
             else if (currentState.page === 'cart') {
                 const target = e.target.dataset.backTo || 'items';
                 navigateTo(target === 'sites' ? 'categories' : target);
@@ -530,6 +612,41 @@
                     list.appendChild(div);
                 });
             }
+        }
+
+        // 渲染與搜尋消防法規列表
+        function renderRegulations() {
+            const list = document.getElementById('listRegulations');
+            const keyword = document.getElementById('regSearchBar').value.toLowerCase().trim();
+
+            if (regulationsDb.length === 0) {
+                list.innerHTML = '<p class="text-muted text-center">目前本機尚無任何法規資料。<br>請點選上方按鈕匯入外部法規 JSON 檔案。</p>';
+                return;
+            }
+
+            const filtered = regulationsDb.filter(reg => {
+                const titleStr = (reg.title || '').toLowerCase();
+                const contentStr = (reg.content || '').toLowerCase();
+                return titleStr.includes(keyword) || contentStr.includes(keyword);
+            });
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<p class="text-muted text-center">找不到相符的消防法規條文。</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            filtered.forEach(reg => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.padding = '12px';
+                card.style.gap = '6px';
+                card.innerHTML = `
+                    <div style="font-weight: bold; color: #1f2937; font-size: 14px; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px;">${reg.title || '未命名條文'}</div>
+                    <div style="font-size: 12.5px; color: #4b5563; line-height: 1.5; white-space: pre-wrap; word-break: break-all;">${reg.content || '無內容'}</div>
+                `;
+                list.appendChild(card);
+            });
         }
 
         function handleItemCheck(itemId, checked) {
@@ -714,6 +831,16 @@
             } else {
                 fallbackCopy(data.text, '📝 明細已成功複製！');
             }
+        }
+
+        // 按鈕三：發送到 LINE
+        function shareToLine() {
+            const data = compileCartData();
+            if (!data) return alert('訂單裡沒有材料，無法操作！');
+            
+            // 使用 LINE Scheme 網址導向
+            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(data.text)}`;
+            window.open(lineUrl, '_blank');
         }
 
         function fallbackCopy(text, msg) {
@@ -967,6 +1094,7 @@
         }
 
         loadFromLocalStorage(); 
+        loadRegulationsFromStorage();
         navigateTo('sites');
     </script>
 </body>
