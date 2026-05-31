@@ -434,7 +434,7 @@
                 </div>
                 <div class="log-entry-row">
                     <div>
-                        <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px; color: #4b5563;">區域/樓層：</label>
+                        <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px; color: #4b5563;">樓層/區域：</label>
                         <input type="text" class="log-floor-input" value="${floorValue}" placeholder="如：1F柱牆、3 樓外牆">
                     </div>
                     <div>
@@ -494,7 +494,7 @@
                 if (itemVal || floorVal || peopleVal) {
                     hasContent = true;
                     projectLogText += `項目 ${i + 1}：${itemVal || '無'}\n`;
-                    projectLogText += `↳ 區域/樓層：${floorVal || '無'}\n`;
+                    projectLogText += `↳ 樓層/區域：${floorVal || '無'}\n`;
                     projectLogText += `↳ 施工人數：${peopleVal ? peopleVal + ' 人' : '無'}\n\n`;
                 }
             }
