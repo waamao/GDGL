@@ -10,11 +10,18 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-        body { background-color: #f3f4f6; color: #1f2937; margin: 0; padding-bottom: 96px; -webkit-tap-highlight-color: transparent; }
-        .max-w-md { max-width: 448px; margin: 0 auto; padding: 16px; }
         
-        /* 頁首樣式：換成深灰色調 */
-        header { background-color: #1f2937; color: #ffffff; padding: 16px; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        /* 修正主視窗結構：使其填滿全螢幕且不觸發全頁捲動 */
+        html, body { height: 100%; margin: 0; padding: 0; background-color: #f3f4f6; color: #1f2937; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+        
+        /* 使用 flex 讓 main 填滿 header 以下的所有空間 */
+        body { display: flex; flex-direction: column; }
+        
+        /* 限制最大寬度並置中 */
+        main.max-w-md { max-width: 448px; width: 100%; margin: 0 auto; flex: 1; min-height: 0; padding: 16px; position: relative; }
+        
+        /* 頁首樣式：固定在最上方 */
+        header { background-color: #1f2937; color: #ffffff; padding: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
         .header-title { font-size: 16px; font-weight: bold; margin: 0 8px; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: center; }
         
         /* 通用按鈕：全數換成黑白灰階風格 */
@@ -30,13 +37,13 @@
         /* 加大返回鍵 */
         #btnBack { font-size: 20px; padding: 4px 16px; }
         
-        /* 頁面切換機制 */
-        .page { display: none; }
-        .page.active { display: block; display: flex; flex-direction: column; gap: 16px; }
+        /* 頁面切換機制：改為撐滿主區塊高度，方便內部做獨立捲動 */
+        .page { display: none; height: 100%; min-height: 0; }
+        .page.active { display: flex; flex-direction: column; gap: 16px; }
         
         /* 卡片與區塊樣式 */
-        .card { background-color: #ffffff; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 12px; }
-        .alert-box { padding: 12px; border-radius: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .card { background-color: #ffffff; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+        .alert-box { padding: 12px; border-radius: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-shrink: 0; }
         .alert-amber { background-color: #f3f4f6; border: 1px solid #cbd5e1; color: #333333; }
         .alert-blue { background-color: #e5e7eb; border: 1px solid #cbd5e1; color: #111111; font-weight: 600; }
         
@@ -46,8 +53,11 @@
         .flex-row { display: flex; gap: 8px; width: 100%; align-items: center; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         
-        /* 清單列表物件 */
-        .list-container { display: flex; flex-direction: column; gap: 8px; }
+        /* 清單列表物件：改為可獨立內部滑動 */
+        .list-container { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+        /* 真正的滾動容器區 */
+        .scroll-list-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 16px; }
+        
         .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; }
         .list-item:active { border-color: #333333; }
         
@@ -66,7 +76,7 @@
         .manage-btns .btn-del { color: #888888; }
         
         /* 大按鈕 */
-        .btn-block-lg { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; display: block; text-decoration: none; box-sizing: border-box; margin-top: 16px; }
+        .btn-block-lg { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; display: block; text-decoration: none; box-sizing: border-box; margin-top: 16px; flex-shrink: 0; }
         
         .hidden { display: none !important; }
         .text-center { text-align: center; }
@@ -95,7 +105,7 @@
 
     <main class="max-w-md">
 
-        <section id="pageSites" class="page active">
+        <section id="pageSites" class="page">
             <div class="alert-box alert-amber">
                 <div style="font-weight: bold;">💾 資料備份與手動匯入</div>
                 <div style="font-size: 11px; color: #666666;">系統具備本機自動記憶功能，通常無須重複匯入。若欲更換手機或清除瀏覽器快取，可在此執行匯出/匯入。</div>
@@ -105,9 +115,9 @@
                 </div>
             </div>
 
-            <div class="list-container">
-                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">請選擇要填單的工地：</h3>
-                <div id="listSites"></div>
+            <div class="list-container" style="overflow: hidden;">
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇要填單的工地：</h3>
+                <div id="listSites" class="scroll-list-body"></div>
             </div>
         </section>
 
@@ -121,14 +131,14 @@
             </div>
         </section>
 
-        <section id="pageLog" class="page">
+        <section id="pageLog" class="page" style="overflow-y: auto;">
             <div class="alert-box alert-blue">
                 目前工地：<span id="logSiteName"></span>
             </div>
             <div class="card">
                 <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">📝 施工日誌內容填寫</h3>
                 <div id="logItemsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
-                    </div>
+                </div>
                 <button onclick="addLogItemRow()" class="btn-slate" style="width: 100%; padding: 10px; margin-top: 4px;">➕ 新增施工項目</button>
             </div>
             <button onclick="copyLogToClipboard()" class="btn-green btn-block-lg">📋 複製日誌文字</button>
@@ -145,8 +155,8 @@
             </div>
 
             <div class="list-container">
-                <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">請選擇材料大類：</h3>
-                <div id="listCategories"></div>
+                <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇材料大類：</h3>
+                <div id="listCategories" class="scroll-list-body"></div>
             </div>
         </section>
 
@@ -165,8 +175,8 @@
             </div>
 
             <div class="list-container">
-                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">品項清單 (請勾選並輸入數量)：</h3>
-                <div id="listItems"></div>
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">品項清單 (請勾選並輸入數量)：</h3>
+                <div id="listItems" class="scroll-list-body"></div>
             </div>
 
             <button onclick="navigateTo('cart')" class="btn-amber btn-block-lg">📋 查看我的材料訂單 (<span id="cartCountBottom">0</span>)</button>
@@ -179,11 +189,11 @@
             </div>
 
             <div class="list-container">
-                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">已選材料明細：</h3>
-                <div id="listCartItems"></div>
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">已選材料明細：</h3>
+                <div id="listCartItems" class="scroll-list-body"></div>
             </div>
 
-            <button id="btnSubmitCart" onclick="copyAndUploadCart()" class="btn-green btn-block-lg">📋 確認並複製、上傳至試算表</button>
+            <button id="btnSubmitCart" onclick="copyAndUploadCart()" class="btn-green btn-block-lg" style="margin-top:0;">📋 確認並複製、上傳至試算表</button>
             <button onclick="copyOnlyCart()" class="btn-slate btn-block-lg" style="margin-top: 8px;">📝 僅複製純文字訂購單</button>
             <button onclick="shareToLine()" class="btn-line btn-block-lg" style="margin-top: 8px;">💬 直接傳送到 LINE 群組/個人</button>
         </section>
@@ -208,12 +218,12 @@
             </div>
 
             <div class="list-container">
-                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px;">法規搜尋結果：</h3>
-                <div id="listRegulations" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 2px;"></div>
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">法規搜尋結果：</h3>
+                <div id="listRegulations" class="scroll-list-body" style="max-height: none;"></div>
             </div>
         </section>
 
-        <section id="pageManage" class="page">
+        <section id="pageManage" class="page" style="overflow-y: auto;">
             <div class="card">
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">🏢 工地基本資料維護</h3>
                 <div class="flex-row">
@@ -666,7 +676,7 @@
             const keyword = document.getElementById('regSearchBar').value.toLowerCase().trim();
 
             if (regulationsDb.length === 0) {
-                list.innerHTML = '<p class="text-muted text-center">目前本機尚無任何法規資料。<br>請點選上方按鈕匯入外部法規 JSON 檔案。</p>';
+                list.innerHTML = '<p class="text-muted text-center">目前本機尚無 any 法規資料。<br>請點選上方按鈕匯入外部法規 JSON 檔案。</p>';
                 return;
             }
 
