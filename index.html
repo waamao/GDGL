@@ -77,8 +77,9 @@
         .scroll-box { max-height: 220px; overflow-y: auto; background-color: #f9fafb; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
         .manage-item { background-color: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 4px; }
         
-        /* 增加拖曳時的手勢與抓取樣式 */
-        .manage-item { cursor: move; user-select: none; }
+        /* 移除整行拖曳，改為特定 handle 樣式 */
+        .manage-item { user-select: none; }
+        .drag-handle { cursor: move; padding-right: 4px; }
         .sortable-ghost { opacity: 0.4; background-color: #e2e8f0 !important; border: 1px dashed #94a3b8 !important; }
         
         .manage-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -355,14 +356,12 @@
                 cart = {};
                 updateCartBadge();
                 if(document.getElementById('globalSearchBar')) document.getElementById('globalSearchBar').value = '';
-                // 主動清除上次選取的工地
                 currentState.siteId = null;
                 currentState.siteName = '';
                 navigateTo('sites');
             }
         }
 
-        // 匯入備份
         function importJSON(input) {
             const file = input.files[0];
             if (!file) return;
@@ -378,7 +377,6 @@
                             document.getElementById('inputScriptUrl').value = db.config.scriptUrl || '';
                         }
                         alert('🎉 全站基礎資料與連動網址已匯入成功！您可以到後台自由拖曳調整順序。');
-                        // 匯入新資料時重置選擇狀態
                         currentState.siteId = null;
                         currentState.siteName = '';
                         navigateTo('sites');
@@ -389,7 +387,6 @@
             input.value = '';
         }
 
-        // 匯出備份
         function exportJSON() {
             if (db.sites.length === 0 && db.categories.length === 0 && db.items.length === 0) {
                 if(!confirm('目前系統內無任何資料，確定要匯出空白的備份檔嗎？')) return;
@@ -403,7 +400,6 @@
             downloadAnchorLine.remove();
         }
 
-        // 匯入消防法規 JSON
         function importRegulationsJSON(input) {
             const file = input.files[0];
             if (!file) return;
@@ -427,7 +423,6 @@
             input.value = '';
         }
 
-        // 施工日誌動態欄位控制 (人數配置為數字鍵盤型態)
         function addLogItemRow(itemValue = '', floorValue = '', peopleValue = '') {
             const container = document.getElementById('logItemsContainer');
             const div = document.createElement('div');
@@ -467,7 +462,6 @@
             addLogItemRow(); 
         }
 
-        // 選擇主頁面的某個工地
         function selectSiteOnHome(siteId, siteName) {
             currentState.siteId = siteId;
             currentState.siteName = siteName;
@@ -483,7 +477,6 @@
             document.getElementById('homeMenuZone').classList.remove('hidden');
         }
 
-        // 彙整施工日誌純文字內容
         function compileLogText() {
             const container = document.getElementById('logItemsContainer');
             const items = container.getElementsByClassName('log-entry-item');
@@ -541,7 +534,6 @@
             window.open(lineUrl, '_blank');
         }
 
-        // 彙整工地記事文字內容
         function compileNotesText() {
             const val = document.getElementById('txtSiteNotes').value.trim();
             if (!val) return null;
@@ -581,7 +573,6 @@
             window.open(lineUrl, '_blank');
         }
 
-        // 頁面導覽機制
         function navigateTo(page) {
             const prevPage = currentState.page;
             currentState.page = page;
@@ -601,10 +592,8 @@
                 document.getElementById('btnClearOrder').classList.add('hidden');
                 document.getElementById('btnManage').classList.remove('hidden');
                 
-                // 【修改處】刪除了每次清除 siteId / siteName 的程式碼
                 renderSites();
 
-                // 【修改處】如果先前已有選取工地，返回時自動將其反白並顯示功能選單，否則隱藏選單
                 if (currentState.siteId) {
                     selectSiteOnHome(currentState.siteId, currentState.siteName);
                 } else {
@@ -681,7 +670,6 @@
             updateCartBadge();
         }
 
-        // 返回鍵邏輯
         document.getElementById('btnBack').addEventListener('click', (e) => {
             if (currentState.page === 'manage') navigateTo('sites');
             else if (currentState.page === 'log') navigateTo('sites');
@@ -711,7 +699,6 @@
             });
         }
 
-        // 分類首頁渲染
         function renderCategories() {
             const list = document.getElementById('listCategories');
             const keyword = document.getElementById('globalSearchBar').value.toLowerCase().trim();
@@ -759,7 +746,6 @@
             }
         }
 
-        // 渲染與搜尋消防法規列表
         function renderRegulations() {
             const list = document.getElementById('listRegulations');
             const keyword = document.getElementById('regSearchBar').value.toLowerCase().trim();
@@ -815,7 +801,6 @@
             updateCartBadge();
         }
 
-        // 新增品項
         function quickAddItem() {
             const catId = currentState.catId;
             const name = document.getElementById('inputQuickItem').value.trim();
@@ -835,7 +820,7 @@
             const list = document.getElementById('listItems');
             const filteredItems = db.items.filter(item => item.catId === currentState.catId);
             
-            list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">此大類下暫無任何材料品項。</p>' : '';
+            list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">此大類下暫無 any 材料品項。</p>' : '';
             
             filteredItems.forEach(item => {
                 const inCart = !!cart[item.id];
@@ -905,7 +890,6 @@
             });
         }
 
-        // 整理購物車結構
         function compileCartData() {
             const cartKeys = Object.keys(cart);
             const selectedItems = [];
@@ -1040,7 +1024,6 @@
             });
         }
 
-        // 工地基本維護
         function addSite() {
             const name = document.getElementById('inputNewSite').value.trim();
             if (!name) return alert('請輸入工地名稱');
@@ -1079,7 +1062,7 @@
                 div.className = "manage-item";
                 div.setAttribute('data-id', site.id); 
                 div.innerHTML = `
-                    <span class="manage-text">☰ ${site.name}</span>
+                    <span class="manage-text"><span class="drag-handle">☰</span> ${site.name}</span>
                     <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
                         <button onclick="renameSite('${site.id}', '${site.name}')">✏️ 改名</button>
                         <button onclick="deleteSite('${site.id}', '${site.name}')" class="btn-del">🗑️ 刪除</button>
@@ -1089,7 +1072,6 @@
             });
         }
 
-        // 分類基本維護
         function addCategory() {
             const name = document.getElementById('inputNewCategory').value.trim();
             if (!name) return alert('請輸入分類名稱');
@@ -1129,7 +1111,7 @@
                 div.className = "manage-item";
                 div.setAttribute('data-id', cat.id); 
                 div.innerHTML = `
-                    <span class="manage-text">☰ ${cat.name}</span>
+                    <span class="manage-text"><span class="drag-handle">☰</span> ${cat.name}</span>
                     <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
                         <button onclick="renameCategory('${cat.id}', '${cat.name}')">✏️ 改名</button>
                         <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="btn-del">🗑️ 刪除</button>
@@ -1177,7 +1159,7 @@
                 div.setAttribute('data-id', item.id); 
                 const safeName = item.name.replace(/'/g, "\\'");
                 div.innerHTML = `
-                    <span class="manage-text">☰ ${item.name}</span>
+                    <span class="manage-text"><span class="drag-handle">☰</span> ${item.name}</span>
                     <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
                         <button onclick="renameManageItem('${item.id}', '${safeName}')">✏️ 改名</button>
                         <button onclick="deleteManageItem('${item.id}', '${safeName}')" class="btn-del">🗑️ 刪除</button>
@@ -1228,17 +1210,15 @@
             }
         }
 
-        // ==========================================
-        // 初始化拖曳排序功能 (Sortable.js 連動)
-        // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             loadFromLocalStorage(); 
             loadRegulationsFromStorage();
             navigateTo('sites');
 
-            // 1. 初始化 工地後台 拖曳
+            // 1. 初始化 工地後台 拖曳 (加入 handle)
             new Sortable(document.getElementById('manageListSites'), {
                 animation: 150,
+                handle: '.drag-handle',
                 ghostClass: 'sortable-ghost',
                 onEnd: function () {
                     const newSites = [];
@@ -1252,9 +1232,10 @@
                 }
             });
 
-            // 2. 初始化 材料分類後台 拖曳
+            // 2. 初始化 材料分類後台 拖曳 (加入 handle)
             new Sortable(document.getElementById('manageListCategories'), {
                 animation: 150,
+                handle: '.drag-handle',
                 ghostClass: 'sortable-ghost',
                 onEnd: function () {
                     const newCategories = [];
@@ -1268,9 +1249,10 @@
                 }
             });
 
-            // 3. 初始化 材料品項後台 拖曳
+            // 3. 初始化 材料品項後台 拖曳 (加入 handle)
             new Sortable(document.getElementById('manageListItems'), {
                 animation: 150,
+                handle: '.drag-handle',
                 ghostClass: 'sortable-ghost',
                 onEnd: function () {
                     const catId = document.getElementById('manageSelectCategory').value;
