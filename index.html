@@ -8,6 +8,7 @@
     <title>工地管理系統</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         
@@ -48,10 +49,11 @@
         .alert-blue { background-color: #e5e7eb; border: 1px solid #cbd5e1; color: #111111; font-weight: 600; }
         
         /* 表單輸入框 */
-        input[type="text"], select { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; background-color: white; }
-        input[type="text"]:focus, select:focus { border-color: #333333; }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; background-color: white; }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: #333333; }
         .flex-row { display: flex; gap: 8px; width: 100%; align-items: center; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .flex-col { display: flex; flex-direction: column; gap: 8px; }
         
         /* 清單列表物件：改為可獨立內部滑動 */
         .list-container { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
@@ -61,6 +63,10 @@
         .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; }
         .list-item:active { border-color: #333333; }
         
+        /* 工地被選取時的反白樣式 */
+        .list-item.selected { background-color: #1f2937 !important; border-color: #1f2937 !important; }
+        .list-item.selected span { color: #ffffff !important; }
+
         /* 前台材料品項勾選樣式 */
         .item-label { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; cursor: pointer; user-select: none; font-size: 14px; font-weight: 500; }
         .item-checkbox { width: 20px; height: 20px; border-radius: 4px; accent-color: #333333; flex-shrink: 0; }
@@ -68,8 +74,13 @@
         .cart-qty-input { width: 96px !important; text-align: center; font-weight: bold; background-color: #e5e7eb !important; color: #333333; }
         
         /* 後台管理列表縮緊樣式 */
-        .scroll-box { max-height: 180px; overflow-y: auto; background-color: #f9fafb; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
+        .scroll-box { max-height: 220px; overflow-y: auto; background-color: #f9fafb; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
         .manage-item { background-color: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 4px; }
+        
+        /* 增加拖曳時的手勢與抓取樣式 */
+        .manage-item { cursor: move; user-select: none; }
+        .sortable-ghost { opacity: 0.4; background-color: #e2e8f0 !important; border: 1px dashed #94a3b8 !important; }
+        
         .manage-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .manage-btns { display: flex; gap: 4px; flex-shrink: 0; }
         .manage-btns button { padding: 4px 6px; font-size: 11px; font-weight: normal; background: none; color: #555555; }
@@ -98,7 +109,7 @@
         <h1 id="appTitle" class="header-title"></h1>
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
             <button id="btnExportTop" onclick="exportJSON()" class="btn-slate">匯出系統備份</button>
-            <button id="btnManage" onclick="navigateTo('manage')" class="btn-slate">⚙️ 設定後台</button>
+            <button id="btnManage" onclick="navigateTo('manage')" class="btn-slate">⚙️ 設定</button>
             <button id="btnNavCart" onclick="navigateTo('cart')" class="hidden btn-amber">📋 訂單(<span id="cartCount">0</span>)</button>
         </div>
     </header>
@@ -115,19 +126,20 @@
                 </div>
             </div>
 
-            <div class="list-container" style="overflow: hidden;">
+            <div class="list-container" style="overflow: hidden; flex: 1;">
                 <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇要填單的工地：</h3>
                 <div id="listSites" class="scroll-list-body"></div>
             </div>
-        </section>
 
-        <section id="pageMenu" class="page">
-            <div class="alert-box alert-blue">
-                目前工地：<span id="menuSiteName"></span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
-                <button onclick="navigateTo('log')" class="btn-slate btn-block-lg" style="margin-top:0; padding: 18px; font-size: 16px;">📝 工地日誌</button>
-                <button onclick="navigateTo('categories')" class="btn-blue btn-block-lg" style="margin-top:0; padding: 18px; font-size: 16px;">🧱 材料訂購</button>
+            <div id="homeMenuZone" class="hidden" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 2px dashed #e5e7eb; flex-shrink: 0;">
+                <div class="alert-box alert-blue" style="margin: 0;">
+                    已選取工地：<span id="menuSiteName"></span>
+                </div>
+                <div class="flex-col">
+                    <button onclick="navigateTo('log')" class="btn-slate" style="padding: 14px; font-size: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; width: 100%;">施工日誌</button>
+                    <button onclick="navigateTo('notes')" class="btn-amber" style="padding: 14px; font-size: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; width: 100%;">工地記事</button>
+                    <button onclick="navigateTo('categories')" class="btn-blue" style="padding: 14px; font-size: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; width: 100%;">材料訂購</button>
+                </div>
             </div>
         </section>
 
@@ -142,6 +154,19 @@
                 <button onclick="addLogItemRow()" class="btn-slate" style="width: 100%; padding: 10px; margin-top: 4px;">➕ 新增施工項目</button>
             </div>
             <button onclick="copyLogToClipboard()" class="btn-green btn-block-lg">📋 複製日誌文字</button>
+            <button onclick="shareLogToLine()" class="btn-line btn-block-lg" style="margin-top: 8px;">💬 直接傳送到 LINE</button>
+        </section>
+
+        <section id="pageNotes" class="page" style="overflow-y: auto;">
+            <div class="alert-box alert-blue">
+                目前工地：<span id="notesSiteName"></span>
+            </div>
+            <div class="card">
+                <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">📒 工地事項紀錄</h3>
+                <textarea id="txtSiteNotes" rows="12" placeholder="在此輸入各種工地重要記事、備忘或交代事項..." style="width: 100%; resize: none; line-height: 1.6;"></textarea>
+            </div>
+            <button onclick="copyNotesToClipboard()" class="btn-green btn-block-lg">📋 複製記事文字</button>
+            <button onclick="shareNotesToLine()" class="btn-line btn-block-lg" style="margin-top: 8px;">💬 直接傳送到 LINE</button>
         </section>
 
         <section id="pageCategories" class="page">
@@ -185,7 +210,7 @@
         <section id="pageCart" class="page">
             <div class="alert-box alert-amber" style="line-height: 1.6;">
                 <div><strong>預計送貨工地：</strong> <span id="cartSiteName"></span></div>
-                <div style="color: #6b7280; font-size: 11px;">提示：您可以在這裡修改最終數量，或點擊 ❌ 取Cancel該品項。</div>
+                <div style="color: #6b7280; font-size: 11px;">提示：您可以在這裡修改最終數量，或點擊 ❌ 取消該品項。</div>
             </div>
 
             <div class="list-container">
@@ -225,7 +250,7 @@
 
         <section id="pageManage" class="page" style="overflow-y: auto;">
             <div class="card">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">🏢 工地基本資料維護</h3>
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">🏢 工地基本資料維護 <span style="font-size:11px; color:#6b7280; font-weight:normal;">(可拖曳排序)</span></h3>
                 <div class="flex-row">
                     <input type="text" id="inputNewSite" placeholder="輸入新工地名稱">
                     <button onclick="addSite()" class="btn-green" style="flex-shrink: 0;">新增</button>
@@ -234,7 +259,7 @@
             </div>
 
             <div class="card">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📁 材料分類維護</h3>
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📁 材料分類維護 <span style="font-size:11px; color:#6b7280; font-weight:normal;">(可拖曳排序)</span></h3>
                 <div class="flex-row">
                     <input type="text" id="inputNewCategory" placeholder="如：水泥類、五金類">
                     <button onclick="addCategory()" class="btn-green" style="flex-shrink: 0;">新增</button>
@@ -243,7 +268,7 @@
             </div>
 
             <div class="card">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📦 材料品項維護</h3>
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📦 材料品項維護 <span style="font-size:11px; color:#6b7280; font-weight:normal;">(可拖曳排序)</span></h3>
                 <div style="margin-bottom: 8px;">
                     <select id="manageSelectCategory" onchange="renderManageItems()" style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px; font-size: 13px;">
                         <option value="">請先選擇分類...</option>
@@ -337,7 +362,7 @@
             }
         }
 
-        // 匯入備份 (具備如同 Excel SORT 般的排序功能)
+        // 匯入備份
         function importJSON(input) {
             const file = input.files[0];
             if (!file) return;
@@ -347,25 +372,12 @@
                     const parsed = JSON.parse(e.target.result);
                     if (parsed.sites && parsed.categories && parsed.items) {
                         db = parsed;
-                        
-                        if (Array.isArray(db.sites)) {
-                            db.sites.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-                        }
-                        if (Array.isArray(db.categories)) {
-                            db.categories.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-                        }
-                        if (Array.isArray(db.items)) {
-                            db.items.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-                        }
-
                         if (!db.config) db.config = { scriptUrl: '' };
                         saveToLocalStorage(); 
-                        
                         if(document.getElementById('inputScriptUrl')) {
                             document.getElementById('inputScriptUrl').value = db.config.scriptUrl || '';
                         }
-
-                        alert('🎉 全站基礎資料與連動網址已匯入成功，並已自動排序儲存！');
+                        alert('🎉 全站基礎資料與連動網址已匯入成功！您可以到後台自由拖曳調整順序。');
                         navigateTo('sites');
                     } else { alert('匯入失敗：JSON 結構格式不正確。'); }
                 } catch (err) { alert('讀取檔案失敗。'); }
@@ -402,7 +414,7 @@
                         alert(`🎉 成功匯入 ${parsed.length} 條消防法規資料！`);
                         renderRegulations();
                     } else {
-                        alert('匯入失敗：格式不正確。請確保檔案為 JSON 陣列結構。例如：\n[\n  {"title": "第一條", "content": "法規內容..."}\n]');
+                        alert('匯入失敗：格式不正確。請確保檔案為 JSON 陣列結構。');
                     }
                 } catch (err) {
                     alert('讀取法規 JSON 檔案失敗，請檢查檔案格式。');
@@ -412,11 +424,9 @@
             input.value = '';
         }
 
-        // 施工日誌動態欄位控制
+        // 施工日誌動態欄位控制 (人數配置為數字鍵盤型態)
         function addLogItemRow(itemValue = '', floorValue = '', peopleValue = '') {
             const container = document.getElementById('logItemsContainer');
-            const index = container.children.length;
-            
             const div = document.createElement('div');
             div.className = 'log-entry-item';
             div.innerHTML = `
@@ -431,8 +441,8 @@
                         <input type="text" class="log-floor-input" value="${floorValue}" placeholder="如：1F柱牆、3 樓外牆">
                     </div>
                     <div>
-                        <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px; color: #4b5563;">人數：</label>
-                        <input type="text" class="log-people-input" value="${peopleValue}" placeholder="如：泥作 3 人、粗工 1">
+                        <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px; color: #4b5563;">人數 (人)：</label>
+                        <input type="number" inputmode="numeric" pattern="[0-9]*" class="log-people-input" value="${peopleValue}" placeholder="如：3">
                     </div>
                 </div>
             `;
@@ -451,7 +461,122 @@
         function clearLogInputs() {
             const container = document.getElementById('logItemsContainer');
             container.innerHTML = '';
-            addLogItemRow(); // 預設留一組空欄位
+            addLogItemRow(); 
+        }
+
+        // 選擇主頁面的某個工地
+        function selectSiteOnHome(siteId, siteName) {
+            currentState.siteId = siteId;
+            currentState.siteName = siteName;
+            
+            document.querySelectorAll('#listSites .list-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            const selectedEl = document.getElementById(`site-item-${siteId}`);
+            if (selectedEl) {
+                selectedEl.classList.add('selected');
+            }
+
+            document.getElementById('menuSiteName').innerText = siteName;
+            document.getElementById('homeMenuZone').classList.remove('hidden');
+        }
+
+        // 彙整施工日誌純文字內容
+        function compileLogText() {
+            const container = document.getElementById('logItemsContainer');
+            const items = container.getElementsByClassName('log-entry-item');
+            
+            let hasContent = false;
+            let projectLogText = '';
+
+            for (let i = 0; i < items.length; i++) {
+                const itemVal = items[i].querySelector('.log-item-input').value.trim();
+                const floorVal = items[i].querySelector('.log-floor-input').value.trim();
+                const peopleVal = items[i].querySelector('.log-people-input').value.trim();
+
+                if (itemVal || floorVal || peopleVal) {
+                    hasContent = true;
+                    projectLogText += `項目 ${i + 1}：${itemVal || '無'}\n`;
+                    projectLogText += `↳ 區域/樓層：${floorVal || '無'}\n`;
+                    projectLogText += `↳ 施工人數：${peopleVal ? peopleVal + ' 人' : '無'}\n\n`;
+                }
+            }
+
+            if (!hasContent) return null;
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const dateStr = `${year}/${month}/${date}`;
+
+            let logText = `【施工日誌】\n`;
+            logText += `工地名稱：${currentState.siteName || '未指定'}\n`;
+            logText += `填報日期：${dateStr}\n`;
+            logText += `--------------------\n`;
+            logText += projectLogText;
+            logText += `--------------------`;
+            return logText.trim();
+        }
+
+        function copyLogToClipboard() {
+            const text = compileLogText();
+            if (!text) return alert('請至少填寫一項項目內容後再進行複製！');
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('📋 施工日誌純文字已成功複製！快去 LINE 貼上傳送吧！');
+                }).catch(() => fallbackCopy(text, '📋 施工日誌已成功複製！'));
+            } else {
+                fallbackCopy(text, '📋 施工日誌已成功複製！');
+            }
+        }
+
+        function shareLogToLine() {
+            const text = compileLogText();
+            if (!text) return alert('請至少填寫一項項目內容後再傳送！');
+            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+            window.open(lineUrl, '_blank');
+        }
+
+        // 彙整工地記事文字內容
+        function compileNotesText() {
+            const val = document.getElementById('txtSiteNotes').value.trim();
+            if (!val) return null;
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const dateStr = `${year}/${month}/${date}`;
+
+            let notesText = `【工地記事】\n`;
+            notesText += `工地名稱：${currentState.siteName || '未指定'}\n`;
+            notesText += `記錄日期：${dateStr}\n`;
+            notesText += `--------------------\n`;
+            notesText += val + `\n`;
+            notesText += `--------------------`;
+            return notesText.trim();
+        }
+
+        function copyNotesToClipboard() {
+            const text = compileNotesText();
+            if (!text) return alert('請先輸入記事內容後再進行複製！');
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('📋 工地記事內容已成功複製到剪貼簿！');
+                }).catch(() => fallbackCopy(text, '📋 工地記事已成功複製！'));
+            } else {
+                fallbackCopy(text, '📋 工地記事已成功複製！');
+            }
+        }
+
+        function shareNotesToLine() {
+            const text = compileNotesText();
+            if (!text) return alert('請先輸入記事內容後再進行傳送！');
+            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+            window.open(lineUrl, '_blank');
         }
 
         // 頁面導覽機制
@@ -473,22 +598,27 @@
                 document.getElementById('btnBack').classList.add('hidden');
                 document.getElementById('btnClearOrder').classList.add('hidden');
                 document.getElementById('btnManage').classList.remove('hidden');
+                
+                currentState.siteId = null;
+                currentState.siteName = '';
+                document.getElementById('homeMenuZone').classList.add('hidden');
                 renderSites();
-            } else if (page === 'menu') {
-                document.getElementById('pageMenu').classList.add('active');
-                document.getElementById('appTitle').innerText = '工地主選單';
-                document.getElementById('btnClearOrder').classList.add('hidden');
-                if(document.getElementById('menuSiteName')) {
-                    document.getElementById('menuSiteName').innerText = currentState.siteName || '';
-                }
             } else if (page === 'log') {
                 document.getElementById('pageLog').classList.add('active');
-                document.getElementById('appTitle').innerText = '📝 填寫工地日誌';
+                document.getElementById('appTitle').innerText = '📝 填寫施工日誌';
                 document.getElementById('btnClearOrder').classList.add('hidden');
                 if(document.getElementById('logSiteName')) {
                     document.getElementById('logSiteName').innerText = currentState.siteName || '';
                 }
                 clearLogInputs();
+            } else if (page === 'notes') {
+                document.getElementById('pageNotes').classList.add('active');
+                document.getElementById('appTitle').innerText = '📒 填寫工地記事';
+                document.getElementById('btnClearOrder').classList.add('hidden');
+                if(document.getElementById('notesSiteName')) {
+                    document.getElementById('notesSiteName').innerText = currentState.siteName || '';
+                }
+                document.getElementById('txtSiteNotes').value = '';
             } else if (page === 'categories') {
                 document.getElementById('pageCategories').classList.add('active');
                 document.getElementById('appTitle').innerText = ''; 
@@ -547,11 +677,11 @@
         // 返回鍵邏輯
         document.getElementById('btnBack').addEventListener('click', (e) => {
             if (currentState.page === 'manage') navigateTo('sites');
-            else if (currentState.page === 'menu') navigateTo('sites');
-            else if (currentState.page === 'log') navigateTo('menu');
-            else if (currentState.page === 'categories') navigateTo('menu');
+            else if (currentState.page === 'log') navigateTo('sites');
+            else if (currentState.page === 'notes') navigateTo('sites');
+            else if (currentState.page === 'categories') navigateTo('sites');
             else if (currentState.page === 'items') navigateTo('categories');
-            else if (currentState.page === 'regulations') navigateTo('menu');
+            else if (currentState.page === 'regulations') navigateTo('sites');
             else if (currentState.page === 'cart') {
                 const target = e.target.dataset.backTo || 'items';
                 navigateTo(target === 'sites' ? 'categories' : target);
@@ -560,69 +690,21 @@
 
         function renderSites() {
             const list = document.getElementById('listSites');
-            list.innerHTML = db.sites.length === 0 ? '<p class="text-muted text-center">目前無資料。<br>請先點擊上方匯入 JSON，<br>或點擊右上角「設定後台」手動建立。</p>' : '';
+            list.innerHTML = db.sites.length === 0 ? '<p class="text-muted text-center">目前無資料。<br>請先點擊上方匯入 JSON，<br>或點擊右上角「設定」手動建立。</p>' : '';
             db.sites.forEach(site => {
                 const div = document.createElement('div');
                 div.className = "list-item";
+                div.id = `site-item-${site.id}`;
                 div.style.cursor = "pointer";
-                div.onclick = function() { currentState.siteId=site.id; currentState.siteName=site.name; navigateTo('menu'); };
+                div.onclick = function() { selectSiteOnHome(site.id, site.name); };
                 div.innerHTML = `
                     <span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1f2937;">${site.name}</span> 
-                    <span style="color: #4b5563; font-size: 12px; font-weight: bold; flex-shrink: 0;">進入 →</span>
                 `;
                 list.appendChild(div);
             });
         }
 
-        // 工地日誌多項目純文字格式彙整與複製
-        function copyLogToClipboard() {
-            const container = document.getElementById('logItemsContainer');
-            const items = container.getElementsByClassName('log-entry-item');
-            
-            let hasContent = false;
-            let projectLogText = '';
-
-            for (let i = 0; i < items.length; i++) {
-                const itemVal = items[i].querySelector('.log-item-input').value.trim();
-                const floorVal = items[i].querySelector('.log-floor-input').value.trim();
-                const peopleVal = items[i].querySelector('.log-people-input').value.trim();
-
-                if (itemVal || floorVal || peopleVal) {
-                    hasContent = true;
-                    projectLogText += `項目 ${i + 1}：${itemVal || '無'}\n`;
-                    projectLogText += `↳ 區域/樓層：${floorVal || '無'}\n`;
-                    projectLogText += `↳ 施工人數：${peopleVal || '無'}\n\n`;
-                }
-            }
-
-            if (!hasContent) {
-                alert('請至少填寫一項項目內容後再進行複製！');
-                return;
-            }
-
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const date = String(now.getDate()).padStart(2, '0');
-            const dateStr = `${year}/${month}/${date}`;
-
-            let logText = `【工地施工日誌】\n`;
-            logText += `工地名稱：${currentState.siteName || '未指定'}\n`;
-            logText += `填報日期：${dateStr}\n`;
-            logText += `--------------------\n`;
-            logText += projectLogText;
-            logText += `--------------------`;
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(logText.trim()).then(() => {
-                    alert('📋 工地日誌純文字已成功複製！快去 LINE 貼上傳送吧！');
-                }).catch(() => fallbackCopy(logText, '📋 工地日誌已成功複製！'));
-            } else {
-                fallbackCopy(logText, '📋 工地日誌已成功複製！');
-            }
-        }
-
-        // 分類首頁渲染：整合全站跨分類品項搜尋
+        // 分類首頁渲染
         function renderCategories() {
             const list = document.getElementById('listCategories');
             const keyword = document.getElementById('globalSearchBar').value.toLowerCase().trim();
@@ -676,7 +758,7 @@
             const keyword = document.getElementById('regSearchBar').value.toLowerCase().trim();
 
             if (regulationsDb.length === 0) {
-                list.innerHTML = '<p class="text-muted text-center">目前本機尚無 any 法規資料。<br>請點選上方按鈕匯入外部法規 JSON 檔案。</p>';
+                list.innerHTML = '<p class="text-muted text-center">目前本機尚無任何法規資料。<br>請點選上方按鈕匯入外部法規 JSON 檔案。</p>';
                 return;
             }
 
@@ -726,6 +808,7 @@
             updateCartBadge();
         }
 
+        // 新增品項
         function quickAddItem() {
             const catId = currentState.catId;
             const name = document.getElementById('inputQuickItem').value.trim();
@@ -736,10 +819,6 @@
             if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
 
             db.items.push({ id: Date.now().toString(), catId, name });
-            
-            // 快速新增後，同步執行自動排序
-            db.items.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-            
             saveToLocalStorage(); 
             document.getElementById('inputQuickItem').value = '';
             renderItems(); 
@@ -819,7 +898,7 @@
             });
         }
 
-        // 整理購物車結構共用函式
+        // 整理購物車結構
         function compileCartData() {
             const cartKeys = Object.keys(cart);
             const selectedItems = [];
@@ -863,7 +942,6 @@
             return { text: textOutput.trim(), items: selectedItems };
         }
 
-        // 按鈕一：複製文字並同步發送至 Google 試算表
         function copyAndUploadCart() {
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料，無法操作！');
@@ -879,7 +957,6 @@
             }
         }
 
-        // 按鈕二：單純複製文字，不上傳雲端試算表
         function copyOnlyCart() {
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料，無法操作！');
@@ -893,12 +970,9 @@
             }
         }
 
-        // 按鈕三：發送到 LINE
         function shareToLine() {
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料，無法操作！');
-            
-            // 使用 LINE Scheme 網址導向
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(data.text)}`;
             window.open(lineUrl, '_blank');
         }
@@ -923,10 +997,8 @@
 
         function sendOrderToGoogleSheet(selectedItems) {
             const SCRIPT_URL = (db.config && db.config.scriptUrl) ? db.config.scriptUrl.trim() : '';
-            
             if (!SCRIPT_URL) {
-                console.warn('未設定 Apps Script URL，無法執行試算表上傳。請至後台設定。');
-                alert('⚠️ 系統提示：因尚未設定或匯入「Apps Script連動網址」，本次訂單將只會複製純文字，無法上傳試算表。請到「設定後台」底部進行設定。');
+                alert('⚠️ 系統提示：因尚未設定或匯入「Apps Script連動網址」，本次訂單將只會複製純文字，無法上傳試算表。請到「設定」底部進行設定。');
                 return;
             }
 
@@ -948,17 +1020,11 @@
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(() => {
-                console.log('訂單傳送請求已發出');
-            })
-            .catch(error => {
-                console.error('傳送訂單時發生錯誤:', error);
-            })
+            .then(() => { console.log('訂單傳送請求已發出'); })
+            .catch(error => { console.error('傳送訂單時發生錯誤:', error); })
             .finally(() => {
                 if(btn) {
                     btn.innerText = '📋 確認並複製、上傳至試算表';
@@ -967,14 +1033,11 @@
             });
         }
 
+        // 工地基本維護
         function addSite() {
             const name = document.getElementById('inputNewSite').value.trim();
             if (!name) return alert('請輸入工地名稱');
             db.sites.push({ id: Date.now().toString(), name });
-            
-            // 後台手動新增工地後，立刻執行 A-Z/筆劃自動排序
-            db.sites.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-            
             saveToLocalStorage(); 
             document.getElementById('inputNewSite').value = '';
             renderManageSites();
@@ -989,10 +1052,6 @@
             if (site) {
                 site.name = trimmed;
                 if (currentState.siteId === id) currentState.siteName = trimmed;
-                
-                // 更名後重新排序
-                db.sites.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-                
                 saveToLocalStorage(); 
                 renderManageSites();
             }
@@ -1011,9 +1070,10 @@
             db.sites.forEach(site => {
                 const div = document.createElement('div');
                 div.className = "manage-item";
+                div.setAttribute('data-id', site.id); 
                 div.innerHTML = `
-                    <span class="manage-text">${site.name}</span>
-                    <div class="manage-btns">
+                    <span class="manage-text">☰ ${site.name}</span>
+                    <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
                         <button onclick="renameSite('${site.id}', '${site.name}')">✏️ 改名</button>
                         <button onclick="deleteSite('${site.id}', '${site.name}')" class="btn-del">🗑️ 刪除</button>
                     </div>
@@ -1022,14 +1082,11 @@
             });
         }
 
+        // 分類基本維護
         function addCategory() {
             const name = document.getElementById('inputNewCategory').value.trim();
             if (!name) return alert('請輸入分類名稱');
             db.categories.push({ id: Date.now().toString(), name });
-            
-            // 後台手動新增大類後，立刻執行 A-Z/筆劃自動排序
-            db.categories.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-            
             saveToLocalStorage(); 
             document.getElementById('inputNewCategory').value = '';
             renderManageCategories();
@@ -1044,10 +1101,6 @@
             if (cat) {
                 cat.name = trimmed;
                 if (currentState.catId === id) currentState.catName = trimmed;
-                
-                // 更名後重新排序
-                db.categories.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-                
                 saveToLocalStorage(); 
                 renderManageCategories();
             }
@@ -1059,7 +1112,6 @@
                 if (currentState.catId === id) { currentState.catId = null; currentState.catName = ''; }
                 saveToLocalStorage(); 
                 renderManageCategories();
-                if (typeof renderManageCategoryDropdown === 'function') renderManageCategoryDropdown();
             }
         }
         function renderManageCategories() {
@@ -1068,9 +1120,10 @@
             db.categories.forEach(cat => {
                 const div = document.createElement('div');
                 div.className = "manage-item";
+                div.setAttribute('data-id', cat.id); 
                 div.innerHTML = `
-                    <span class="manage-text">${cat.name}</span>
-                    <div class="manage-btns">
+                    <span class="manage-text">☰ ${cat.name}</span>
+                    <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
                         <button onclick="renameCategory('${cat.id}', '${cat.name}')">✏️ 改名</button>
                         <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="btn-del">🗑️ 刪除</button>
                     </div>
@@ -1091,7 +1144,6 @@
                 opt.innerText = cat.name;
                 select.appendChild(opt);
             });
-            
             if (currentVal && db.categories.find(c => c.id === currentVal)) {
                 select.value = currentVal;
             } else {
@@ -1115,10 +1167,11 @@
             items.forEach(item => {
                 const div = document.createElement('div');
                 div.className = "manage-item";
+                div.setAttribute('data-id', item.id); 
                 const safeName = item.name.replace(/'/g, "\\'");
                 div.innerHTML = `
-                    <span class="manage-text">${item.name}</span>
-                    <div class="manage-btns">
+                    <span class="manage-text">☰ ${item.name}</span>
+                    <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
                         <button onclick="renameManageItem('${item.id}', '${safeName}')">✏️ 改名</button>
                         <button onclick="deleteManageItem('${item.id}', '${safeName}')" class="btn-del">🗑️ 刪除</button>
                     </div>
@@ -1127,7 +1180,6 @@
             });
         }
 
-        // 新增品項 (具備手動新增自動排序功能)
         function addManageItem() {
             const catId = document.getElementById('manageSelectCategory').value;
             if (!catId) return alert('請先選擇上方的材料分類');
@@ -1138,10 +1190,6 @@
             if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
 
             db.items.push({ id: Date.now().toString(), catId, name });
-            
-            // 後台手動新增品項後，立刻執行 A-Z/筆劃自動排序
-            db.items.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-            
             saveToLocalStorage();
             document.getElementById('inputNewManageItem').value = '';
             renderManageItems();
@@ -1156,10 +1204,6 @@
             const item = db.items.find(i => i.id === id);
             if (item) {
                 item.name = trimmed;
-                
-                // 更名後重新排序
-                db.items.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
-                
                 saveToLocalStorage();
                 renderManageItems();
             }
@@ -1177,9 +1221,72 @@
             }
         }
 
-        loadFromLocalStorage(); 
-        loadRegulationsFromStorage();
-        navigateTo('sites');
+        // ==========================================
+        // 初始化拖曳排序功能 (Sortable.js 連動)
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage(); 
+            loadRegulationsFromStorage();
+            navigateTo('sites');
+
+            // 1. 初始化 工地後台 拖曳
+            new Sortable(document.getElementById('manageListSites'), {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function () {
+                    const newSites = [];
+                    document.querySelectorAll('#manageListSites .manage-item').forEach(el => {
+                        const id = el.getAttribute('data-id');
+                        const site = db.sites.find(s => s.id === id);
+                        if(site) newSites.push(site);
+                    });
+                    db.sites = newSites;
+                    saveToLocalStorage();
+                }
+            });
+
+            // 2. 初始化 材料分類後台 拖曳
+            new Sortable(document.getElementById('manageListCategories'), {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function () {
+                    const newCategories = [];
+                    document.querySelectorAll('#manageListCategories .manage-item').forEach(el => {
+                        const id = el.getAttribute('data-id');
+                        const cat = db.categories.find(c => c.id === id);
+                        if(cat) newCategories.push(cat);
+                    });
+                    db.categories = newCategories;
+                    saveToLocalStorage();
+                }
+            });
+
+            // 3. 初始化 材料品項後台 拖曳
+            new Sortable(document.getElementById('manageListItems'), {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function () {
+                    const catId = document.getElementById('manageSelectCategory').value;
+                    if(!catId) return;
+
+                    const currentCatItemIds = [];
+                    document.querySelectorAll('#manageListItems .manage-item').forEach(el => {
+                        currentCatItemIds.push(el.getAttribute('data-id'));
+                    });
+
+                    const otherCatItems = db.items.filter(item => item.catId !== catId);
+                    
+                    const reorderedCatItems = [];
+                    currentCatItemIds.forEach(id => {
+                        const item = db.items.find(i => i.id === id);
+                        if(item) reorderedCatItems.push(item);
+                    });
+
+                    db.items = [...otherCatItems, ...reorderedCatItems];
+                    saveToLocalStorage();
+                }
+            });
+        });
     </script>
 </body>
 </html>
