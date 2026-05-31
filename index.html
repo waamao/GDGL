@@ -337,7 +337,7 @@
             }
         }
 
-        // 匯入備份
+        // 匯入備份 (具備如同 Excel SORT 般的排序功能)
         function importJSON(input) {
             const file = input.files[0];
             if (!file) return;
@@ -736,6 +736,10 @@
             if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
 
             db.items.push({ id: Date.now().toString(), catId, name });
+            
+            // 快速新增後，同步執行自動排序
+            db.items.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+            
             saveToLocalStorage(); 
             document.getElementById('inputQuickItem').value = '';
             renderItems(); 
@@ -967,6 +971,10 @@
             const name = document.getElementById('inputNewSite').value.trim();
             if (!name) return alert('請輸入工地名稱');
             db.sites.push({ id: Date.now().toString(), name });
+            
+            // 後台手動新增工地後，立刻執行 A-Z/筆劃自動排序
+            db.sites.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+            
             saveToLocalStorage(); 
             document.getElementById('inputNewSite').value = '';
             renderManageSites();
@@ -981,6 +989,10 @@
             if (site) {
                 site.name = trimmed;
                 if (currentState.siteId === id) currentState.siteName = trimmed;
+                
+                // 更名後重新排序
+                db.sites.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+                
                 saveToLocalStorage(); 
                 renderManageSites();
             }
@@ -1014,6 +1026,10 @@
             const name = document.getElementById('inputNewCategory').value.trim();
             if (!name) return alert('請輸入分類名稱');
             db.categories.push({ id: Date.now().toString(), name });
+            
+            // 後台手動新增大類後，立刻執行 A-Z/筆劃自動排序
+            db.categories.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+            
             saveToLocalStorage(); 
             document.getElementById('inputNewCategory').value = '';
             renderManageCategories();
@@ -1028,6 +1044,10 @@
             if (cat) {
                 cat.name = trimmed;
                 if (currentState.catId === id) currentState.catName = trimmed;
+                
+                // 更名後重新排序
+                db.categories.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+                
                 saveToLocalStorage(); 
                 renderManageCategories();
             }
@@ -1107,7 +1127,7 @@
             });
         }
 
-        // 新增品項
+        // 新增品項 (具備手動新增自動排序功能)
         function addManageItem() {
             const catId = document.getElementById('manageSelectCategory').value;
             if (!catId) return alert('請先選擇上方的材料分類');
@@ -1118,6 +1138,10 @@
             if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
 
             db.items.push({ id: Date.now().toString(), catId, name });
+            
+            // 後台手動新增品項後，立刻執行 A-Z/筆劃自動排序
+            db.items.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+            
             saveToLocalStorage();
             document.getElementById('inputNewManageItem').value = '';
             renderManageItems();
@@ -1132,6 +1156,10 @@
             const item = db.items.find(i => i.id === id);
             if (item) {
                 item.name = trimmed;
+                
+                // 更名後重新排序
+                db.items.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+                
                 saveToLocalStorage();
                 renderManageItems();
             }
