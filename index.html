@@ -131,10 +131,7 @@
                 <div id="listSites" class="scroll-list-body"></div>
             </div>
 
-            <div id="homeMenuZone" class="hidden" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 2px dashed #e5e7eb; flex-shrink: 0;">
-                <div class="alert-box alert-blue" style="margin: 0;">
-                    已選取工地：<span id="menuSiteName"></span>
-                </div>
+            <div id="homeMenuZone" class="hidden" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 2px dashed #e5e7eb; flex-shrink: 0; margin-bottom: 30px;">
                 <div class="flex-col">
                     <button onclick="navigateTo('log')" class="btn-slate" style="padding: 14px; font-size: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; width: 100%;">施工日誌</button>
                     <button onclick="navigateTo('notes')" class="btn-amber" style="padding: 14px; font-size: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; width: 100%;">工地記事</button>
@@ -477,7 +474,7 @@
                 selectedEl.classList.add('selected');
             }
 
-            document.getElementById('menuSiteName').innerText = siteName;
+            // 修改處：移除了將名稱寫入提示框並取消 hidden 的程式碼，直接顯示選單即可
             document.getElementById('homeMenuZone').classList.remove('hidden');
         }
 
@@ -758,7 +755,7 @@
             const keyword = document.getElementById('regSearchBar').value.toLowerCase().trim();
 
             if (regulationsDb.length === 0) {
-                list.innerHTML = '<p class="text-muted text-center">目前本機尚無任何法規資料。<br>請點選上方按鈕匯入外部法規 JSON 檔案。</p>';
+                list.innerHTML = '<p class="text-muted text-center">目前本機尚無 any 法規資料。<br>請點選上方按鈕匯入外部法規 JSON 檔案。</p>';
                 return;
             }
 
