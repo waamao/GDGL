@@ -355,6 +355,9 @@
                 cart = {};
                 updateCartBadge();
                 if(document.getElementById('globalSearchBar')) document.getElementById('globalSearchBar').value = '';
+                // 主動清除上次選取的工地
+                currentState.siteId = null;
+                currentState.siteName = '';
                 navigateTo('sites');
             }
         }
@@ -375,6 +378,9 @@
                             document.getElementById('inputScriptUrl').value = db.config.scriptUrl || '';
                         }
                         alert('🎉 全站基礎資料與連動網址已匯入成功！您可以到後台自由拖曳調整順序。');
+                        // 匯入新資料時重置選擇狀態
+                        currentState.siteId = null;
+                        currentState.siteName = '';
                         navigateTo('sites');
                     } else { alert('匯入失敗：JSON 結構格式不正確。'); }
                 } catch (err) { alert('讀取檔案失敗。'); }
@@ -474,7 +480,6 @@
                 selectedEl.classList.add('selected');
             }
 
-            // 修改處：移除了將名稱寫入提示框並取消 hidden 的程式碼，直接顯示選單即可
             document.getElementById('homeMenuZone').classList.remove('hidden');
         }
 
@@ -596,10 +601,15 @@
                 document.getElementById('btnClearOrder').classList.add('hidden');
                 document.getElementById('btnManage').classList.remove('hidden');
                 
-                currentState.siteId = null;
-                currentState.siteName = '';
-                document.getElementById('homeMenuZone').classList.add('hidden');
+                // 【修改處】刪除了每次清除 siteId / siteName 的程式碼
                 renderSites();
+
+                // 【修改處】如果先前已有選取工地，返回時自動將其反白並顯示功能選單，否則隱藏選單
+                if (currentState.siteId) {
+                    selectSiteOnHome(currentState.siteId, currentState.siteName);
+                } else {
+                    document.getElementById('homeMenuZone').classList.add('hidden');
+                }
             } else if (page === 'log') {
                 document.getElementById('pageLog').classList.add('active');
                 document.getElementById('appTitle').innerText = '📝 填寫施工日誌';
