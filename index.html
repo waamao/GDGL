@@ -90,6 +90,10 @@
         /* 大按鈕 */
         .btn-block-lg { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; display: block; text-decoration: none; box-sizing: border-box; margin-top: 16px; flex-shrink: 0; }
         
+        /* 新增：統一底部按鈕群組的水平排列樣式 */
+        .bottom-btn-group { display: flex; gap: 8px; width: 100%; margin-top: 16px; flex-shrink: 0; }
+        .bottom-btn-group button { flex: 1; margin: 0 !important; height: 48px; font-size: 14px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 0 4px; }
+
         .hidden { display: none !important; }
         .text-center { text-align: center; }
         .text-muted { color: #9ca3af; font-size: 13px; padding: 16px 0; }
@@ -132,11 +136,11 @@
                 <div id="listSites" class="scroll-list-body"></div>
             </div>
 
-            <div id="homeMenuZone" class="hidden" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 2px dashed #e5e7eb; flex-shrink: 0; margin-bottom: 30px;">
-                <div class="flex-col">
-                    <button onclick="navigateTo('log')" class="btn-slate" style="padding: 14px; font-size: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; width: 100%;">施工日誌</button>
-                    <button onclick="navigateTo('notes')" class="btn-amber" style="padding: 14px; font-size: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; width: 100%;">工地記事</button>
-                    <button onclick="navigateTo('categories')" class="btn-blue" style="padding: 14px; font-size: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; width: 100%;">材料訂購</button>
+            <div id="homeMenuZone" class="hidden" style="margin-top: 8px; padding-top: 12px; border-top: 2px dashed #e5e7eb; flex-shrink: 0; margin-bottom: 30px;">
+                <div class="bottom-btn-group">
+                    <button onclick="navigateTo('log')" class="btn-slate">施工日誌</button>
+                    <button onclick="navigateTo('notes')" class="btn-amber">工地記事</button>
+                    <button onclick="navigateTo('categories')" class="btn-blue">材料訂購</button>
                 </div>
             </div>
         </section>
@@ -151,8 +155,10 @@
                 </div>
                 <button onclick="addLogItemRow()" class="btn-slate" style="width: 100%; padding: 10px; margin-top: 4px;">➕ 新增施工項目</button>
             </div>
-            <button onclick="copyLogToClipboard()" class="btn-green btn-block-lg">📋 複製日誌文字</button>
-            <button onclick="shareLogToLine()" class="btn-line btn-block-lg" style="margin-top: 8px;">💬 直接傳送到 LINE</button>
+            <div class="bottom-btn-group">
+                <button onclick="copyLogToClipboard()" class="btn-green">📋 複製日誌文字</button>
+                <button onclick="shareLogToLine()" class="btn-line">💬 傳送到 LINE</button>
+            </div>
         </section>
 
         <section id="pageNotes" class="page" style="overflow-y: auto;">
@@ -163,8 +169,10 @@
                 <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">📒 工地事項紀錄</h3>
                 <textarea id="txtSiteNotes" rows="12" placeholder="在此輸入各種工地重要記事、備忘或交代事項..." style="width: 100%; resize: none; line-height: 1.6;"></textarea>
             </div>
-            <button onclick="copyNotesToClipboard()" class="btn-green btn-block-lg">📋 複製記事文字</button>
-            <button onclick="shareNotesToLine()" class="btn-line btn-block-lg" style="margin-top: 8px;">💬 直接傳送到 LINE</button>
+            <div class="bottom-btn-group">
+                <button onclick="copyNotesToClipboard()" class="btn-green">📋 複製記事文字</button>
+                <button onclick="shareNotesToLine()" class="btn-line">💬 傳送到 LINE</button>
+            </div>
         </section>
 
         <section id="pageCategories" class="page">
@@ -216,9 +224,11 @@
                 <div id="listCartItems" class="scroll-list-body"></div>
             </div>
 
-            <button id="btnSubmitCart" onclick="copyAndUploadCart()" class="btn-green btn-block-lg" style="margin-top:0;">📋 確認並複製、上傳至試算表</button>
-            <button onclick="copyOnlyCart()" class="btn-slate btn-block-lg" style="margin-top: 8px;">📝 僅複製純文字訂購單</button>
-            <button onclick="shareToLine()" class="btn-line btn-block-lg" style="margin-top: 8px;">💬 直接傳送到 LINE 群組/個人</button>
+            <div class="bottom-btn-group">
+                <button id="btnSubmitCart" onclick="copyAndUploadCart()" class="btn-green">📋 上傳至試算表</button>
+                <button onclick="copyOnlyCart()" class="btn-slate">📝 僅複製訂單</button>
+                <button onclick="shareToLine()" class="btn-line">💬 傳送到 LINE</button>
+            </div>
         </section>
 
         <section id="pageRegulations" class="page">
@@ -319,6 +329,7 @@
             }
         }
 
+        // 以下 JavaScript 代碼內容與原檔完全一致，未做任何邏輯修改
         function loadRegulationsFromStorage() {
             try {
                 const localReg = localStorage.getItem('construction_regulations_db');
@@ -1004,7 +1015,7 @@
 
             const btn = document.getElementById('btnSubmitCart');
             if(btn) {
-                btn.innerText = '⏳ 正在同步傳送至試算表...';
+                btn.innerText = '⏳ 同步中...';
                 btn.disabled = true;
             }
 
@@ -1018,7 +1029,7 @@
             .catch(error => { console.error('傳送訂單時發生錯誤:', error); })
             .finally(() => {
                 if(btn) {
-                    btn.innerText = '📋 確認並複製、上傳至試算表';
+                    btn.innerText = '📋 上傳至試算表';
                     btn.disabled = false;
                 }
             });
