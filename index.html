@@ -92,7 +92,7 @@
         
         /* 修改：將底部按鈕群組改為 position: fixed 固定在螢幕最下方，確保所有頁面基準線完全一致 */
         .bottom-btn-group { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; gap: 8px; margin-top: 0 !important; flex-shrink: 0; z-index: 100; background-color: transparent; }
-        .bottom-btn-group button { flex: 1; margin: 0 !important; height: 96px; font-size: 14px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0 4px; }
+        .bottom-btn-group button { flex: 1; margin: 0 !important; height: 54px; font-size: 14px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0 4px; }
 
         .hidden { display: none !important; }
         .text-center { text-align: center; }
@@ -151,7 +151,7 @@
             </div>
             <div class="scroll-list-body" style="flex: 1;">
                 <div class="card">
-                    <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">📝 施工日誌內容填寫</h3>
+                    <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">施工日誌內容填寫</h3>
                     <div id="logItemsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
                     </div>
                     <button onclick="addLogItemRow()" class="btn-slate" style="width: 100%; padding: 10px; margin-top: 4px;">➕ 新增施工項目</button>
@@ -535,7 +535,7 @@
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                     alert('施工日誌純文字已成功複製！快去 LINE 貼上傳送吧！');
-                }).catch(() => fallbackCopy(text, '📋 施工日誌已成功複製！'));
+                }).catch(() => fallbackCopy(text, '施工日誌已成功複製！'));
             } else {
                 fallbackCopy(text, '施工日誌已成功複製！');
             }
@@ -615,7 +615,7 @@
                 }
             } else if (page === 'log') {
                 document.getElementById('pageLog').classList.add('active');
-                document.getElementById('appTitle').innerText = '📝 填寫施工日誌';
+                document.getElementById('appTitle').innerText = '填寫施工日誌';
                 document.getElementById('btnClearOrder').classList.add('hidden');
                 if(document.getElementById('logSiteName')) {
                     document.getElementById('logSiteName').innerText = currentState.siteName || '';
