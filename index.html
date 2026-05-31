@@ -88,10 +88,10 @@
         .manage-btns .btn-del { color: #888888; }
         
         /* 大按鈕：修改為固定在底部 */
-        .btn-block-lg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 -4px 10px rgba(0,0,0,0.08); text-align: center; display: block; text-decoration: none; box-sizing: border-box; z-index: 100; margin-top: 0 !important; }
+        .btn-block-lg { position: fixed; bottom: 45px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 -4px 10px rgba(0,0,0,0.08); text-align: center; display: block; text-decoration: none; box-sizing: border-box; z-index: 100; margin-top: 0 !important; }
         
         /* 修改：將底部按鈕群組改為 position: fixed 固定在螢幕最下方，確保所有頁面基準線完全一致 */
-        .bottom-btn-group { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; gap: 8px; margin-top: 0 !important; flex-shrink: 0; z-index: 100; background-color: transparent; }
+        .bottom-btn-group { position: fixed; bottom: 45px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; gap: 8px; margin-top: 0 !important; flex-shrink: 0; z-index: 100; background-color: transparent; }
         .bottom-btn-group button { flex: 1; margin: 0 !important; height: 96px; font-size: 14px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0 4px; }
 
         .hidden { display: none !important; }
@@ -115,7 +115,7 @@
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
             <button id="btnExportTop" onclick="exportJSON()" class="btn-slate">匯出系統備份</button>
             <button id="btnManage" onclick="navigateTo('manage')" class="btn-slate">⚙️ 設定</button>
-            <button id="btnNavCart" onclick="navigateTo('cart')" class="hidden btn-amber">📋 訂單(<span id="cartCount">0</span>)</button>
+            <button id="btnNavCart" onclick="navigateTo('cart')" class="hidden btn-amber">訂單(<span id="cartCount">0</span>)</button>
         </div>
     </header>
 
@@ -663,7 +663,7 @@
                 renderRegulations();
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
-                document.getElementById('appTitle').innerText = '📋 訂單確認';
+                document.getElementById('appTitle').innerText = '';
                 document.getElementById('btnBack').dataset.backTo = prevPage === 'cart' ? 'items' : prevPage;
                 
                 if(document.getElementById('cartSiteName')) {
@@ -672,7 +672,7 @@
                 renderCart();
             } else if (page === 'manage') {
                 document.getElementById('pageManage').classList.add('active');
-                document.getElementById('appTitle').innerText = '⚙️ 後台系統設定';
+                document.getElementById('appTitle').innerText = '⚙️系統設定';
                 document.getElementById('btnClearOrder').classList.add('hidden');
                 
                 document.getElementById('inputScriptUrl').value = (db.config && db.config.scriptUrl) ? db.config.scriptUrl : '';
