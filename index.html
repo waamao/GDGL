@@ -190,7 +190,7 @@
             </div>
 
             <div class="list-container">
-                <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇材料大類：</h3>
+                <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇材料分類：</h3>
                 <div id="listCategories" class="scroll-list-body"></div>
             </div>
         </section>
@@ -765,7 +765,7 @@
             const keyword = document.getElementById('regSearchBar').value.toLowerCase().trim();
 
             if (regulationsDb.length === 0) {
-                list.innerHTML = '<p class="text-muted text-center">目前本機尚無 any 法規資料。<br>請點選上方按鈕匯入外部法規 JSON 檔案。</p>';
+                list.innerHTML = '<p class="text-muted text-center">目前本機尚無法規資料。<br>請點選上方按鈕匯入外部法規 JSON 檔案。</p>';
                 return;
             }
 
@@ -834,7 +834,7 @@
             const list = document.getElementById('listItems');
             const filteredItems = db.items.filter(item => item.catId === currentState.catId);
             
-            list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">此大類下暫無 any 材料品項。</p>' : '';
+            list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">此分類下暫無材料品項。</p>' : '';
             
             filteredItems.forEach(item => {
                 const inCart = !!cart[item.id];
