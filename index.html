@@ -53,7 +53,8 @@
         .flex-col { display: flex; flex-direction: column; gap: 8px; }
         
         .list-container { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
-        .scroll-list-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 80px; }
+        /* 增加底部內縮空間避免列表項目被兩層固定按鈕擋住 */
+        .scroll-list-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 120px; }
         
         .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; min-height: 44px; }
         .list-item.selected { background-color: #1f2937 !important; border-color: #1f2937 !important; }
@@ -74,10 +75,10 @@
         .manage-btns button { padding: 4px 6px; font-size: 11px; font-weight: normal; background: none; color: #555555; }
         .manage-btns .btn-del { color: #888888; }
         
-        /* 固定底部按鈕群組 */
+        /* 固定底部按鈕群組統一優化 */
         .bottom-btn-group, .home-fixed-bottom { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; flex-direction: column; gap: 8px; z-index: 100; background-color: transparent; }
         .bottom-btn-group-inner { display: flex; gap: 8px; width: 100%; }
-        button.large-bottom-btn { height: 45px; font-size: 15px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex: 1; }
+        button.large-bottom-btn { height: 45px !important; font-size: 15px !important; font-weight: bold !important; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex: 1; display: flex; align-items: center; justify-content: center; padding: 0; }
 
         .hidden { display: none !important; }
         .text-center { text-align: center; }
@@ -107,7 +108,7 @@
         /* 綜合查看框樣式 */
         .view-box-card { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; background-color: #f9fafb; display: flex; flex-direction: column; gap: 4px; }
         .view-box-title { font-size: 13px; font-weight: bold; color: #374151; display: flex; align-items: center; gap: 6px; }
-        .view-box-content { font-size: 13px; background: white; border: 1px solid #e5e7eb; padding: 6px; border-radius: 6px; min-height: 40px; white-space: pre-wrap; word-break: break-all; max-height: 100px; overflow-y: auto; }
+        .view-box-content { font-size: 13px; background: white; border: 1px solid #e5e7eb; padding: 6px; border-radius: 6px; min-height: 40px; white-space: pre-wrap; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -146,9 +147,9 @@
             </div>
 
             <div style="height: 110px; flex-shrink: 0; position: relative;">
-                <div class="home-fixed-bottom" style="bottom: 33;">
+                <div class="home-fixed-bottom">
                     <div class="bottom-btn-group-inner">
-                        <button onclick="clickHomeMenu('log')" class="btn-slate large-bottom-btn">施工日誌</button>
+                        <button onclick="clickHomeMenu('log')" class="btn-slate_large-bottom-btn" style="background-color: #222222; color: white; height: 45px; font-size: 15px; font-weight: bold; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex: 1; display: flex; align-items: center; justify-content: center; padding: 0;">施工日誌</button>
                         <button onclick="clickHomeMenu('notes')" class="btn-amber large-bottom-btn">工地記事</button>
                     </div>
                     <div class="bottom-btn-group-inner">
@@ -163,52 +164,21 @@
             <div class="alert-box alert-blue">
                 檢視日期：<span id="viewingDateText"></span>
             </div>
-            <div class="scroll-list-body" style="flex: 1; gap: 8px; padding-bottom: 120px;">
-                
-                <div class="view-box-card">
-                    <label class="view-box-title">
-                        <input type="checkbox" id="copyChkLog" class="item-checkbox" checked>
-                        <span>施工日誌</span>
-                    </label>
-                    <div id="viewBoxLog" class="view-box-content"></div>
+            <div id="dynamicViewContentZone" class="scroll-list-body" style="flex: 1; overflow-y: auto; gap: 8px; padding-bottom: 140px;">
                 </div>
-
-                <div class="view-box-card">
-                    <label class="view-box-title">
-                        <input type="checkbox" id="copyChkNotes" class="item-checkbox" checked>
-                        <span>工地記事</span>
-                    </label>
-                    <div id="viewBoxNotes" class="view-box-content"></div>
-                </div>
-
-                <div class="view-box-card">
-                    <label class="view-box-title">
-                        <input type="checkbox" id="copyChkPunch" class="item-checkbox" checked>
-                        <span>打卡紀錄</span>
-                    </label>
-                    <div id="viewBoxPunch" class="view-box-content"></div>
-                </div>
-
-                <div class="view-box-card">
-                    <label class="view-box-title">
-                        <input type="checkbox" id="copyChkOrder" class="item-checkbox" checked>
-                        <span>材料訂購</span>
-                    </label>
-                    <div id="viewBoxOrder" class="view-box-content"></div>
-                </div>
-
-            </div>
             <div class="bottom-btn-group">
                 <div class="bottom-btn-group-inner">
                     <button onclick="copyCombinedViewText()" class="btn-green large-bottom-btn">複製文字</button>
                     <button onclick="shareCombinedViewToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
                 </div>
-                <button onclick="deleteSelectedDateRecords()" class="btn-red large-bottom-btn" style="width:100%;">🗑️ 刪除紀錄</button>
+                <div class="bottom-btn-group-inner">
+                    <button onclick="deleteSelectedDateRecords()" class="btn-red large-bottom-btn">刪除紀錄</button>
+                </div>
             </div>
         </section>
 
         <section id="pagePunch" class="page">
-            <div class="scroll-list-body" style="flex: 1; gap: 12px; padding-bottom: 150px;">
+            <div class="scroll-list-body" style="flex: 1; gap: 12px;">
                 <div class="card">
                     <label style="font-size: 13px; font-weight: bold; color: #4b5563;">請選擇打卡日期：</label>
                     <input type="date" id="inputPunchDate" onchange="syncPunchDateChange()">
@@ -226,8 +196,10 @@
             </div>
 
             <div class="bottom-btn-group">
-                <button onclick="saveMultiplePunchStatus('上班')" class="btn-green large-bottom-btn" style="width: 100%;">打卡</button>
-                <button onclick="sharePunchToLine()" class="btn-line large-bottom-btn" style="width: 100%;">傳送到LINE</button>
+                <div class="bottom-btn-group-inner">
+                    <button onclick="saveMultiplePunchStatus('上班')" class="btn-green large-bottom-btn">打卡</button>
+                    <button onclick="sharePunchToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
+                </div>
             </div>
         </section>
 
@@ -241,8 +213,10 @@
                 </div>
             </div>
             <div class="bottom-btn-group">
-                <button onclick="copyLogToClipboard()" class="btn-green large-bottom-btn">上傳行事曆</button>
-                <button onclick="shareLogToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
+                <div class="bottom-btn-group-inner">
+                    <button onclick="copyLogToClipboard()" class="btn-green large-bottom-btn">上傳行事曆</button>
+                    <button onclick="shareLogToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
+                </div>
             </div>
         </section>
 
@@ -255,8 +229,10 @@
                 </div>
             </div>
             <div class="bottom-btn-group">
-                <button onclick="copyNotesToClipboard()" class="btn-green large-bottom-btn">上傳行事曆</button>
-                <button onclick="shareNotesToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
+                <div class="bottom-btn-group-inner">
+                    <button onclick="copyNotesToClipboard()" class="btn-green large-bottom-btn">上傳行事曆</button>
+                    <button onclick="shareNotesToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
+                </div>
             </div>
         </section>
 
@@ -271,8 +247,10 @@
                 <div id="listCategories" class="scroll-list-body"></div>
             </div>
             <div class="bottom-btn-group">
-                <button onclick="navigateTo('cart')" class="btn-amber large-bottom-btn">查看我的材料訂單 (<span id="cartCountCategory">0</span>)</button>
-                <button onclick="clearOnlyOrder()" class="btn-red large-bottom-btn">清除訂單</button>
+                <div class="bottom-btn-group-inner">
+                    <button onclick="clearOnlyOrder()" class="btn-red large-bottom-btn">清除訂單</button>
+                    <button onclick="navigateTo('cart')" class="btn-amber large-bottom-btn">查看訂單 (<span id="cartCountCategory">0</span>)</button>
+                </div>
             </div>
         </section>
 
@@ -293,8 +271,10 @@
                 <div id="listItems" class="scroll-list-body"></div>
             </div>
             <div class="bottom-btn-group">
-                <button onclick="navigateTo('cart')" class="btn-amber large-bottom-btn">查看我的材料訂單 (<span id="cartCountBottom">0</span>)</button>
-                <button onclick="clearOnlyOrder()" class="btn-red large-bottom-btn">清除訂單</button>
+                <div class="bottom-btn-group-inner">
+                    <button onclick="clearOnlyOrder()" class="btn-red large-bottom-btn">清除訂單</button>
+                    <button onclick="navigateTo('cart')" class="btn-amber large-bottom-btn">查看訂單 (<span id="cartCountBottom">0</span>)</button>
+                </div>
             </div>
         </section>
 
@@ -312,7 +292,9 @@
                     <button onclick="copyOnlyCart()" class="btn-slate large-bottom-btn">上傳行事曆</button>
                     <button onclick="shareToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
                 </div>
-                <button onclick="clearOnlyOrder()" class="btn-red large-bottom-btn">清除訂單</button>
+                <div class="bottom-btn-group-inner">
+                    <button onclick="clearOnlyOrder()" class="btn-red large-bottom-btn">清除訂單</button>
+                </div>
             </div>
         </section>
 
@@ -346,7 +328,7 @@
                 </div>
                 <div id="manageListItems" class="scroll-box"></div>
             </div>
-            <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1;">
+            <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1; margin-bottom: 40px;">
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">🔗 Apps Script 連動網址設定</h3>
                 <div class="flex-row">
                     <input type="text" id="inputScriptUrl" oninput="saveScriptUrl()" placeholder="請貼上 https://script.google.com/... 網址">
@@ -452,7 +434,7 @@
 
         function exportJSON() {
             if (db.sites.length === 0 && db.categories.length === 0 && db.items.length === 0) {
-                if(!confirm('目前系統內無任何資料，確定要匯出空白的備份檔嗎？')) return;
+                if(!confirm('目前系統內無 any 資料，確定要匯出空白的備份檔嗎？')) return;
             }
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
             const downloadAnchorLine = document.createElement('a');
@@ -550,72 +532,112 @@
             initHomeCalendar();
         }
 
-        // ================= 點選日期：四合一綜合查看檢視頁面邏輯 =================
-        function openDateRecordViewer(dateStr) {
-            navigateTo('dateView');
-            document.getElementById('viewingDateText').innerText = dateStr;
-            
-            const rec = db.dailyRecords[dateStr] || {};
-            
-            document.getElementById('viewBoxLog').innerText = (rec.log && rec.log.text) ? rec.log.text : '（當日無日誌紀錄）';
-            document.getElementById('viewBoxNotes').innerText = (rec.notes && rec.notes.text) ? rec.notes.text : '（當日無記事紀錄）';
-            document.getElementById('viewBoxOrder').innerText = (rec.order && rec.order.text) ? rec.order.text : '（當日無材料訂單紀錄）';
+        // ================= 點選日期：動態增長且不覆蓋的四合一綜合查看檢視頁面邏輯 =================
+        
+function openDateRecordViewer(dateStr) {
+    navigateTo('dateView');
+    document.getElementById('viewingDateText').innerText = dateStr;
 
-            // 彙整當天所有工地的打卡明細
-            let punchLines = [];
-            if(db.punches) {
-                for(let sId in db.punches) {
-                    if(db.punches[sId] && db.punches[sId][dateStr]) {
-                        const siteObj = db.sites.find(s => s.id === sId);
-                        const sName = siteObj ? siteObj.name : '未知案場';
-                        const pData = db.punches[sId][dateStr];
-                        punchLines.push(`【${sName}】: ${pData.status}${pData.note ? ` (${pData.note})` : ''}`);
-                    }
-                }
+    const dynamicZone = document.getElementById('dynamicViewContentZone');
+    dynamicZone.innerHTML = '';
+
+    const rec = db.dailyRecords[dateStr] || {};
+    let hasAnyContent = false;
+
+    function addRecordCards(arr, title, prefix){
+        if(!arr) return;
+        const list = Array.isArray(arr) ? arr : [arr];
+        list.forEach((item, idx) => {
+            if(!item || !item.text) return;
+            hasAnyContent = true;
+            const card = document.createElement('div');
+            card.className = 'view-box-card';
+            card.innerHTML = `
+                <label class="view-box-title">
+                    <input type="checkbox" id="${prefix}_${idx}" class="item-checkbox">
+                    <span>${title}</span>
+                </label>
+                <div class="view-box-content">${item.text}</div>
+            `;
+            dynamicZone.appendChild(card);
+        });
+    }
+
+    addRecordCards(rec.log, '施工日誌', 'copyChkLog');
+    addRecordCards(rec.notes, '工地記事', 'copyChkNotes');
+
+    let punchLines = [];
+    if(db.punches){
+        for(let sId in db.punches){
+            if(db.punches[sId] && db.punches[sId][dateStr]){
+                const siteObj = db.sites.find(s => s.id === sId);
+                const sName = siteObj ? siteObj.name : '未知案場';
+                const pData = db.punches[sId][dateStr];
+                punchLines.push(`【${sName}】: ${pData.status}${pData.note ? ` (${pData.note})` : ''}`);
             }
-            document.getElementById('viewBoxPunch').innerText = punchLines.length > 0 ? punchLines.join('\n') : '（當日無打卡紀錄）';
-            
-            // 預設將勾選方塊全部啟動
-            document.getElementById('copyChkLog').checked = false;
-            document.getElementById('copyChkNotes').checked = false;
-            document.getElementById('copyChkPunch').checked = false;
-            document.getElementById('copyChkOrder').checked = false;
         }
+    }
+    if(punchLines.length){
+        hasAnyContent = true;
+        const card = document.createElement('div');
+        card.className = 'view-box-card';
+        card.innerHTML = `
+            <label class="view-box-title">
+                <input type="checkbox" id="copyChkPunch" class="item-checkbox">
+                <span>打卡紀錄</span>
+            </label>
+            <div class="view-box-content">${punchLines.join('<br>')}</div>
+        `;
+        dynamicZone.appendChild(card);
+    }
 
-        function compileCombinedViewText() {
-            const dateStr = selectedHomeDateStr;
-            let finalText = `📅 日期：${dateStr}\n====================\n`;
-            let hasAny = false;
+    addRecordCards(rec.order, '材料訂購', 'copyChkOrder');
 
-            if(document.getElementById('copyChkLog').checked) {
-                const txt = db.dailyRecords[dateStr]?.log?.text;
-                if(txt) { finalText += txt + `\n\n`; hasAny = true; }
-            }
-            if(document.getElementById('copyChkNotes').checked) {
-                const txt = db.dailyRecords[dateStr]?.notes?.text;
-                if(txt) { finalText += txt + `\n\n`; hasAny = true; }
-            }
-            if(document.getElementById('copyChkPunch').checked) {
-                let lines = [];
-                for(let sId in db.punches) {
-                    if(db.punches[sId] && db.punches[sId][dateStr]) {
-                        const siteObj = db.sites.find(s => s.id === sId);
-                        const sName = siteObj ? siteObj.name : '未知案場';
-                        const pData = db.punches[sId][dateStr];
-                        lines.push(`【${sName}】打卡狀態: ${pData.status}${pData.note ? ` (${pData.note})` : ''}`);
-                    }
-                }
-                if(lines.length > 0) { finalText += `【打卡明細】\n` + lines.join('\n') + `\n\n`; hasAny = true; }
-            }
-            if(document.getElementById('copyChkOrder').checked) {
-                const txt = db.dailyRecords[dateStr]?.order?.text;
-                if(txt) { finalText += txt + `\n\n`; hasAny = true; }
-            }
+    if(!hasAnyContent){
+        dynamicZone.innerHTML = '<p class="text-muted text-center" style="padding:20px;">📅 本日無任何填報紀錄或打卡明細。</p>';
+    }
+}
 
-            return hasAny ? finalText.trim() : null;
+function compileCombinedViewText() {
+    const dateStr = selectedHomeDateStr;
+    let finalText = `📅 日期：${dateStr}\n====================\n`;
+    let hasAny = false;
+
+    const rec = db.dailyRecords[dateStr] || {};
+
+    ['log','notes','order'].forEach(type=>{
+        const arr = rec[type] ? (Array.isArray(rec[type]) ? rec[type] : [rec[type]]) : [];
+        arr.forEach((item,idx)=>{
+            const chk = document.getElementById(
+                (type==='log'?'copyChkLog':type==='notes'?'copyChkNotes':'copyChkOrder') + '_' + idx
+            );
+            if(chk && chk.checked && item?.text){
+                finalText += item.text + '\n\n';
+                hasAny = true;
+            }
+        });
+    });
+
+    const chkPunch = document.getElementById('copyChkPunch');
+    if(chkPunch && chkPunch.checked){
+        let lines = [];
+        for(let sId in db.punches){
+            if(db.punches[sId] && db.punches[sId][dateStr]){
+                const siteObj = db.sites.find(s => s.id === sId);
+                const sName = siteObj ? siteObj.name : '未知案場';
+                const pData = db.punches[sId][dateStr];
+                lines.push(`【${sName}】打卡狀態: ${pData.status}${pData.note ? ` (${pData.note})` : ''}`);
+            }
         }
+        if(lines.length){
+            finalText += '【打卡明細】\n' + lines.join('\n') + '\n\n';
+            hasAny = true;
+        }
+    }
 
-        function copyCombinedViewText() {
+    return hasAny ? finalText.trim() : null;
+}
+function copyCombinedViewText() {
             const text = compileCombinedViewText();
             if(!text) return alert('請先勾選有內容的區塊進行複製！');
             fallbackCopy(text, '📋 所選區塊內容已合併複製到剪貼簿！');
@@ -827,7 +849,7 @@
             // 同步寫入系統核心歷史庫中
             const dateStr = getTargetDateStr();
             if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
-            db.dailyRecords[dateStr].log = { siteId: currentState.siteId, text: logText };
+            if(!Array.isArray(db.dailyRecords[dateStr].log)) db.dailyRecords[dateStr].log = []; db.dailyRecords[dateStr].log.push({ siteId: currentState.siteId, text: logText });
             saveToLocalStorage();
             initHomeCalendar();
 
@@ -837,7 +859,7 @@
         function copyLogToClipboard() {
             const text = compileLogText();
             if (!text) return alert('請至少填寫一項項目內容！');
-            fallbackCopy(text, '施工日誌文字已成功複製（可點擊上傳行事曆）！');
+            fallbackCopy(text, '施工日誌文字已成功複製（並上傳行事曆）！');
         }
 
         function shareLogToLine() {
@@ -854,7 +876,7 @@
             
             const dateStr = getTargetDateStr();
             if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
-            db.dailyRecords[dateStr].notes = { siteId: currentState.siteId, text: notesText };
+            if(!Array.isArray(db.dailyRecords[dateStr].notes)) db.dailyRecords[dateStr].notes = []; db.dailyRecords[dateStr].notes.push({ siteId: currentState.siteId, text: notesText });
             saveToLocalStorage();
             initHomeCalendar();
 
@@ -864,7 +886,7 @@
         function copyNotesToClipboard() {
             const text = compileNotesText();
             if (!text) return alert('請先輸入記事內容！');
-            fallbackCopy(text, '工地記事已成功複製（可點擊上傳行事曆）！');
+            fallbackCopy(text, '工地記事已成功複製（並上傳行事曆）！');
         }
 
         function shareNotesToLine() {
@@ -893,7 +915,7 @@
                 if (currentState.siteId) selectSiteOnHome(currentState.siteId, currentState.siteName);
             } else if (page === 'dateView') {
                 document.getElementById('pageDateView').classList.add('active');
-                document.getElementById('appTitle').innerText = '🔍 當日全紀錄檢視';
+                document.getElementById('appTitle').innerText = '';
             } else if (page === 'punch') {
                 document.getElementById('pagePunch').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
@@ -997,7 +1019,7 @@
                             <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="item-checkbox">
                             <span><small style="color:#888;">[${catName}]</small> ${item.name}</span>
                         </label>
-                        <input type="text" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
+                        <input type="number" inputmode="decimal" pattern="[0-9]*" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
                     `;
                     list.appendChild(div);
                 });
@@ -1046,7 +1068,7 @@
                         <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="item-checkbox">
                         <span>${item.name}</span>
                     </label>
-                    <input type="text" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
+                    <input type="number" inputmode="decimal" pattern="[0-9]*" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
                 `;
                 list.appendChild(div);
             });
@@ -1083,7 +1105,7 @@
                         <span style="font-size:11px; color:#4b5563;">[${catObj?catObj.name:'未分類'}]</span>
                         <span style="font-size:14px;">${itemObj.name}</span>
                     </div>
-                    <input type="text" value="${cart[itemId].qty}" oninput="changeCartQty('${itemId}', this.value)" class="cart-qty-input" placeholder="數量/單位">
+                    <input type="number" inputmode="decimal" pattern="[0-9]*" value="${cart[itemId].qty}" oninput="changeCartQty('${itemId}', this.value)" class="cart-qty-input" placeholder="數量/單位">
                     <button onclick="removeCartItem('${itemId}')" style="background:none; color:#ef4444; font-size:14px;">❌</button>
                 `;
                 list.appendChild(div);
@@ -1115,7 +1137,7 @@
             // 保存訂單到歷史存檔中
             const dateStr = getTargetDateStr();
             if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
-            db.dailyRecords[dateStr].order = { siteId: currentState.siteId, text: textOutput };
+            if(!Array.isArray(db.dailyRecords[dateStr].order)) db.dailyRecords[dateStr].order = []; db.dailyRecords[dateStr].order.push({ siteId: currentState.siteId, text: textOutput });
             saveToLocalStorage();
             initHomeCalendar();
 
