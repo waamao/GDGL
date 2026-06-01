@@ -37,8 +37,8 @@
         
         header button { border-radius: 33px !important; }
         
-        /* 加大返回鍵 */
-        #btnBack { font-size: 20px; padding: 4px 16px; }
+        /* 修正返回鍵與首頁鍵樣式，使其與設定鍵一致 */
+        #btnBack, #btnHomeTop { font-size: 12px; padding: 8px 12px; }
         
         /* 頁面切換機制：改為撐滿主區塊高度，方便內部做獨立捲動 */
         .page { display: none; height: 100%; min-height: 0; padding-bottom: 140px; } /* 加大 padding-bottom 確保首頁雙層按鈕不遮擋內容 */
@@ -89,39 +89,14 @@
         .manage-btns button { padding: 4px 6px; font-size: 11px; font-weight: normal; background: none; color: #555555; }
         .manage-btns .btn-del { color: #888888; }
         
-        /* 大按鈕：修改為固定在底部 */
-        .btn-block-lg { 
-            position: fixed; 
-            bottom: 21px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            width: calc(100% - 32px); 
-            max-width: 416px; 
-            
-            /* 🛠️ 改成固定高度 54px 並且讓文字垂直置中 */
-            height: 54px;
-            line-height: 54px;
-            padding: 0; 
-            
-            font-size: 16px; 
-            border-radius: 33px; /* 圓弧保持一致 */
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.08); 
-            text-align: center; 
-            display: block; 
-            text-decoration: none; 
-            box-sizing: border-box; 
-            z-index: 100; 
-            margin-top: 0 !important; 
-        }
+        /* 底部按鈕群組與雙層按鈕定位樣式 */
+        .cart-bottom-zone, .home-bottom-zone, .order-bottom-zone { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; flex-direction: column; gap: 8px; z-index: 100; background-color: transparent; }
+        .cart-bottom-zone .bottom-btn-group-inner, .home-bottom-zone .bottom-btn-group-inner { display: flex; gap: 8px; width: 100%; }
+        .cart-bottom-zone button, .home-bottom-zone button, .order-bottom-zone button { height: 54px; font-size: 14px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 底部按鈕群組 */
+        /* 移除原本固定的大按鈕樣式，全數統一由 zone 管理 */
         .bottom-btn-group { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; gap: 8px; margin-top: 0 !important; flex-shrink: 0; z-index: 100; background-color: transparent; }
         .bottom-btn-group button { flex: 1; margin: 0 !important; height: 54px; font-size: 14px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0 4px; }
-
-        /* 購物車與首頁選單分頁專用雙層按鈕定位樣式 */
-        .cart-bottom-zone, .home-bottom-zone { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; flex-direction: column; gap: 8px; z-index: 100; }
-        .cart-bottom-zone .bottom-btn-group-inner, .home-bottom-zone .bottom-btn-group-inner { display: flex; gap: 8px; width: 100%; }
-        .cart-bottom-zone button, .home-bottom-zone button { height: 54px; font-size: 14px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
         .hidden { display: none !important; }
         .text-center { text-align: center; }
@@ -138,6 +113,7 @@
     <header>
         <div id="headerLeftZone" style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
             <button id="btnBack" class="hidden btn-blue">←</button>
+            <button id="btnHomeTop" class="hidden btn-slate" onclick="navigateTo('sites')">🏠 首頁</button>
         </div>
         <h1 id="appTitle" class="header-title"></h1>
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
@@ -217,12 +193,15 @@
                 <div id="listCategories" class="scroll-list-body"></div>
             </div>
 
-            <button onclick="navigateTo('cart')" class="btn-amber btn-block-lg">查看我的材料訂單 (<span id="cartCountCategory">0</span>)</button>
+            <div class="order-bottom-zone">
+                <button onclick="navigateTo('cart')" class="btn-amber" style="width: 100%;">查看我的材料訂單 (<span id="cartCountCategory">0</span>)</button>
+                <button onclick="clearOnlyOrder()" class="btn-red" style="width: 100%;">🧹 清除訂單</button>
+            </div>
         </section>
 
         <section id="pageItems" class="page">
             <div class="alert-box alert-blue" style="font-weight: normal; line-height: 1.6;">
-                <div><strong>案場名稱：</strong> <span id="currentSiteName2"></span></div>
+                <div><strong>送貨地點：</strong> <span id="currentSiteName2"></span></div>
                 <div><strong>分類名稱：</strong> <span id="currentCategoryName"></span></div>
             </div>
 
@@ -239,7 +218,10 @@
                 <div id="listItems" class="scroll-list-body"></div>
             </div>
 
-            <button onclick="navigateTo('cart')" class="btn-amber btn-block-lg">查看我的材料訂單 (<span id="cartCountBottom">0</span>)</button>
+            <div class="order-bottom-zone">
+                <button onclick="navigateTo('cart')" class="btn-amber" style="width: 100%;">查看我的材料訂單 (<span id="cartCountBottom">0</span>)</button>
+                <button onclick="clearOnlyOrder()" class="btn-red" style="width: 100%;">🧹 清除訂單</button>
+            </div>
         </section>
 
         <section id="pageCart" class="page">
@@ -259,7 +241,7 @@
                     <button onclick="copyOnlyCart()" class="btn-slate" style="flex: 1;">僅複製訂單</button>
                     <button onclick="shareToLine()" class="btn-line" style="flex: 1;">傳送到LINE</button>
                 </div>
-                <button onclick="clearOrderAndHome()" class="btn-red" style="width: 100%;">🧹 清除並回首頁</button>
+                <button onclick="clearOnlyOrder()" class="btn-red" style="width: 100%;">🧹 清除訂單</button>
             </div>
         </section>
 
@@ -348,14 +330,20 @@
             document.getElementById('cartCountBottom').innerText = count;
         }
 
-        function clearOrderAndHome() {
-            if (confirm('確定要「清除目前的訂購清單」並返回首頁嗎？（這不會刪除您的案場與材料基本資料）')) {
+        function clearOnlyOrder() {
+            if (confirm('確定要「清除目前的訂購清單」嗎？')) {
                 cart = {};
                 updateCartBadge();
                 if(document.getElementById('globalSearchBar')) document.getElementById('globalSearchBar').value = '';
-                currentState.siteId = null;
-                currentState.siteName = '';
-                navigateTo('sites');
+                
+                // 根據當前所在頁面重新渲染內容，使勾選狀態與數量欄位立即同步清空
+                if (currentState.page === 'categories') {
+                    renderCategories();
+                } else if (currentState.page === 'items') {
+                    renderItems();
+                } else if (currentState.page === 'cart') {
+                    renderCart();
+                }
             }
         }
 
@@ -505,7 +493,6 @@
             const text = compileLogText();
             if (!text) return alert('請至少填寫一項項目內容後再傳送！');
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-            // 修正：不使用 _blank 新開視窗，直接在當前頁面喚起 LINE
             window.location.href = lineUrl;
         }
 
@@ -545,7 +532,6 @@
             const text = compileNotesText();
             if (!text) return alert('請先輸入記事內容後再進行傳送！');
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-            // 修正：不使用 _blank 新開視窗，直接在當前頁面喚起 LINE
             window.location.href = lineUrl;
         }
 
@@ -556,12 +542,14 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             
             document.getElementById('btnBack').classList.remove('hidden');
+            document.getElementById('btnHomeTop').classList.remove('hidden');
             document.getElementById('btnExportTop').classList.remove('hidden');
 
             if (page === 'sites') {
                 document.getElementById('pageSites').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('btnBack').classList.add('hidden');
+                document.getElementById('btnHomeTop').classList.add('hidden');
                 
                 renderSites();
 
@@ -621,6 +609,7 @@
             } else if (page === 'manage') {
                 document.getElementById('pageManage').classList.add('active');
                 document.getElementById('appTitle').innerText = '⚙️系統設定';
+                document.getElementById('btnHomeTop').classList.add('hidden');
                 
                 document.getElementById('inputScriptUrl').value = (db.config && db.config.scriptUrl) ? db.config.scriptUrl : '';
                 
@@ -896,7 +885,6 @@
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料，無法操作！');
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(data.text)}`;
-            // 修正：不使用 _blank 新開視窗，直接在當前頁面喚起 LINE
             window.location.href = lineUrl;
         }
 
