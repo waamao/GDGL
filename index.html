@@ -21,8 +21,21 @@
         /* 限制最大寬度並置中 */
         main.max-w-md { max-width: 448px; width: 100%; margin: 0 auto; flex: 1; min-height: 0; padding: 16px; position: relative; display: flex; flex-direction: column; }
         
-        /* 頁首樣式：鎖定在最上方，防止 iOS 虛擬鍵盤彈出時捲動 */
-        header { position: sticky; top: 0; background-color: #1f2937; color: #ffffff; padding: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
+        /* 🛠️ 頁首樣式優化：加入 env(safe-area-inset-top) 自動避開 iPhone 動態島/瀏海 */
+        header { 
+            position: sticky; 
+            top: 0; 
+            background-color: #1f2937; 
+            color: #ffffff; 
+            /* 頂部留白加上安全區域高度，若非 iOS 裝置則自動降級為 0，確保基本 16px 留白不變 */
+            padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px 16px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 1000; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            flex-shrink: 0; 
+        }
         .header-title { font-size: 16px; font-weight: bold; margin: 0 8px; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: center; }
         
         /* 通用按鈕：全數換成黑白灰階風格，頂端列按鈕圓弧半徑統一改為 33px */
@@ -41,7 +54,8 @@
         #btnBack { font-size: 20px; padding: 4px 16px; }
         
         /* 頁面切換機制：改為撐滿主區塊高度，方便內部做獨立捲動 */
-        .page { display: none; height: 100%; min-height: 0; padding-bottom: 140px; } /* 加大 padding-bottom 確保首頁雙層按鈕不遮擋內容 */
+        /* 🛠️ 底端留白也加上環境變數，防止部分 iPhone 的底部「黑條（Home Indicator）」遮擋按鈕 */
+        .page { display: none; height: 100%; min-height: 0; padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); } 
         .page.active { display: flex; flex-direction: column; gap: 16px; }
         
         /* 卡片與區塊樣式 */
@@ -90,21 +104,21 @@
         .manage-btns .btn-del { color: #888888; }
         
         /* 大按鈕：修改為固定在底部 */
+        /* 🛠️ 調整 bottom 計算方式，避免 iPhone 底部安全區重疊 */
         .btn-block-lg { 
             position: fixed; 
-            bottom: 21px; 
+            bottom: calc(21px + env(safe-area-inset-bottom, 0px)); 
             left: 50%; 
             transform: translateX(-50%); 
             width: calc(100% - 32px); 
             max-width: 416px; 
             
-            /* 🛠️ 改成固定高度 54px 並且讓文字垂直置中 */
             height: 54px;
             line-height: 54px;
             padding: 0; 
             
             font-size: 16px; 
-            border-radius: 33px; /* 圓弧保持一致 */
+            border-radius: 33px; 
             box-shadow: 0 -4px 10px rgba(0,0,0,0.08); 
             text-align: center; 
             display: block; 
@@ -115,11 +129,37 @@
         }
         
         /* 底部按鈕群組 */
-        .bottom-btn-group { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; gap: 8px; margin-top: 0 !important; flex-shrink: 0; z-index: 100; background-color: transparent; }
+        /* 🛠️ 同步調整底部安全區距離 */
+        .bottom-btn-group { 
+            position: fixed; 
+            bottom: calc(21px + env(safe-area-inset-bottom, 0px)); 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: calc(100% - 32px); 
+            max-width: 416px; 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 0 !important; 
+            flex-shrink: 0; 
+            z-index: 100; 
+            background-color: transparent; 
+        }
         .bottom-btn-group button { flex: 1; margin: 0 !important; height: 54px; font-size: 14px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0 4px; }
 
         /* 購物車與首頁選單分頁專用雙層按鈕定位樣式 */
-        .cart-bottom-zone, .home-bottom-zone { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+        /* 🛠️ 同步調整雙層按鈕底端安全區距離 */
+        .cart-bottom-zone, .home-bottom-zone { 
+            position: fixed; 
+            bottom: calc(21px + env(safe-area-inset-bottom, 0px)); 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: calc(100% - 32px); 
+            max-width: 416px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            z-index: 100; 
+        }
         .cart-bottom-zone .bottom-btn-group-inner, .home-bottom-zone .bottom-btn-group-inner { display: flex; gap: 8px; width: 100%; }
         .cart-bottom-zone button, .home-bottom-zone button { height: 54px; font-size: 14px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
