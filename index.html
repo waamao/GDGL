@@ -562,20 +562,16 @@
                 list.forEach((item, idx) => {
                     if(!item || !item.text) return;
                     hasAnyContent = true;
-                    const card = document.createElement('div');
+                    const card = document.createElement('label');
                     card.className = 'view-box-card';
+                    card.setAttribute('for', `${prefix}_${idx}`);
                     card.innerHTML = `
-                        <label class="view-box-title">
+                        <div class="view-box-title">
                             <input type="checkbox" id="${prefix}_${idx}" class="item-checkbox">
                             <span>${title}</span>
-                        </label>
+                        </div>
                         <div class="view-box-content">${item.text}</div>
                     `;
-                    card.addEventListener('click', function(e) {
-                        if(e.target.tagName === 'INPUT') return;
-                        const chk = card.querySelector('input[type="checkbox"]');
-                        if(chk) chk.checked = !chk.checked;
-                    });
                     dynamicZone.appendChild(card);
                 });
             }
@@ -597,21 +593,17 @@
             }
             if(punchLines.length){
                 hasAnyContent = true;
-                const card = document.createElement('div');
+                const card = document.createElement('label');
                 card.className = 'view-box-card';
+                card.setAttribute('for', 'copyChkPunch');
                 const punchDisplayText = `日期：${dateStr} 出勤紀錄：${punchLines.join('、')}${punchNote ? `（${punchNote}）` : ''}`;
                 card.innerHTML = `
-                    <label class="view-box-title">
+                    <div class="view-box-title">
                         <input type="checkbox" id="copyChkPunch" class="item-checkbox">
                         <span>出勤紀錄</span>
-                    </label>
+                    </div>
                     <div class="view-box-content">${punchDisplayText}</div>
                 `;
-                card.addEventListener('click', function(e) {
-                    if(e.target.tagName === 'INPUT') return;
-                    const chk = card.querySelector('input[type="checkbox"]');
-                    if(chk) chk.checked = !chk.checked;
-                });
                 dynamicZone.appendChild(card);
             }
 
