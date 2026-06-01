@@ -127,7 +127,6 @@
         <section id="pageSites" class="page">
             <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0;">
                 <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
-                <button id="btnHomeImport" onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px; flex-shrink:0;">📥 匯入系統備份檔(JSON)</button>
                 
                 <h3 style="font-size: 13px; color: #4b5563; margin: 2px 0; flex-shrink: 0;">請選擇要填單的案場 (超過3個可上下滑動)：</h3>
                 
@@ -333,6 +332,10 @@
                     <button onclick="addManageItem()" class="btn-green" style="flex-shrink: 0;">新增</button>
                 </div>
                 <div id="manageListItems" class="scroll-box"></div>
+            </div>
+            <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1; margin-bottom: 40px;">
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統備份與還原</h3>
+                <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📥 匯入系統備份檔(JSON)</button>
             </div>
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1; margin-bottom: 40px;">
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">Apps Script 連動網址設定</h3>
