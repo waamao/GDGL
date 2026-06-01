@@ -900,7 +900,8 @@
         function shareLogToLine() {
             const logText = getLogRawText();
             if (!logText) return alert('請至少填寫一項項目內容！');
-            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(logText)}`;
+            const dateStr = document.getElementById('inputLogDate').value || getTargetDateStr();
+            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(dateStr + ' ' + logText)}`;
         }
 
         // ================= 工地記事模組 =================
@@ -931,7 +932,8 @@
         function shareNotesToLine() {
             const notesText = getNotesRawText();
             if (!notesText) return alert('請先輸入記事內容！');
-            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(notesText)}`;
+            const dateStr = document.getElementById('inputNotesDate').value || getTargetDateStr();
+            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(dateStr + ' ' + notesText)}`;
         }
 
         // ================= 頁面切換控制核心 =================
@@ -1207,7 +1209,8 @@
         function shareCartToLineOnly() {
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料！');
-            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(data.text)}`;
+            const dateStr = getTargetDateStr();
+            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(dateStr + ' ' + data.text)}`;
         }
 
         function fallbackCopy(text, msg) {
