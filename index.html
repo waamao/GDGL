@@ -4,7 +4,7 @@
     <link rel="icon" type="image/x-icon" href="./favicon.png">
     <link rel="apple-touch-icon" href="./favicon.png">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>工地管理系統</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,16 +13,16 @@
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         
         /* 修正主視窗結構：使其填滿全螢幕且不觸發全頁捲動 */
-        html, body { height: 100%; margin: 0; padding: 0; background-color: #f3f4f6; color: #1f2937; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+        html, body { height: 100%; margin: 0; padding: 0; background-color: #f3f4f6; color: #1f2937; -webkit-tap-highlight-color: transparent; overflow: hidden; position: relative; }
         
         /* 使用 flex 讓 main 填滿 header 以下的所有空間 */
         body { display: flex; flex-direction: column; }
         
         /* 限制最大寬度並置中 */
-        main.max-w-md { max-width: 448px; width: 100%; margin: 0 auto; flex: 1; min-height: 0; padding: 16px; position: relative; }
+        main.max-w-md { max-width: 448px; width: 100%; margin: 0 auto; flex: 1; min-height: 0; padding: 16px; position: relative; display: flex; flex-direction: column; }
         
-        /* 頁首樣式：固定在最上方 */
-        header { background-color: #1f2937; color: #ffffff; padding: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
+        /* 頁首樣式：鎖定在最上方，防止 iOS 虛擬鍵盤彈出時捲動 */
+        header { position: sticky; top: 0; background-color: #1f2937; color: #ffffff; padding: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
         .header-title { font-size: 16px; font-weight: bold; margin: 0 8px; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: center; }
         
         /* 通用按鈕：全數換成黑白灰階風格，頂端列按鈕圓弧半徑統一改為 33px */
@@ -60,7 +60,7 @@
         /* 清單列表物件：改為可獨立內部滑動 */
         .list-container { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
         /* 真正的滾動容器區 */
-        .scroll-list-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 24px; }
+        .scroll-list-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 24px; -webkit-overflow-scrolling: touch; }
         
         .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; }
         .list-item:active { border-color: #333333; }
@@ -76,7 +76,7 @@
         .cart-qty-input { width: 96px !important; text-align: center; font-weight: bold; background-color: #e5e7eb !important; color: #333333; }
         
         /* 後台管理列表縮緊樣式 */
-        .scroll-box { max-height: 220px; overflow-y: auto; background-color: #f9fafb; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
+        .scroll-box { max-height: 220px; overflow-y: auto; background-color: #f9fafb; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; -webkit-overflow-scrolling: touch; }
         .manage-item { background-color: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 4px; }
         
         /* 移除整行拖曳，改為特定 handle 樣式 */
@@ -169,7 +169,7 @@
         </section>
 
         <section id="pageLog" class="page">
-            <div class="alert-box alert-blue">
+            <div class="alert-box alert-blue" style="padding: 10px 12px;">
                 目前工地：<span id="logSiteName"></span>
             </div>
             <div class="scroll-list-body" style="flex: 1;">
@@ -187,7 +187,7 @@
         </section>
 
         <section id="pageNotes" class="page">
-            <div class="alert-box alert-blue">
+            <div class="alert-box alert-blue" style="padding: 10px 12px;">
                 目前工地：<span id="notesSiteName"></span>
             </div>
             <div class="scroll-list-body" style="flex: 1;">
@@ -203,7 +203,7 @@
         </section>
 
         <section id="pageCategories" class="page">
-            <div class="alert-box alert-blue">
+            <div class="alert-box alert-blue" style="padding: 10px 12px;">
                 目前工地：<span id="currentSiteName"></span>
             </div>
 
@@ -221,9 +221,8 @@
         </section>
 
         <section id="pageItems" class="page">
-            <div class="alert-box alert-blue" style="font-weight: normal; line-height: 1.6;">
-                <div><strong>工地：</strong> <span id="currentSiteName2"></span></div>
-                <div><strong>分類：</strong> <span id="currentCategoryName"></span></div>
+            <div class="alert-box alert-blue" style="padding: 10px 12px; font-weight: normal; line-height: 1.4;">
+                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>工地：</strong><span id="currentSiteName2"></span><span style="color: #cbd5e1; margin: 0 6px;">|</span><strong>分類：</strong><span id="currentCategoryName"></span></div>
             </div>
 
             <div class="alert-box" style="background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #334155;">
@@ -505,7 +504,6 @@
             const text = compileLogText();
             if (!text) return alert('請至少填寫一項項目內容後再傳送！');
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-            // 修正：不使用 _blank 新開視窗，直接在當前頁面喚起 LINE
             window.location.href = lineUrl;
         }
 
@@ -545,7 +543,6 @@
             const text = compileNotesText();
             if (!text) return alert('請先輸入記事內容後再進行傳送！');
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-            // 修正：不使用 _blank 新開視窗，直接在當前頁面喚起 LINE
             window.location.href = lineUrl;
         }
 
@@ -896,7 +893,6 @@
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料，無法操作！');
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(data.text)}`;
-            // 修正：不使用 _blank 新開視窗，直接在當前頁面喚起 LINE
             window.location.href = lineUrl;
         }
 
