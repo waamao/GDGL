@@ -878,7 +878,7 @@
                 }
             }
             if (!hasContent) return null;
-            return `【施工日誌】\n案場名稱：${currentState.siteName}\n--------------------\n${projectLogText}--------------------`;
+            return `施工日誌\n案場名稱：${currentState.siteName}\n--------------------\n${projectLogText}--------------------`;
         }
 
         // 純儲存 (上傳行事曆功能鈕) — 陣列追加模式，不覆蓋舊紀錄
@@ -911,7 +911,7 @@
         function getNotesRawText() {
             const val = document.getElementById('txtSiteNotes').value.trim();
             if (!val) return null;
-            return `【工地記事】\n案場名稱：${currentState.siteName}\n--------------------\n${val}\n--------------------`;
+            return `工地記事\n案場名稱：${currentState.siteName}\n--------------------\n${val}\n--------------------`;
         }
 
         // 純儲存 (上傳行事曆功能鈕) — 陣列追加模式，不覆蓋舊紀錄
