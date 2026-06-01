@@ -103,7 +103,8 @@
         .dot-order { background-color: #222222; }
 
         /* 綜合查看框樣式 */
-        .view-box-card { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; background-color: #f9fafb; display: flex; flex-direction: column; gap: 4px; }
+        .view-box-card { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; background-color: #f9fafb; display: flex; flex-direction: column; gap: 4px; cursor: pointer; user-select: none; }
+        .view-box-card:active { background-color: #f0f0f0; }
         .view-box-title { font-size: 13px; font-weight: bold; color: #374151; display: flex; align-items: center; gap: 6px; }
         .view-box-content { font-size: 13px; background: white; border: 1px solid #e5e7eb; padding: 6px; border-radius: 6px; min-height: 40px; white-space: pre-wrap; word-break: break-all; }
     </style>
@@ -570,6 +571,11 @@
                         </label>
                         <div class="view-box-content">${item.text}</div>
                     `;
+                    card.addEventListener('click', function(e) {
+                        if(e.target.tagName === 'INPUT') return;
+                        const chk = card.querySelector('input[type="checkbox"]');
+                        if(chk) chk.checked = !chk.checked;
+                    });
                     dynamicZone.appendChild(card);
                 });
             }
@@ -601,6 +607,11 @@
                     </label>
                     <div class="view-box-content">${punchDisplayText}</div>
                 `;
+                card.addEventListener('click', function(e) {
+                    if(e.target.tagName === 'INPUT') return;
+                    const chk = card.querySelector('input[type="checkbox"]');
+                    if(chk) chk.checked = !chk.checked;
+                });
                 dynamicZone.appendChild(card);
             }
 
