@@ -12,75 +12,60 @@
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         
-        /* 修正主視窗結構：使其填滿全螢幕且不觸發全頁捲動 */
-        html, body { height: 100%; margin: 0; padding: 0; background-color: #f3f4f6; color: #1f2937; -webkit-tap-highlight-color: transparent; overflow: hidden; }
-        
-        /* 使用 flex 讓 main 填滿 header 以下的所有空間 */
+        html, body { height: 100%; margin: 0; padding: 0; background-color: #dadbdd; color: #1f2937; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         body { display: flex; flex-direction: column; }
+        main.max-w-md { max-width: 448px; width: 100%; margin: 0 auto; flex: 1; min-height: 0; padding: 16px; position: relative; display: flex; flex-direction: column; }
         
-        /* 限制最大寬度並置中 */
-        main.max-w-md { max-width: 448px; width: 100%; margin: 0 auto; flex: 1; min-height: 0; padding: 16px; position: relative; }
-        
-        /* 頁首樣式：固定在最上方 */
         header { background-color: #1f2937; color: #ffffff; padding: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
         .header-title { font-size: 16px; font-weight: bold; margin: 0 8px; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: center; }
         
-        /* 通用按鈕：全數換成黑白灰階風格，頂端列按鈕圓弧半徑統一改為 33px */
         button { border: none; cursor: pointer; border-radius: 8px; font-weight: bold; padding: 8px 12px; font-size: 12px; transition: background-color 0.2s; }
         button:active { opacity: 0.8; }
         .btn-blue { background-color: #374151; color: white; }
         .btn-red { background-color: #555555; color: white; }
         .btn-green { background-color: #222222; color: white; }
-        .btn-amber { background-color: #777777; color: white; }
-        .btn-slate { background-color: #444444; color: white; }
+        .btn-amber { background-color: #222222; color: white; }
+        .btn-slate { background-color: #222222; color: white; }
         .btn-line { background-color: #06C755; color: white; }
         
         header button { border-radius: 33px !important; }
-        
-        /* 修正返回鍵與首頁鍵樣式，使其與設定鍵一致 */
         #btnBack, #btnHomeTop { font-size: 12px; padding: 8px 12px; }
         
-        /* 頁面切換機制：改為撐滿主區塊高度，方便內部做獨立捲動 */
-        .page { display: none; height: 100%; min-height: 0; padding-bottom: 140px; } /* 加大 padding-bottom 確保首頁雙層按鈕不遮擋內容 */
-        .page.active { display: flex; flex-direction: column; gap: 16px; }
+        /* 頁面切換：首頁與其他填單頁面皆在 main 內獨立調配 */
+        .page { display: none; height: 100%; min-height: 0; flex-direction: column; gap: 12px; }
+        .page.active { display: flex; }
         
-        /* 卡片與區塊樣式 */
-        .card { background-color: #ffffff; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+        /* 首頁專用彈性佈局 */
+        #pageSites { display: none; height: 100%; flex-direction: column; justify-content: space-between; }
+        #pageSites.active { display: flex; }
+        
+        /* 超過3個案場可滑動選取 */
+        .home-sites-scroll-zone { max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; border: 1px dashed #cbd5e1; padding: 6px; border-radius: 8px; background-color: #f9fafb; }
+        
+        .card { background-color: #ffffff; padding: 14px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
         .alert-box { padding: 12px; border-radius: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-shrink: 0; }
-        .alert-amber { background-color: #f3f4f6; border: 1px solid #cbd5e1; color: #333333; }
         .alert-blue { background-color: #e5e7eb; border: 1px solid #cbd5e1; color: #111111; font-weight: 600; }
         
-        /* 表單輸入框 */
-        input[type="text"], input[type="number"], select, textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; background-color: white; }
+        input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; background-color: white; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: #333333; }
         .flex-row { display: flex; gap: 8px; width: 100%; align-items: center; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .flex-col { display: flex; flex-direction: column; gap: 8px; }
         
-        /* 清單列表物件：改為可獨立內部滑動 */
         .list-container { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
-        /* 真正的滾動容器區 */
-        .scroll-list-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 24px; }
+        .scroll-list-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 80px; }
         
-        .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; }
-        .list-item:active { border-color: #333333; }
-        
-        /* 工地被選取時的反白樣式 */
+        .list-item { background-color: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); gap: 8px; min-height: 44px; }
         .list-item.selected { background-color: #1f2937 !important; border-color: #1f2937 !important; }
         .list-item.selected span { color: #ffffff !important; }
 
-        /* 前台材料品項勾選樣式 */
         .item-label { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; cursor: pointer; user-select: none; font-size: 14px; font-weight: 500; }
         .item-checkbox { width: 20px; height: 20px; border-radius: 4px; accent-color: #333333; flex-shrink: 0; }
         .qty-input { width: 96px !important; text-align: center; font-weight: 600; background-color: #f8fafc !important; }
         .cart-qty-input { width: 96px !important; text-align: center; font-weight: bold; background-color: #e5e7eb !important; color: #333333; }
         
-        /* 後台管理列表縮緊樣式 */
         .scroll-box { max-height: 220px; overflow-y: auto; background-color: #f9fafb; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
-        .manage-item { background-color: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 4px; }
-        
-        /* 移除整行拖曳，改為特定 handle 樣式 */
-        .manage-item { user-select: none; }
+        .manage-item { background-color: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 4px; user-select: none; }
         .drag-handle { cursor: move; padding-right: 4px; }
         .sortable-ghost { opacity: 0.4; background-color: #e2e8f0 !important; border: 1px dashed #94a3b8 !important; }
         
@@ -89,23 +74,40 @@
         .manage-btns button { padding: 4px 6px; font-size: 11px; font-weight: normal; background: none; color: #555555; }
         .manage-btns .btn-del { color: #888888; }
         
-        /* 底部按鈕群組與雙層按鈕定位樣式 */
-        .cart-bottom-zone, .home-bottom-zone, .order-bottom-zone { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; flex-direction: column; gap: 8px; z-index: 100; background-color: transparent; }
-        .cart-bottom-zone .bottom-btn-group-inner, .home-bottom-zone .bottom-btn-group-inner { display: flex; gap: 8px; width: 100%; }
-        .cart-bottom-zone button, .home-bottom-zone button, .order-bottom-zone button { height: 54px; font-size: 14px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        
-        /* 移除原本固定的大按鈕樣式，全數統一由 zone 管理 */
-        .bottom-btn-group { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; gap: 8px; margin-top: 0 !important; flex-shrink: 0; z-index: 100; background-color: transparent; }
-        .bottom-btn-group button { flex: 1; margin: 0 !important; height: 54px; font-size: 14px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0 4px; }
+        /* 固定底部按鈕群組 */
+        .bottom-btn-group, .home-fixed-bottom { position: fixed; bottom: 33px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; flex-direction: column; gap: 8px; z-index: 100; background-color: transparent; }
+        .bottom-btn-group-inner { display: flex; gap: 8px; width: 100%; }
+        button.large-bottom-btn { height: 36px; font-size: 14px; border-radius: 33px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex: 1; }
 
         .hidden { display: none !important; }
         .text-center { text-align: center; }
-        .text-muted { color: #9ca3af; font-size: 13px; padding: 16px 0; }
+        .text-muted { color: #9ca3af; font-size: 13px; padding: 8px 0; }
 
-        /* 施工日誌動態項目樣式 */
         .log-entry-item { padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background-color: #f9fafb; position: relative; display: flex; flex-direction: column; gap: 8px; }
         .log-entry-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .btn-delete-log-item { background: none; color: #ef4444; font-size: 16px; padding: 4px 8px; position: absolute; top: 4px; right: 4px; }
+
+        /* 月曆元件基礎樣式 */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background-color: #f3f4f6; padding: 4px; border-radius: 8px; }
+        .calendar-weekday { text-align: center; font-size: 11px; font-weight: bold; color: #6b7280; padding: 2px 0; }
+        .calendar-day { background-color: white; border: 1px solid #e5e7eb; border-radius: 6px; min-height: 42px; padding: 2px; display: flex; flex-direction: column; justify-content: space-between; position: relative; cursor: pointer; }
+        .calendar-day:active { background-color: #f3f4f6; }
+        .calendar-day.empty { background-color: transparent; border: none; cursor: default; }
+        .calendar-day.today { border-color: #1f2937; background-color: #f8fafc; }
+        .calendar-day.selected { background-color: #e5e7eb; border-color: #4b5563; }
+        .day-num { font-size: 11px; font-weight: bold; color: #4b5563; }
+        .day-dots { display: flex; gap: 2px; justify-content: center; overflow: hidden; padding-top: 2px; }
+        .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+        .dot-log { background-color: #374151; }
+        .dot-notes { background-color: #777777; }
+        .dot-punch { background-color: #06C755; }
+        .dot-order { background-color: #222222; }
+
+        /* 綜合查看框樣式 */
+        .view-box-card { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; background-color: #f9fafb; display: flex; flex-direction: column; gap: 4px; }
+        .view-box-title { font-size: 13px; font-weight: bold; color: #374151; display: flex; align-items: center; gap: 6px; }
+        .view-box-content { font-size: 13px; background: white; border: 1px solid #e5e7eb; padding: 6px; border-radius: 6px; min-height: 40px; white-space: pre-wrap; word-break: break-all; max-height: 100px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -113,7 +115,7 @@
     <header>
         <div id="headerLeftZone" style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
             <button id="btnBack" class="hidden btn-blue">←</button>
-            <button id="btnHomeTop" class="hidden btn-slate" onclick="navigateTo('sites')">🏠 首頁</button>
+            <button id="btnHomeTop" class="hidden btn-slate" onclick="navigateTo('sites')">⌂ 首頁</button>
         </div>
         <h1 id="appTitle" class="header-title"></h1>
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
@@ -125,77 +127,152 @@
     <main class="max-w-md">
 
         <section id="pageSites" class="page">
-            <div class="list-container" style="overflow: hidden; flex: 1;">
+            <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0;">
                 <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
-                <button id="btnHomeImport" onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 12px; font-size: 14px; border-radius: 8px; margin-bottom: 4px;">📥 匯入系統備份檔(JSON)</button>
+                <button id="btnHomeImport" onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px; flex-shrink:0;">📥 匯入系統備份檔(JSON)</button>
                 
-                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇要填單的案場：</h3>
-                <div id="listSites" class="scroll-list-body"></div>
+                <h3 style="font-size: 13px; color: #4b5563; margin: 2px 0; flex-shrink: 0;">請選擇要填單的案場 (超過3個可上下滑動)：</h3>
+                
+                <div id="listSites" class="home-sites-scroll-zone"></div>
+                
+                <div class="card" style="padding: 8px; margin-top: 4px;">
+                    <div class="calendar-header">
+                        <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 2px 8px; font-size:11px;">上個月</button>
+                        <span id="homeCalendarTitle" style="font-weight: bold; font-size: 13px;">2026 年 06 月</span>
+                        <button onclick="changeHomeMonth(1)" class="btn-slate" style="padding: 2px 8px; font-size:11px;">下個月</button>
+                    </div>
+                    <div class="calendar-grid" id="homeCalendarGrid"></div>
+                </div>
             </div>
 
-            <div id="homeMenuZone" class="hidden">
-                <div class="home-bottom-zone">
+            <div style="height: 110px; flex-shrink: 0; position: relative;">
+                <div class="home-fixed-bottom" style="bottom: 33;">
                     <div class="bottom-btn-group-inner">
-                        <button onclick="navigateTo('log')" class="btn-slate" style="flex: 1;">施工日誌</button>
-                        <button onclick="navigateTo('notes')" class="btn-amber" style="flex: 1;">工地記事</button>
+                        <button onclick="clickHomeMenu('log')" class="btn-slate large-bottom-btn">施工日誌</button>
+                        <button onclick="clickHomeMenu('notes')" class="btn-amber large-bottom-btn">工地記事</button>
                     </div>
-                    <button onclick="navigateTo('categories')" class="btn-blue" style="width: 100%;">材料訂購</button>
+                    <div class="bottom-btn-group-inner">
+                        <button onclick="clickHomeMenu('punch')" class="btn-amber large-bottom-btn">打卡紀錄</button>
+                        <button onclick="clickHomeMenu('categories')" class="btn-blue large-bottom-btn">材料訂購</button>
+                    </div>
                 </div>
+            </div>
+        </section>
+
+        <section id="pageDateView" class="page">
+            <div class="alert-box alert-blue">
+                檢視日期：<span id="viewingDateText"></span>
+            </div>
+            <div class="scroll-list-body" style="flex: 1; gap: 8px; padding-bottom: 120px;">
+                
+                <div class="view-box-card">
+                    <label class="view-box-title">
+                        <input type="checkbox" id="copyChkLog" class="item-checkbox" checked>
+                        <span>施工日誌</span>
+                    </label>
+                    <div id="viewBoxLog" class="view-box-content"></div>
+                </div>
+
+                <div class="view-box-card">
+                    <label class="view-box-title">
+                        <input type="checkbox" id="copyChkNotes" class="item-checkbox" checked>
+                        <span>工地記事</span>
+                    </label>
+                    <div id="viewBoxNotes" class="view-box-content"></div>
+                </div>
+
+                <div class="view-box-card">
+                    <label class="view-box-title">
+                        <input type="checkbox" id="copyChkPunch" class="item-checkbox" checked>
+                        <span>打卡紀錄</span>
+                    </label>
+                    <div id="viewBoxPunch" class="view-box-content"></div>
+                </div>
+
+                <div class="view-box-card">
+                    <label class="view-box-title">
+                        <input type="checkbox" id="copyChkOrder" class="item-checkbox" checked>
+                        <span>材料訂購</span>
+                    </label>
+                    <div id="viewBoxOrder" class="view-box-content"></div>
+                </div>
+
+            </div>
+            <div class="bottom-btn-group">
+                <div class="bottom-btn-group-inner">
+                    <button onclick="copyCombinedViewText()" class="btn-green large-bottom-btn">複製文字</button>
+                    <button onclick="shareCombinedViewToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
+                </div>
+                <button onclick="deleteSelectedDateRecords()" class="btn-red large-bottom-btn" style="width:100%;">🗑️ 刪除紀錄</button>
+            </div>
+        </section>
+
+        <section id="pagePunch" class="page">
+            <div class="scroll-list-body" style="flex: 1; gap: 12px; padding-bottom: 150px;">
+                <div class="card">
+                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">請選擇打卡日期：</label>
+                    <input type="date" id="inputPunchDate" onchange="syncPunchDateChange()">
+                </div>
+
+                <div class="card">
+                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">選擇上班案場 (可複選，支援一天多案場)：</label>
+                    <div id="punchSitesGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;"></div>
+                </div>
+
+                <div class="card">
+                    <label style="font-size: 12px; font-weight: bold; color: #4b5563;">打卡備註 (選填)：</label>
+                    <input type="text" id="inputPunchNote" placeholder="輸入備註事項...">
+                </div>
+            </div>
+
+            <div class="bottom-btn-group">
+                <button onclick="saveMultiplePunchStatus('上班')" class="btn-green large-bottom-btn" style="width: 100%;">打卡</button>
+                <button onclick="sharePunchToLine()" class="btn-line large-bottom-btn" style="width: 100%;">傳送到LINE</button>
             </div>
         </section>
 
         <section id="pageLog" class="page">
-            <div class="alert-box alert-blue">
-                案場名稱：<span id="logSiteName"></span>
-            </div>
+            <div class="alert-box alert-blue">案場名稱：<span id="logSiteName"></span></div>
             <div class="scroll-list-body" style="flex: 1;">
                 <div class="card">
                     <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">施工日誌內容填寫</h3>
-                    <div id="logItemsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
-                    </div>
+                    <div id="logItemsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;"></div>
                     <button onclick="addLogItemRow()" class="btn-slate" style="width: 100%; padding: 10px; margin-top: 4px;">➕ 新增施工項目</button>
                 </div>
             </div>
             <div class="bottom-btn-group">
-                <button onclick="copyLogToClipboard()" class="btn-green">複製日誌文字</button>
-                <button onclick="shareLogToLine()" class="btn-line">傳送到LINE</button>
+                <button onclick="copyLogToClipboard()" class="btn-green large-bottom-btn">上傳行事曆</button>
+                <button onclick="shareLogToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
             </div>
         </section>
 
         <section id="pageNotes" class="page">
-            <div class="alert-box alert-blue">
-                案場名稱：<span id="notesSiteName"></span>
-            </div>
+            <div class="alert-box alert-blue">案場名稱：<span id="notesSiteName"></span></div>
             <div class="scroll-list-body" style="flex: 1;">
                 <div class="card">
                     <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">工地事項紀錄</h3>
-                    <textarea id="txtSiteNotes" rows="12" placeholder="在此輸入各種工地重要記事、備忘 or 交代事項..." style="width: 100%; resize: none; line-height: 1.6;"></textarea>
+                    <textarea id="txtSiteNotes" rows="12" placeholder="在此輸入各種工地重要記事..." style="width: 100%; resize: none; line-height: 1.6;"></textarea>
                 </div>
             </div>
             <div class="bottom-btn-group">
-                <button onclick="copyNotesToClipboard()" class="btn-green">複製記事文字</button>
-                <button onclick="shareNotesToLine()" class="btn-line">傳送到LINE</button>
+                <button onclick="copyNotesToClipboard()" class="btn-green large-bottom-btn">上傳行事曆</button>
+                <button onclick="shareNotesToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
             </div>
         </section>
 
         <section id="pageCategories" class="page">
-            <div class="alert-box alert-blue">
-                送貨地點：<span id="currentSiteName"></span>
-            </div>
-
+            <div class="alert-box alert-blue">送貨地點：<span id="currentSiteName"></span></div>
             <div class="card" style="padding: 12px; flex-direction: row; align-items: center; gap: 8px;">
                 <span style="color: #9ca3af;">🔍</span>
-                <input type="text" id="globalSearchBar" oninput="renderCategories()" style="border: none; padding: 4px; font-size: 14px; width: 100%; outline: none;" placeholder="在此直接輸入關鍵字，一次搜尋全部材料品項...">
+                <input type="text" id="globalSearchBar" oninput="renderCategories()" style="border: none; padding: 4px; font-size: 14px; width: 100%; outline: none;" placeholder="搜尋全部材料品項...">
             </div>
-
             <div class="list-container">
-                <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇材料分類：</h3>
+                <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 4px; flex-shrink: 0;">請選擇材料分類：</h3>
                 <div id="listCategories" class="scroll-list-body"></div>
             </div>
-
-            <div class="order-bottom-zone">
-                <button onclick="navigateTo('cart')" class="btn-amber" style="width: 100%;">查看我的材料訂單 (<span id="cartCountCategory">0</span>)</button>
-                <button onclick="clearOnlyOrder()" class="btn-red" style="width: 100%;">🧹 清除訂單</button>
+            <div class="bottom-btn-group">
+                <button onclick="navigateTo('cart')" class="btn-amber large-bottom-btn">查看我的材料訂單 (<span id="cartCountCategory">0</span>)</button>
+                <button onclick="clearOnlyOrder()" class="btn-red large-bottom-btn">🧹 清除訂單</button>
             </div>
         </section>
 
@@ -204,70 +281,62 @@
                 <div><strong>送貨地點：</strong> <span id="currentSiteName2"></span></div>
                 <div><strong>分類名稱：</strong> <span id="currentCategoryName"></span></div>
             </div>
-
             <div class="alert-box" style="background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #334155;">
-                <div style="font-weight: bold;">➕ 快速新增材料品項 (至當前分類)</div>
+                <div style="font-weight: bold;">➕ 快速新增材料品項</div>
                 <div class="flex-row">
                     <input type="text" id="inputQuickItem" placeholder="">
                     <button onclick="quickAddItem()" class="btn-blue" style="flex-shrink: 0; padding: 8px 16px;">新增</button>
                 </div>
             </div>
-
             <div class="list-container">
-                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">品項清單 (請勾選並輸入數量)：</h3>
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px; flex-shrink: 0;">品項清單 (請勾選並輸入數量)：</h3>
                 <div id="listItems" class="scroll-list-body"></div>
             </div>
-
-            <div class="order-bottom-zone">
-                <button onclick="navigateTo('cart')" class="btn-amber" style="width: 100%;">查看我的材料訂單 (<span id="cartCountBottom">0</span>)</button>
-                <button onclick="clearOnlyOrder()" class="btn-red" style="width: 100%;">🧹 清除訂單</button>
+            <div class="bottom-btn-group">
+                <button onclick="navigateTo('cart')" class="btn-amber large-bottom-btn">查看我的材料訂單 (<span id="cartCountBottom">0</span>)</button>
+                <button onclick="clearOnlyOrder()" class="btn-red large-bottom-btn">🧹 清除訂單</button>
             </div>
         </section>
 
         <section id="pageCart" class="page">
             <div class="alert-box alert-amber" style="line-height: 1.6;">
                 <div><strong>預計送貨案場：</strong> <span id="cartSiteName"></span></div>
-                <div style="color: #6b7280; font-size: 11px;">提示：您可以在這裡修改最終數量，或點擊 ❌ 取消該品項。</div>
             </div>
-
             <div class="list-container">
-                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">已選材料明細：</h3>
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px; flex-shrink: 0;">已選材料明細：</h3>
                 <div id="listCartItems" class="scroll-list-body"></div>
             </div>
-
-            <div class="cart-bottom-zone">
+            <div class="bottom-btn-group">
                 <div class="bottom-btn-group-inner">
-                    <button id="btnSubmitCart" onclick="copyAndUploadCart()" class="btn-green" style="flex: 1;">複製並上傳</button>
-                    <button onclick="copyOnlyCart()" class="btn-slate" style="flex: 1;">僅複製訂單</button>
-                    <button onclick="shareToLine()" class="btn-line" style="flex: 1;">傳送到LINE</button>
+                    <button id="btnSubmitCart" onclick="copyAndUploadCart()" class="btn-green large-bottom-btn">上傳到Google</button>
+                    <button onclick="copyOnlyCart()" class="btn-slate large-bottom-btn">上傳行事曆</button>
+                    <button onclick="shareToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
                 </div>
-                <button onclick="clearOnlyOrder()" class="btn-red" style="width: 100%;">🧹 清除訂單</button>
+                <button onclick="clearOnlyOrder()" class="btn-red large-bottom-btn">🧹 清除訂單</button>
             </div>
         </section>
 
         <section id="pageManage" class="page" style="overflow-y: auto;">
             <div class="card">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">🏢 案場基本資料維護 <span style="font-size:11px; color:#6b7280; font-weight:normal;">(可拖曳排序)</span></h3>
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">🏢 案場基本資料維護</h3>
                 <div class="flex-row">
                     <input type="text" id="inputNewSite" placeholder="輸入新案場名稱">
                     <button onclick="addSite()" class="btn-green" style="flex-shrink: 0;">新增</button>
                 </div>
                 <div id="manageListSites" class="scroll-box"></div>
             </div>
-
             <div class="card">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📁 材料分類維護 <span style="font-size:11px; color:#6b7280; font-weight:normal;">(可拖曳排序)</span></h3>
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">📁 材料分類維護</h3>
                 <div class="flex-row">
                     <input type="text" id="inputNewCategory" placeholder="如：水泥類、五金類">
                     <button onclick="addCategory()" class="btn-green" style="flex-shrink: 0;">新增</button>
                 </div>
                 <div id="manageListCategories" class="scroll-box"></div>
             </div>
-
             <div class="card">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">材料品項維護 <span style="font-size:11px; color:#6b7280; font-weight:normal;">(自動排序)</span></h3>
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">材料品項維護</h3>
                 <div style="margin-bottom: 8px;">
-                    <select id="manageSelectCategory" onchange="renderManageItems()" style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px; font-size: 13px;">
+                    <select id="manageSelectCategory" onchange="renderManageItems()" style="width: 100%; padding: 8px; font-size: 13px;">
                         <option value="">請先選擇分類...</option>
                     </select>
                 </div>
@@ -277,10 +346,8 @@
                 </div>
                 <div id="manageListItems" class="scroll-box"></div>
             </div>
-
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1;">
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">🔗 Apps Script 連動網址設定</h3>
-                <div style="font-size: 11px; color: #64748b; line-height: 1.4;">此處設定會同步記憶在手機中，且點擊最上方「匯出系統備份」時也會自動打包進 JSON 檔案。</div>
                 <div class="flex-row">
                     <input type="text" id="inputScriptUrl" oninput="saveScriptUrl()" placeholder="請貼上 https://script.google.com/... 網址">
                 </div>
@@ -290,9 +357,22 @@
     </main>
 
     <script>
-        let db = { sites: [], categories: [], items: [], config: { scriptUrl: '' } };
+        // 核心資料庫，將所有歷史填單數據併入此物件，隨系統完整匯出/匯入
+        let db = { 
+            sites: [], 
+            categories: [], 
+            items: [], 
+            punches: {}, 
+            config: { scriptUrl: '' },
+            dailyRecords: {} // 存放格式: {'YYYY-MM-DD': { log: { siteId, text }, notes: { siteId, text }, order: { siteId, text } }}
+        };
         let currentState = { page: 'sites', siteId: null, siteName: '', catId: null, catName: '' };
         let cart = {};
+
+        // 首頁整合型月曆狀態
+        let homeCalYear = new Date().getFullYear();
+        let homeCalMonth = new Date().getMonth();
+        let selectedHomeDateStr = '';
 
         function loadFromLocalStorage() {
             try {
@@ -302,6 +382,8 @@
                     if (parsed.sites && parsed.categories && parsed.items) {
                         db = parsed;
                         if (!db.config) db.config = { scriptUrl: '' };
+                        if (!db.punches) db.punches = {};
+                        if (!db.dailyRecords) db.dailyRecords = {};
                     }
                 }
             } catch (e) {
@@ -335,15 +417,9 @@
                 cart = {};
                 updateCartBadge();
                 if(document.getElementById('globalSearchBar')) document.getElementById('globalSearchBar').value = '';
-                
-                // 根據當前所在頁面重新渲染內容，使勾選狀態與數量欄位立即同步清空
-                if (currentState.page === 'categories') {
-                    renderCategories();
-                } else if (currentState.page === 'items') {
-                    renderItems();
-                } else if (currentState.page === 'cart') {
-                    renderCart();
-                }
+                if (currentState.page === 'categories') renderCategories();
+                else if (currentState.page === 'items') renderItems();
+                else if (currentState.page === 'cart') renderCart();
             }
         }
 
@@ -357,11 +433,13 @@
                     if (parsed.sites && parsed.categories && parsed.items) {
                         db = parsed;
                         if (!db.config) db.config = { scriptUrl: '' };
+                        if (!db.punches) db.punches = {}; 
+                        if (!db.dailyRecords) db.dailyRecords = {};
                         saveToLocalStorage(); 
                         if(document.getElementById('inputScriptUrl')) {
                             document.getElementById('inputScriptUrl').value = db.config.scriptUrl || '';
                         }
-                        alert('🎉 全站基礎資料與連動網址已匯入成功！品項將會自動排序。');
+                        alert('🎉 全站基礎資料與歷史填報紀錄已成功同步匯入！');
                         currentState.siteId = null;
                         currentState.siteName = '';
                         navigateTo('sites');
@@ -385,6 +463,294 @@
             downloadAnchorLine.remove();
         }
 
+        // 輔助函式：取得今日或指定日期格式化字串
+        function getTargetDateStr() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        // ================= 首頁綜合型月曆渲染 =================
+        function initHomeCalendar() {
+            const titleEl = document.getElementById('homeCalendarTitle');
+            titleEl.innerText = `${homeCalYear} 年 ${String(homeCalMonth + 1).padStart(2, '0')} 月`;
+
+            const gridEl = document.getElementById('homeCalendarGrid');
+            gridEl.innerHTML = '';
+
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            weekdays.forEach(wd => {
+                const wdEl = document.createElement('div');
+                wdEl.className = 'calendar-weekday';
+                wdEl.innerText = wd;
+                gridEl.appendChild(wdEl);
+            });
+
+            const firstDayIndex = new Date(homeCalYear, homeCalMonth, 1).getDay();
+            const totalDays = new Date(homeCalYear, homeCalMonth + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyEl = document.createElement('div');
+                emptyEl.className = 'calendar-day empty';
+                gridEl.appendChild(emptyEl);
+            }
+
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dateStr = `${homeCalYear}-${String(homeCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                if (dateStr === todayStr) dayEl.classList.add('today');
+                
+                dayEl.onclick = () => {
+                    selectedHomeDateStr = dateStr;
+                    openDateRecordViewer(dateStr);
+                };
+
+                const numEl = document.createElement('span');
+                numEl.className = 'day-num';
+                numEl.innerText = day;
+                dayEl.appendChild(numEl);
+
+                // 渲染底端燈號提示 (點點)
+                const dotsEl = document.createElement('div');
+                dotsEl.className = 'day-dots';
+
+                let hasLog = db.dailyRecords[dateStr] && db.dailyRecords[dateStr].log;
+                let hasNotes = db.dailyRecords[dateStr] && db.dailyRecords[dateStr].notes;
+                let hasOrder = db.dailyRecords[dateStr] && db.dailyRecords[dateStr].order;
+                
+                // 打卡紀錄判定
+                let hasPunch = false;
+                if(db.punches) {
+                    for(let sId in db.punches) {
+                        if(db.punches[sId] && db.punches[sId][dateStr]) {
+                            hasPunch = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(hasLog) dotsEl.innerHTML += '<span class="dot dot-log"></span>';
+                if(hasNotes) dotsEl.innerHTML += '<span class="dot dot-notes"></span>';
+                if(hasPunch) dotsEl.innerHTML += '<span class="dot dot-punch"></span>';
+                if(hasOrder) dotsEl.innerHTML += '<span class="dot dot-order"></span>';
+
+                dayEl.appendChild(dotsEl);
+                gridEl.appendChild(dayEl);
+            }
+        }
+
+        function changeHomeMonth(dir) {
+            homeCalMonth += dir;
+            if (homeCalMonth > 11) { homeCalMonth = 0; homeCalYear++; }
+            else if (homeCalMonth < 0) { homeCalMonth = 11; homeCalYear--; }
+            initHomeCalendar();
+        }
+
+        // ================= 點選日期：四合一綜合查看檢視頁面邏輯 =================
+        function openDateRecordViewer(dateStr) {
+            navigateTo('dateView');
+            document.getElementById('viewingDateText').innerText = dateStr;
+            
+            const rec = db.dailyRecords[dateStr] || {};
+            
+            document.getElementById('viewBoxLog').innerText = (rec.log && rec.log.text) ? rec.log.text : '（當日無日誌紀錄）';
+            document.getElementById('viewBoxNotes').innerText = (rec.notes && rec.notes.text) ? rec.notes.text : '（當日無記事紀錄）';
+            document.getElementById('viewBoxOrder').innerText = (rec.order && rec.order.text) ? rec.order.text : '（當日無材料訂單紀錄）';
+
+            // 彙整當天所有工地的打卡明細
+            let punchLines = [];
+            if(db.punches) {
+                for(let sId in db.punches) {
+                    if(db.punches[sId] && db.punches[sId][dateStr]) {
+                        const siteObj = db.sites.find(s => s.id === sId);
+                        const sName = siteObj ? siteObj.name : '未知案場';
+                        const pData = db.punches[sId][dateStr];
+                        punchLines.push(`【${sName}】: ${pData.status}${pData.note ? ` (${pData.note})` : ''}`);
+                    }
+                }
+            }
+            document.getElementById('viewBoxPunch').innerText = punchLines.length > 0 ? punchLines.join('\n') : '（當日無打卡紀錄）';
+            
+            // 預設將勾選方塊全部啟動
+            document.getElementById('copyChkLog').checked = false;
+            document.getElementById('copyChkNotes').checked = false;
+            document.getElementById('copyChkPunch').checked = false;
+            document.getElementById('copyChkOrder').checked = false;
+        }
+
+        function compileCombinedViewText() {
+            const dateStr = selectedHomeDateStr;
+            let finalText = `📅 日期：${dateStr}\n====================\n`;
+            let hasAny = false;
+
+            if(document.getElementById('copyChkLog').checked) {
+                const txt = db.dailyRecords[dateStr]?.log?.text;
+                if(txt) { finalText += txt + `\n\n`; hasAny = true; }
+            }
+            if(document.getElementById('copyChkNotes').checked) {
+                const txt = db.dailyRecords[dateStr]?.notes?.text;
+                if(txt) { finalText += txt + `\n\n`; hasAny = true; }
+            }
+            if(document.getElementById('copyChkPunch').checked) {
+                let lines = [];
+                for(let sId in db.punches) {
+                    if(db.punches[sId] && db.punches[sId][dateStr]) {
+                        const siteObj = db.sites.find(s => s.id === sId);
+                        const sName = siteObj ? siteObj.name : '未知案場';
+                        const pData = db.punches[sId][dateStr];
+                        lines.push(`【${sName}】打卡狀態: ${pData.status}${pData.note ? ` (${pData.note})` : ''}`);
+                    }
+                }
+                if(lines.length > 0) { finalText += `【打卡明細】\n` + lines.join('\n') + `\n\n`; hasAny = true; }
+            }
+            if(document.getElementById('copyChkOrder').checked) {
+                const txt = db.dailyRecords[dateStr]?.order?.text;
+                if(txt) { finalText += txt + `\n\n`; hasAny = true; }
+            }
+
+            return hasAny ? finalText.trim() : null;
+        }
+
+        function copyCombinedViewText() {
+            const text = compileCombinedViewText();
+            if(!text) return alert('請先勾選有內容的區塊進行複製！');
+            fallbackCopy(text, '📋 所選區塊內容已合併複製到剪貼簿！');
+        }
+
+        function shareCombinedViewToLine() {
+            const text = compileCombinedViewText();
+            if(!text) return alert('請先勾選有內容的區塊傳送！');
+            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+        }
+
+        function deleteSelectedDateRecords() {
+            if(confirm(`⚠️ 確定要刪除 ${selectedHomeDateStr} 當天所有的施工日誌、工地記事、打卡與材料訂購歷史紀錄嗎？(不可還原)`)) {
+                const dateStr = selectedHomeDateStr;
+                if(db.dailyRecords[dateStr]) delete db.dailyRecords[dateStr];
+                if(db.punches) {
+                    for(let sId in db.punches) {
+                        if(db.punches[sId] && db.punches[sId][dateStr]) delete db.punches[sId][dateStr];
+                    }
+                }
+                saveToLocalStorage();
+                initHomeCalendar();
+                navigateTo('sites');
+            }
+        }
+
+        // ================= 免選案場打卡新邏輯 =================
+        function renderPunchSites() {
+            const box = document.getElementById('punchSitesGroup');
+            box.innerHTML = '';
+            if(db.sites.length === 0) {
+                box.innerHTML = '<p class="text-muted">請先至後台設定新增案場資料。</p>';
+                return;
+            }
+            const dateStr = document.getElementById('inputPunchDate').value;
+            db.sites.forEach(site => {
+                let isChecked = false;
+                if(db.punches[site.id] && db.punches[site.id][dateStr] && db.punches[site.id][dateStr].status === '上班') {
+                    isChecked = true;
+                }
+                const label = document.createElement('label');
+                label.className = 'item-label';
+                label.style.padding = '4px 0';
+                label.innerHTML = `
+                    <input type="checkbox" value="${site.id}" class="item-checkbox punch-site-chk" ${isChecked ? 'checked' : ''}>
+                    <span>${site.name}</span>
+                `;
+                box.appendChild(label);
+            });
+        }
+
+        function syncPunchDateChange() {
+            const dateStr = document.getElementById('inputPunchDate').value;
+            if(!dateStr) return;
+            renderPunchSites();
+            
+            // 自動讀取當日第一筆備註帶入
+            const noteInput = document.getElementById('inputPunchNote');
+            noteInput.value = '';
+            for(let sId in db.punches) {
+                if(db.punches[sId] && db.punches[sId][dateStr] && db.punches[sId][dateStr].note) {
+                    noteInput.value = db.punches[sId][dateStr].note;
+                    break;
+                }
+            }
+        }
+
+        function saveMultiplePunchStatus(status) {
+            const dateStr = document.getElementById('inputPunchDate').value;
+            if(!dateStr) return alert('請先選擇打卡日期！');
+
+            const chks = document.querySelectorAll('.punch-site-chk');
+            const note = document.getElementById('inputPunchNote').value.trim();
+
+            if(status === '未上班') {
+                chks.forEach(chk => {
+                    const sId = chk.value;
+                    if(db.punches[sId] && db.punches[sId][dateStr]) {
+                        delete db.punches[sId][dateStr];
+                    }
+                });
+                alert('已清除所選日期的上班打卡紀錄。');
+            } else {
+                let selectedCount = 0;
+                chks.forEach(chk => {
+                    const sId = chk.value;
+                    if(chk.checked) {
+                        if(!db.punches[sId]) db.punches[sId] = {};
+                        db.punches[sId][dateStr] = { status: '上班', note: note };
+                        selectedCount++;
+                    } else {
+                        if(db.punches[sId] && db.punches[sId][dateStr]) delete db.punches[sId][dateStr];
+                    }
+                });
+                if(selectedCount === 0) return alert('請至少勾選一個您今日前往的施工案場！');
+                alert('📍 打卡成功！');
+            }
+
+            saveToLocalStorage();
+            initHomeCalendar();
+            renderPunchSites();
+        }
+
+        function compilePunchText() {
+            const dateStr = document.getElementById('inputPunchDate').value;
+            if(!dateStr) return null;
+            
+            let lines = [];
+            for(let sId in db.punches) {
+                if(db.punches[sId] && db.punches[sId][dateStr]) {
+                    const siteObj = db.sites.find(s => s.id === sId);
+                    const sName = siteObj ? siteObj.name : '未知案場';
+                    const pData = db.punches[sId][dateStr];
+                    lines.push(`- ${sName}：${pData.status}${pData.note ? ` (${pData.note})` : ''}`);
+                }
+            }
+
+            if(lines.length === 0) return null;
+
+            return `【打卡紀錄】\n日期：${dateStr}\n--------------------\n${lines.join('\n')}\n--------------------`;
+        }
+
+        function copyPunchToClipboard() {
+            const text = compilePunchText();
+            if (!text) return alert('該日期無任何打卡紀錄，無法進行複製！');
+            fallbackCopy(text, '打卡明細已成功生成並複製（可點擊上傳行事曆）！');
+        }
+
+        function sharePunchToLine() {
+            const text = compilePunchText();
+            if (!text) return alert('該日期無任何打卡紀錄，無法傳送！');
+            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+        }
+
+        // ================= 施工日誌舊有功能鏈結與優化 =================
         function addLogItemRow(itemValue = '', floorValue = '', peopleValue = '') {
             const container = document.getElementById('logItemsContainer');
             const div = document.createElement('div');
@@ -393,16 +759,16 @@
                 <button type="button" class="btn-delete-log-item" onclick="removeLogItemRow(this)">移除</button>
                 <div style="margin-top: 8px;">
                     <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px; color: #4b5563;">施工項目：</label>
-                    <input type="text" class="log-item-input" value="${itemValue}" placeholder="">
+                    <input type="text" class="log-item-input" value="${itemValue}">
                 </div>
                 <div class="log-entry-row">
                     <div>
                         <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px; color: #4b5563;">樓層/區域：</label>
-                        <input type="text" class="log-floor-input" value="${floorValue}" placeholder="如：1F柱牆、3 樓外牆">
+                        <input type="text" class="log-floor-input" value="${floorValue}" placeholder="如：1F柱牆">
                     </div>
                     <div>
                         <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px; color: #4b5563;">人數 (人)：</label>
-                        <input type="number" inputmode="numeric" pattern="[0-9]*" class="log-people-input" value="${peopleValue}" placeholder="如：3">
+                        <input type="number" inputmode="numeric" pattern="[0-9]*" class="log-people-input" value="${peopleValue}">
                     </div>
                 </div>
             `;
@@ -411,10 +777,7 @@
 
         function removeLogItemRow(button) {
             const container = document.getElementById('logItemsContainer');
-            if (container.children.length <= 1) {
-                alert('請至少保留一個施工項目！');
-                return;
-            }
+            if (container.children.length <= 1) return alert('請至少保留一個施工項目！');
             button.parentElement.remove();
         }
 
@@ -427,24 +790,25 @@
         function selectSiteOnHome(siteId, siteName) {
             currentState.siteId = siteId;
             currentState.siteName = siteName;
-            
-            document.querySelectorAll('#listSites .list-item').forEach(item => {
-                item.classList.remove('selected');
-            });
+            document.querySelectorAll('#listSites .list-item').forEach(item => item.classList.remove('selected'));
             const selectedEl = document.getElementById(`site-item-${siteId}`);
-            if (selectedEl) {
-                selectedEl.classList.add('selected');
-            }
+            if (selectedEl) selectedEl.classList.add('selected');
+        }
 
-            document.getElementById('homeMenuZone').classList.remove('hidden');
+        function clickHomeMenu(targetPage) {
+            if(targetPage === 'punch') {
+                navigateTo('punch');
+                return;
+            }
+            if(!currentState.siteId) return alert('⚠️ 請先在上方列表中點擊選擇一個要填單的案場！');
+            navigateTo(targetPage);
         }
 
         function compileLogText() {
             const container = document.getElementById('logItemsContainer');
             const items = container.getElementsByClassName('log-entry-item');
-            
-            let hasContent = false;
             let projectLogText = '';
+            let hasContent = false;
 
             for (let i = 0; i < items.length; i++) {
                 const itemVal = items[i].querySelector('.log-item-input').value.trim();
@@ -453,94 +817,68 @@
 
                 if (itemVal || floorVal || peopleVal) {
                     hasContent = true;
-                    projectLogText += `項目 ${i + 1}：${itemVal || '無'}\n`;
-                    projectLogText += `↳ 樓層/區域：${floorVal || '無'}\n`;
-                    projectLogText += `↳ 施工人數：${peopleVal ? peopleVal + ' 人' : '無'}\n\n`;
+                    projectLogText += `項目 ${i + 1}：${itemVal || '無'}\n↳ 區域：${floorVal || '無'}\n↳ 人數：${peopleVal ? peopleVal + ' 人' : '無'}\n`;
                 }
             }
-
             if (!hasContent) return null;
 
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const date = String(now.getDate()).padStart(2, '0');
-            const dateStr = `${year}/${month}/${date}`;
+            let logText = `【施工日誌】\n案場名稱：${currentState.siteName}\n--------------------\n${projectLogText}--------------------`;
+            
+            // 同步寫入系統核心歷史庫中
+            const dateStr = getTargetDateStr();
+            if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
+            db.dailyRecords[dateStr].log = { siteId: currentState.siteId, text: logText };
+            saveToLocalStorage();
+            initHomeCalendar();
 
-            let logText = `【施工日誌】\n`;
-            logText += `案場名稱：${currentState.siteName || '未指定'}\n`;
-            logText += `填報日期：${dateStr}\n`;
-            logText += `--------------------\n`;
-            logText += projectLogText;
-            logText += `--------------------`;
-            return logText.trim();
+            return logText;
         }
 
         function copyLogToClipboard() {
             const text = compileLogText();
-            if (!text) return alert('請至少填寫一項項目內容後再進行複製！');
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('施工日誌純文字已成功複製！快去 LINE 貼上傳送吧！');
-                }).catch(() => fallbackCopy(text, '施工日誌已成功複製！'));
-            } else {
-                fallbackCopy(text, '施工日誌已成功複製！');
-            }
+            if (!text) return alert('請至少填寫一項項目內容！');
+            fallbackCopy(text, '施工日誌文字已成功複製（可點擊上傳行事曆）！');
         }
 
         function shareLogToLine() {
             const text = compileLogText();
-            if (!text) return alert('請至少填寫一項項目內容後再傳送！');
-            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-            window.location.href = lineUrl;
+            if (!text) return alert('請至少填寫一項項目內容！');
+            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
         }
 
         function compileNotesText() {
             const val = document.getElementById('txtSiteNotes').value.trim();
             if (!val) return null;
 
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const date = String(now.getDate()).padStart(2, '0');
-            const dateStr = `${year}/${month}/${date}`;
+            let notesText = `【工地記事】\n案場名稱：${currentState.siteName}\n--------------------\n${val}\n--------------------`;
+            
+            const dateStr = getTargetDateStr();
+            if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
+            db.dailyRecords[dateStr].notes = { siteId: currentState.siteId, text: notesText };
+            saveToLocalStorage();
+            initHomeCalendar();
 
-            let notesText = `【工地記事】\n`;
-            notesText += `案場名稱：${currentState.siteName || '未指定'}\n`;
-            notesText += `記錄日期：${dateStr}\n`;
-            notesText += `--------------------\n`;
-            notesText += val + `\n`;
-            notesText += `--------------------`;
-            return notesText.trim();
+            return notesText;
         }
 
         function copyNotesToClipboard() {
             const text = compileNotesText();
-            if (!text) return alert('請先輸入記事內容後再進行複製！');
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('工地記事內容已成功複製到剪貼簿！');
-                }).catch(() => fallbackCopy(text, '工地記事已成功複製！'));
-            } else {
-                fallbackCopy(text, '工地記事已成功複製！');
-            }
+            if (!text) return alert('請先輸入記事內容！');
+            fallbackCopy(text, '工地記事已成功複製（可點擊上傳行事曆）！');
         }
 
         function shareNotesToLine() {
             const text = compileNotesText();
-            if (!text) return alert('請先輸入記事內容後再進行傳送！');
-            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-            window.location.href = lineUrl;
+            if (!text) return alert('請先輸入記事內容！');
+            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
         }
 
+        // ================= 路由引導與切換控制 =================
         function navigateTo(page) {
             const prevPage = currentState.page;
             currentState.page = page;
 
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            
             document.getElementById('btnBack').classList.remove('hidden');
             document.getElementById('btnHomeTop').classList.remove('hidden');
             document.getElementById('btnExportTop').classList.remove('hidden');
@@ -550,69 +888,51 @@
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('btnBack').classList.add('hidden');
                 document.getElementById('btnHomeTop').classList.add('hidden');
-                
                 renderSites();
-
-                if (currentState.siteId) {
-                    selectSiteOnHome(currentState.siteId, currentState.siteName);
-                } else {
-                    document.getElementById('homeMenuZone').classList.add('hidden');
-                }
+                initHomeCalendar();
+                if (currentState.siteId) selectSiteOnHome(currentState.siteId, currentState.siteName);
+            } else if (page === 'dateView') {
+                document.getElementById('pageDateView').classList.add('active');
+                document.getElementById('appTitle').innerText = '🔍 當日全紀錄檢視';
+            } else if (page === 'punch') {
+                document.getElementById('pagePunch').classList.add('active');
+                document.getElementById('appTitle').innerText = '';
+                document.getElementById('inputPunchDate').value = getTargetDateStr();
+                renderPunchSites();
             } else if (page === 'log') {
                 document.getElementById('pageLog').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
-                if(document.getElementById('logSiteName')) {
-                    document.getElementById('logSiteName').innerText = currentState.siteName || '';
-                }
+                document.getElementById('logSiteName').innerText = currentState.siteName;
                 clearLogInputs();
             } else if (page === 'notes') {
                 document.getElementById('pageNotes').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
-                if(document.getElementById('notesSiteName')) {
-                    document.getElementById('notesSiteName').innerText = currentState.siteName || '';
-                }
+                document.getElementById('notesSiteName').innerText = currentState.siteName;
                 document.getElementById('txtSiteNotes').value = '';
             } else if (page === 'categories') {
                 document.getElementById('pageCategories').classList.add('active');
                 document.getElementById('appTitle').innerText = ''; 
                 document.getElementById('globalSearchBar').value = ''; 
-                
-                if(document.getElementById('currentSiteName')) {
-                    document.getElementById('currentSiteName').innerText = currentState.siteName || '';
-                }
+                document.getElementById('currentSiteName').innerText = currentState.siteName;
                 renderCategories();
             } else if (page === 'items') {
                 document.getElementById('pageItems').classList.add('active');
                 document.getElementById('appTitle').innerText = ''; 
                 document.getElementById('inputQuickItem').value = ''; 
-                
-                if(document.getElementById('currentSiteName2')) {
-                    document.getElementById('currentSiteName2').innerText = currentState.siteName || '';
-                }
-                if(document.getElementById('currentCategoryName')) {
-                    document.getElementById('currentCategoryName').innerText = currentState.catName || '';
-                }
+                document.getElementById('currentSiteName2').innerText = currentState.siteName;
+                document.getElementById('currentCategoryName').innerText = currentState.catName;
                 renderItems();
-                
-                const itemsListBody = document.getElementById('listItems');
-                if (itemsListBody) itemsListBody.scrollTop = 0;
-
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('btnBack').dataset.backTo = prevPage === 'cart' ? 'items' : prevPage;
-                
-                if(document.getElementById('cartSiteName')) {
-                    document.getElementById('cartSiteName').innerText = currentState.siteName || '';
-                }
+                document.getElementById('cartSiteName').innerText = currentState.siteName;
                 renderCart();
             } else if (page === 'manage') {
                 document.getElementById('pageManage').classList.add('active');
                 document.getElementById('appTitle').innerText = '⚙️系統設定';
                 document.getElementById('btnHomeTop').classList.add('hidden');
-                
-                document.getElementById('inputScriptUrl').value = (db.config && db.config.scriptUrl) ? db.config.scriptUrl : '';
-                
+                document.getElementById('inputScriptUrl').value = db.config?.scriptUrl || '';
                 renderManageSites();
                 renderManageCategories();
                 renderManageCategoryDropdown(); 
@@ -621,29 +941,26 @@
         }
 
         document.getElementById('btnBack').addEventListener('click', (e) => {
-            if (currentState.page === 'manage') navigateTo('sites');
-            else if (currentState.page === 'log') navigateTo('sites');
-            else if (currentState.page === 'notes') navigateTo('sites');
-            else if (currentState.page === 'categories') navigateTo('sites');
-            else if (currentState.page === 'items') navigateTo('categories');
-            else if (currentState.page === 'cart') {
+            const p = currentState.page;
+            if (p === 'manage' || p === 'log' || p === 'notes' || p === 'punch' || p === 'categories' || p === 'dateView') navigateTo('sites');
+            else if (p === 'items') navigateTo('categories');
+            else if (p === 'cart') {
                 const target = e.target.dataset.backTo || 'items';
                 navigateTo(target === 'sites' ? 'categories' : target);
             }
         });
 
+        // ================= 剩餘標準核心渲染邏輯 =================
         function renderSites() {
             const list = document.getElementById('listSites');
-            list.innerHTML = db.sites.length === 0 ? '<p class="text-muted text-center">目前無資料。<br>請點擊上方「匯入」或右上方「設定」建立。</p>' : '';
+            list.innerHTML = db.sites.length === 0 ? '<p class="text-muted text-center">目前無資料，請前往「設定」建立。</p>' : '';
             db.sites.forEach(site => {
                 const div = document.createElement('div');
                 div.className = "list-item";
                 div.id = `site-item-${site.id}`;
                 div.style.cursor = "pointer";
                 div.onclick = function() { selectSiteOnHome(site.id, site.name); };
-                div.innerHTML = `
-                    <span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1f2937;">${site.name}</span> 
-                `;
+                div.innerHTML = `<span style="font-weight:500; color:#1f2937;">${site.name}</span>`;
                 list.appendChild(div);
             });
         }
@@ -655,26 +972,19 @@
 
             if (keyword === '') {
                 header.innerText = '請選擇材料分類：';
-                list.innerHTML = db.categories.length === 0 ? '<p class="text-muted text-center">目前無分類，請先至後台新增分類。</p>' : '';
+                list.innerHTML = db.categories.length === 0 ? '<p class="text-muted text-center">目前無分類，請先至後台新增。</p>' : '';
                 db.categories.forEach(cat => {
                     const div = document.createElement('div');
                     div.className = "list-item";
                     div.style.cursor = "pointer";
                     div.onclick = function() { currentState.catId=cat.id; currentState.catName=cat.name; navigateTo('items'); };
-                    div.innerHTML = `
-                        <span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1f2937;">${cat.name}</span> 
-                        <span style="color: #4b5563; font-size: 12px; font-weight: bold; flex-shrink: 0;">進入 →</span>
-                    `;
+                    div.innerHTML = `<span style="font-weight:500; color:#1f2937;">${cat.name}</span> <span style="color:#4b5563; font-size:12px; font-weight:bold;">進入 →</span>`;
                     list.appendChild(div);
                 });
             } else {
-                header.innerText = '🔍 全品項搜尋結果 (可在此直接勾選並輸入數量)：';
-                const filteredItems = db.items
-                    .filter(item => item.name.toLowerCase().includes(keyword))
-                    .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
-                
+                header.innerText = '🔍 全品項搜尋結果：';
+                const filteredItems = db.items.filter(item => item.name.toLowerCase().includes(keyword)).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
                 list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">無符合的材料品項。</p>' : '';
-                
                 filteredItems.forEach(item => {
                     const catObj = db.categories.find(c => c.id === item.catId);
                     const catName = catObj ? catObj.name : '未分類';
@@ -682,16 +992,12 @@
                     const qtyValue = inCart ? cart[item.id].qty : '';
                     const div = document.createElement('div');
                     div.className = "list-item";
-                    div.style.padding = "10px 12px";
-                    
                     div.innerHTML = `
                         <label class="item-label">
                             <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="item-checkbox">
-                            <span style="word-break: break-all; white-space: normal; padding-right: 4px;"><small style="color: #888888; font-weight:bold;">[${catName}]</small> ${item.name}</span>
+                            <span><small style="color:#888;">[${catName}]</small> ${item.name}</span>
                         </label>
-                        <div style="flex-shrink: 0; display: flex; align-items: center; gap: 8px;">
-                            <input type="text" inputmode="decimal" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
-                        </div>
+                        <input type="text" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
                     `;
                     list.appendChild(div);
                 });
@@ -699,11 +1005,8 @@
         }
 
         function handleItemCheck(itemId, checked) {
-            if (checked) {
-                if (!cart[itemId]) cart[itemId] = { qty: '' };
-            } else {
-                delete cart[itemId];
-            }
+            if (checked) { if (!cart[itemId]) cart[itemId] = { qty: '' }; } 
+            else { delete cart[itemId]; }
             updateCartBadge();
         }
 
@@ -722,12 +1025,7 @@
         function quickAddItem() {
             const catId = currentState.catId;
             const name = document.getElementById('inputQuickItem').value.trim();
-            if (!catId) return alert('請先選取材料分類');
-            if (!name) return alert('請輸入品項名稱');
-            
-            const isDuplicate = db.items.some(item => item.catId === catId && item.name.toLowerCase() === name.toLowerCase());
-            if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
-
+            if (!name) return alert('品項名稱不能為空');
             db.items.push({ id: Date.now().toString(), catId, name });
             saveToLocalStorage(); 
             document.getElementById('inputQuickItem').value = '';
@@ -736,39 +1034,27 @@
 
         function renderItems() {
             const list = document.getElementById('listItems');
-            const filteredItems = db.items
-                .filter(item => item.catId === currentState.catId)
-                .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
-            
+            const filteredItems = db.items.filter(item => item.catId === currentState.catId).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
             list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">此分類下暫無材料品項。</p>' : '';
-            
             filteredItems.forEach(item => {
                 const inCart = !!cart[item.id];
                 const qtyValue = inCart ? cart[item.id].qty : '';
                 const div = document.createElement('div');
                 div.className = "list-item";
-                div.style.padding = "10px 12px";
-                
                 div.innerHTML = `
                     <label class="item-label">
                         <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="item-checkbox">
-                        <span style="word-break: break-all; white-space: normal; padding-right: 4px;">${item.name}</span>
+                        <span>${item.name}</span>
                     </label>
-                    <div style="flex-shrink: 0; display: flex; align-items: center; gap: 8px;">
-                        <input type="text" inputmode="decimal" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
-                    </div>
+                    <input type="text" value="${qtyValue}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量/單位">
                 `;
                 list.appendChild(div);
             });
         }
 
         function changeCartQty(itemId, qty) {
-            if (qty.trim() === '') {
-                delete cart[itemId];
-                renderCart();
-            } else {
-                cart[itemId].qty = qty;
-            }
+            if (qty.trim() === '') { delete cart[itemId]; renderCart(); } 
+            else { cart[itemId].qty = qty; }
             updateCartBadge();
         }
 
@@ -781,30 +1067,24 @@
         function renderCart() {
             const list = document.getElementById('listCartItems');
             const cartKeys = Object.keys(cart);
-            
             if (cartKeys.length === 0) {
-                list.innerHTML = '<p class="text-muted text-center">📋 訂單空空如也，請先去挑選材料填寫數量。</p>';
+                list.innerHTML = '<p class="text-muted text-center">📋 訂單空空如也。</p>';
                 return;
             }
-            
             list.innerHTML = '';
             cartKeys.forEach(itemId => {
                 const itemObj = db.items.find(i => i.id === itemId);
                 if (!itemObj) return;
                 const catObj = db.categories.find(c => c.id === itemObj.catId);
-                const catName = catObj ? catObj.name : '未分類';
-                
                 const div = document.createElement('div');
                 div.className = "list-item";
                 div.innerHTML = `
-                    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
-                        <span style="font-size: 11px; font-weight: bold; color: #4b5563; margin-bottom: 2px;">[${catName}]</span>
-                        <span style="word-break: break-all; white-space: normal; padding-right: 4px; font-size: 14px;">${itemObj.name}</span>
+                    <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+                        <span style="font-size:11px; color:#4b5563;">[${catObj?catObj.name:'未分類'}]</span>
+                        <span style="font-size:14px;">${itemObj.name}</span>
                     </div>
-                    <div style="display: flex; align-items: center; flex-shrink: 0; gap: 8px;">
-                        <input type="text" inputmode="decimal" value="${cart[itemId].qty}" oninput="changeCartQty('${itemId}', this.value)" class="cart-qty-input" placeholder="數量/單位">
-                        <button onclick="removeCartItem('${itemId}')" style="background: none; color: #ef4444; padding: 4px; font-size: 14px;">❌</button>
-                    </div>
+                    <input type="text" value="${cart[itemId].qty}" oninput="changeCartQty('${itemId}', this.value)" class="cart-qty-input" placeholder="數量/單位">
+                    <button onclick="removeCartItem('${itemId}')" style="background:none; color:#ef4444; font-size:14px;">❌</button>
                 `;
                 list.appendChild(div);
             });
@@ -813,26 +1093,14 @@
         function compileCartData() {
             const cartKeys = Object.keys(cart);
             const selectedItems = [];
-
             cartKeys.forEach(itemId => {
                 const itemObj = db.items.find(i => i.id === itemId);
                 if (itemObj) {
                     const catObj = db.categories.find(c => c.id === itemObj.catId);
-                    selectedItems.push({
-                        catName: catObj ? catObj.name : '未分類',
-                        itemName: itemObj.name,
-                        qty: cart[itemId].qty || '未填數量'
-                    });
+                    selectedItems.push({ catName: catObj?catObj.name:'未分類', itemName: itemObj.name, qty: cart[itemId].qty || '未填' });
                 }
             });
-
             if (selectedItems.length === 0) return null;
-
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const date = String(now.getDate()).padStart(2, '0');
-            const dateStr = `${year}/${month}/${date}`;
 
             const grouped = {};
             selectedItems.forEach(item => {
@@ -840,154 +1108,95 @@
                 grouped[item.catName].push(`${item.itemName} *${item.qty}`);
             });
 
-            let textOutput = `送貨地點：${currentState.siteName || '未指定'}\n`;
-            textOutput += `填單日期：${dateStr}\n`;
-            textOutput += `--------------------\n`;
-
-            for (const catName in grouped) {
-                textOutput += `【${catName}】\n`;
-                textOutput += grouped[catName].join('\n') + `\n\n`;
-            }
+            let textOutput = `【材料訂購單】\n送貨地點：${currentState.siteName}\n--------------------\n`;
+            for (const catName in grouped) { textOutput += `【${catName}】\n` + grouped[catName].join('\n') + `\n`; }
             textOutput += `--------------------`;
+
+            // 保存訂單到歷史存檔中
+            const dateStr = getTargetDateStr();
+            if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
+            db.dailyRecords[dateStr].order = { siteId: currentState.siteId, text: textOutput };
+            saveToLocalStorage();
+            initHomeCalendar();
 
             return { text: textOutput.trim(), items: selectedItems };
         }
 
         function copyAndUploadCart() {
             const data = compileCartData();
-            if (!data) return alert('訂單裡沒有材料，無法操作！');
-
+            if (!data) return alert('訂單裡沒有材料！');
             sendOrderToGoogleSheet(data.items);
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(data.text).then(() => {
-                    alert('訂單已成功上傳至雲端試算表，且純文字明細已複製到剪貼簿！');
-                }).catch(() => fallbackCopy(data.text, '📋 訂單已傳送至試算表，且明細已成功複製！'));
-            } else {
-                fallbackCopy(data.text, '訂單已傳送至試算表，且明細已成功複製！');
-            }
+            fallbackCopy(data.text, '訂單已成功上傳至試算表，明細已複製！');
         }
 
         function copyOnlyCart() {
             const data = compileCartData();
-            if (!data) return alert('訂單裡沒有材料，無法操作！');
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(data.text).then(() => {
-                    alert('純文字訂購單明細已成功複製到剪貼簿！（此操作未上傳試算表）');
-                }).catch(() => fallbackCopy(data.text, '📝 明細已成功複製！'));
-            } else {
-                fallbackCopy(data.text, '明細已成功複製！');
-            }
+            if (!data) return alert('訂單裡沒有材料！');
+            fallbackCopy(data.text, '明細已複製到剪貼簿！(未上傳試算表)');
         }
 
         function shareToLine() {
             const data = compileCartData();
-            if (!data) return alert('訂單裡沒有材料，無法操作！');
-            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(data.text)}`;
-            window.location.href = lineUrl;
+            if (!data) return alert('訂單裡沒有材料！');
+            window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(data.text)}`;
         }
 
         function fallbackCopy(text, msg) {
             const textArea = document.createElement("textarea");
             textArea.value = text.trim();
-            textArea.style.position = "fixed"; 
-            textArea.style.top = "0";
-            textArea.style.left = "0";
+            textArea.style.position = "fixed"; top = "0"; left = "0";
             document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                alert(msg || '📋 明細已成功複製！');
-            } catch (err) {
-                alert('手機瀏覽器不支援自動複製，請手動全選複製。');
-            }
+            textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); alert(msg); } 
+            catch (err) { alert('不支援自動複製，請手動複製。'); }
             document.body.removeChild(textArea);
         }
 
         function sendOrderToGoogleSheet(selectedItems) {
-            const SCRIPT_URL = (db.config && db.config.scriptUrl) ? db.config.scriptUrl.trim() : '';
-            if (!SCRIPT_URL) {
-                alert('⚠️ 系統提示：因尚未設定或匯入「Apps Script連動網址」，本次訂單將只會複製純文字，無法上傳試算表。請到「設定」底部進行設定。');
-                return;
-            }
-
+            const SCRIPT_URL = db.config?.scriptUrl?.trim() || '';
+            if (!SCRIPT_URL) return;
             const payload = {
-                AM: currentState.siteName || '未指定',
-                items: selectedItems.map(item => ({
-                    cat: item.catName,
-                    PX: item.itemName,
-                    SL: item.qty
-                }))
+                AM: currentState.siteName,
+                items: selectedItems.map(item => ({ cat: item.catName, PX: item.itemName, SL: item.qty }))
             };
-
             const btn = document.getElementById('btnSubmitCart');
-            if(btn) {
-                btn.innerText = '⏳ 同步中...';
-                btn.disabled = true;
-            }
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(() => { console.log('訂單傳送請求已發出'); })
-            .catch(error => { console.error('傳送訂單時發生錯誤:', error); })
-            .finally(() => {
-                if(btn) {
-                    btn.innerText = '複製並上傳';
-                    btn.disabled = false;
-                }
-            });
+            if(btn) { btn.innerText = '⏳ 同步中...'; btn.disabled = true; }
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .finally(() => { if(btn) { btn.innerText = '上傳到Google'; btn.disabled = false; } });
         }
 
+        // ================= 後台資料庫結構排序維護 =================
         function addSite() {
             const name = document.getElementById('inputNewSite').value.trim();
             if (!name) return alert('請輸入案場名稱');
             db.sites.push({ id: Date.now().toString(), name });
-            saveToLocalStorage(); 
-            document.getElementById('inputNewSite').value = '';
-            renderManageSites();
+            saveToLocalStorage(); document.getElementById('inputNewSite').value = ''; renderManageSites();
         }
         function renameSite(id, oldName) {
-            const newName = prompt(`請輸入案場「${oldName}」的新名稱：`, oldName);
-            if (newName === null) return; 
-            const trimmed = newName.trim();
-            if (!trimmed) return alert('案場名稱不能為空！');
-            
+            const newName = prompt(`請輸入案場新名稱：`, oldName);
+            if (!newName?.trim()) return;
             const site = db.sites.find(s => s.id === id);
-            if (site) {
-                site.name = trimmed;
-                if (currentState.siteId === id) currentState.siteName = trimmed;
-                saveToLocalStorage(); 
-                renderManageSites();
-            }
+            if (site) { site.name = newName.trim(); saveToLocalStorage(); renderManageSites(); }
         }
         function deleteSite(id, name) {
             if (confirm(`確定要刪除案場「${name}」嗎？`)) {
                 db.sites = db.sites.filter(site => site.id !== id);
                 if (currentState.siteId === id) { currentState.siteId = null; currentState.siteName = ''; }
-                saveToLocalStorage(); 
-                renderManageSites();
+                if (db.punches[id]) delete db.punches[id];
+                saveToLocalStorage(); renderManageSites();
             }
         }
         function renderManageSites() {
             const list = document.getElementById('manageListSites');
-            list.innerHTML = db.sites.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:8px 0;">暫無案場資料。</p>' : '';
+            list.innerHTML = db.sites.length === 0 ? '<p style="color:#9ca3af; text-align:center;">暫無資料。</p>' : '';
             db.sites.forEach(site => {
                 const div = document.createElement('div');
-                div.className = "manage-item";
-                div.setAttribute('data-id', site.id); 
-                div.innerHTML = `
-                    <span class="manage-text"><span class="drag-handle">☰</span> ${site.name}</span>
+                div.className = "manage-item"; div.setAttribute('data-id', site.id); 
+                div.innerHTML = `<span class="manage-text"><span class="drag-handle">☰</span> ${site.name}</span>
                     <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
                         <button onclick="renameSite('${site.id}', '${site.name}')">✏️ 改名</button>
                         <button onclick="deleteSite('${site.id}', '${site.name}')" class="btn-del">🗑️ 刪除</button>
-                    </div>
-                `;
+                    </div>`;
                 list.appendChild(div);
             });
         }
@@ -996,140 +1205,85 @@
             const name = document.getElementById('inputNewCategory').value.trim();
             if (!name) return alert('請輸入分類名稱');
             db.categories.push({ id: Date.now().toString(), name });
-            saveToLocalStorage(); 
-            document.getElementById('inputNewCategory').value = '';
-            renderManageCategories();
+            saveToLocalStorage(); document.getElementById('inputNewCategory').value = ''; renderManageCategories();
         }
         function renameCategory(id, oldName) {
-            const newName = prompt(`請輸入分類「${oldName}」的新名稱：`, oldName);
-            if (newName === null) return;
-            const trimmed = newName.trim();
-            if (!trimmed) return alert('分類名稱不能為空！');
-
+            const newName = prompt(`請輸入分類新名稱：`, oldName);
+            if (!newName?.trim()) return;
             const cat = db.categories.find(c => c.id === id);
-            if (cat) {
-                cat.name = trimmed;
-                if (currentState.catId === id) currentState.catName = trimmed;
-                saveToLocalStorage(); 
-                renderManageCategories();
-            }
+            if (cat) { cat.name = newName.trim(); saveToLocalStorage(); renderManageCategories(); }
         }
         function deleteCategory(id, name) {
-            if (confirm(`確定要刪除分類「${name}」嗎？\n⚠️ 注意：此分類底下的所有材料品項也會一併被移除！`)) {
+            if (confirm(`確定要刪除分類「${name}」嗎？`)) {
                 db.categories = db.categories.filter(cat => cat.id !== id);
                 db.items = db.items.filter(item => item.catId !== id);
-                if (currentState.catId === id) { currentState.catId = null; currentState.catName = ''; }
-                saveToLocalStorage(); 
-                renderManageCategories();
+                saveToLocalStorage(); renderManageCategories();
             }
         }
         function renderManageCategories() {
             const list = document.getElementById('manageListCategories');
-            list.innerHTML = db.categories.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:8px 0;">暫無分類資料。</p>' : '';
+            list.innerHTML = db.categories.length === 0 ? '<p style="color:#9ca3af; text-align:center;">暫無資料。</p>' : '';
             db.categories.forEach(cat => {
                 const div = document.createElement('div');
-                div.className = "manage-item";
-                div.setAttribute('data-id', cat.id); 
-                div.innerHTML = `
-                    <span class="manage-text"><span class="drag-handle">☰</span> ${cat.name}</span>
+                div.className = "manage-item"; div.setAttribute('data-id', cat.id); 
+                div.innerHTML = `<span class="manage-text"><span class="drag-handle">☰</span> ${cat.name}</span>
                     <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
                         <button onclick="renameCategory('${cat.id}', '${cat.name}')">✏️ 改名</button>
                         <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="btn-del">🗑️ 刪除</button>
-                    </div>
-                `;
+                    </div>`;
                 list.appendChild(div);
             });
-            if (typeof renderManageCategoryDropdown === 'function') renderManageCategoryDropdown();
+            renderManageCategoryDropdown();
         }
 
         function renderManageCategoryDropdown() {
             const select = document.getElementById('manageSelectCategory');
             if (!select) return;
-            const currentVal = select.value;
+            const val = select.value;
             select.innerHTML = '<option value="">請先選擇分類...</option>';
             db.categories.forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat.id;
-                opt.innerText = cat.name;
-                select.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = cat.id; opt.innerText = cat.name; select.appendChild(opt);
             });
-            if (currentVal && db.categories.find(c => c.id === currentVal)) {
-                select.value = currentVal;
-            } else {
-                select.value = "";
-            }
+            if (val && db.categories.find(c => c.id === val)) select.value = val;
             renderManageItems();
         }
 
         function renderManageItems() {
             const list = document.getElementById('manageListItems');
             const catId = document.getElementById('manageSelectCategory').value;
-            
-            if (!catId) {
-                list.innerHTML = '<p style="color:#9ca3af; text-align:center; margin:8px 0;">請先從上方選擇分類。</p>';
-                return;
-            }
-
-            const items = db.items
-                .filter(item => item.catId === catId)
-                .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
-
-            list.innerHTML = items.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:8px 0;">此分類暫無品項。</p>' : '';
-            
+            if (!catId) { list.innerHTML = '<p style="color:#9ca3af; text-align:center;">請先選擇分類。</p>'; return; }
+            const items = db.items.filter(item => item.catId === catId).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
+            list.innerHTML = items.length === 0 ? '<p style="color:#9ca3af; text-align:center;">此分類暫無品項。</p>' : '';
             items.forEach(item => {
                 const div = document.createElement('div');
                 div.className = "manage-item";
-                div.setAttribute('data-id', item.id); 
-                const safeName = item.name.replace(/'/g, "\\'");
-                div.innerHTML = `
-                    <span class="manage-text">${item.name}</span>
+                div.innerHTML = `<span class="manage-text">${item.name}</span>
                     <div class="manage-btns">
-                        <button onclick="renameManageItem('${item.id}', '${safeName}')">✏️ 改名</button>
-                        <button onclick="deleteManageItem('${item.id}', '${safeName}')" class="btn-del">🗑️ 刪除</button>
-                    </div>
-                `;
+                        <button onclick="renameManageItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')">✏️ 改名</button>
+                        <button onclick="deleteManageItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="btn-del">🗑️ 刪除</button>
+                    </div>`;
                 list.appendChild(div);
             });
         }
 
         function addManageItem() {
             const catId = document.getElementById('manageSelectCategory').value;
-            if (!catId) return alert('請先選擇上方的材料材料分類');
             const name = document.getElementById('inputNewManageItem').value.trim();
-            if (!name) return alert('請輸入品項名稱');
-            
-            const isDuplicate = db.items.some(item => item.catId === catId && item.name.toLowerCase() === name.toLowerCase());
-            if (isDuplicate) return alert(`⚠️ 此分類下已有相同的材料品項「${name}」。`);
-
+            if (!catId || !name) return alert('分類與品項名稱不能為空');
             db.items.push({ id: Date.now().toString(), catId, name });
-            saveToLocalStorage();
-            document.getElementById('inputNewManageItem').value = '';
-            renderManageItems();
+            saveToLocalStorage(); document.getElementById('inputNewManageItem').value = ''; renderManageItems();
         }
-
         function renameManageItem(id, oldName) {
-            const newName = prompt(`請輸入品項「${oldName}」的新名稱：`, oldName);
-            if (newName === null) return;
-            const trimmed = newName.trim();
-            if (!trimmed) return alert('品項名稱不能為空！');
-
+            const newName = prompt(`請輸入品項新名稱：`, oldName);
+            if (!newName?.trim()) return;
             const item = db.items.find(i => i.id === id);
-            if (item) {
-                item.name = trimmed;
-                saveToLocalStorage();
-                renderManageItems();
-            }
+            if (item) { item.name = newName.trim(); saveToLocalStorage(); renderManageItems(); }
         }
-
         function deleteManageItem(id, name) {
-            if (confirm(`確定要刪除材料品項「${name}」嗎？`)) {
+            if (confirm(`確定要刪除品項「${name}」嗎？`)) {
                 db.items = db.items.filter(item => item.id !== id);
-                if (cart[id]) {
-                    delete cart[id];
-                    updateCartBadge();
-                }
-                saveToLocalStorage();
-                renderManageItems();
+                if (cart[id]) delete cart[id];
+                saveToLocalStorage(); renderManageItems();
             }
         }
 
@@ -1138,34 +1292,26 @@
             navigateTo('sites');
 
             new Sortable(document.getElementById('manageListSites'), {
-                animation: 150,
-                handle: '.drag-handle',
-                ghostClass: 'sortable-ghost',
+                animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost',
                 onEnd: function () {
-                    const newSites = [];
+                    const sorted = [];
                     document.querySelectorAll('#manageListSites .manage-item').forEach(el => {
-                        const id = el.getAttribute('data-id');
-                        const site = db.sites.find(s => s.id === id);
-                        if(site) newSites.push(site);
+                        const site = db.sites.find(s => s.id === el.getAttribute('data-id'));
+                        if(site) sorted.push(site);
                     });
-                    db.sites = newSites;
-                    saveToLocalStorage();
+                    db.sites = sorted; saveToLocalStorage();
                 }
             });
 
             new Sortable(document.getElementById('manageListCategories'), {
-                animation: 150,
-                handle: '.drag-handle',
-                ghostClass: 'sortable-ghost',
+                animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost',
                 onEnd: function () {
-                    const newCategories = [];
+                    const sorted = [];
                     document.querySelectorAll('#manageListCategories .manage-item').forEach(el => {
-                        const id = el.getAttribute('data-id');
-                        const cat = db.categories.find(c => c.id === id);
-                        if(cat) newCategories.push(cat);
+                        const cat = db.categories.find(c => c.id === el.getAttribute('data-id'));
+                        if(cat) sorted.push(cat);
                     });
-                    db.categories = newCategories;
-                    saveToLocalStorage();
+                    db.categories = sorted; saveToLocalStorage();
                 }
             });
         });
