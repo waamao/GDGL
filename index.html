@@ -90,7 +90,29 @@
         .manage-btns .btn-del { color: #888888; }
         
         /* 大按鈕：修改為固定在底部 */
-        .btn-block-lg { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; padding: 14px; font-size: 16px; border-radius: 33px; box-shadow: 0 -4px 10px rgba(0,0,0,0.08); text-align: center; display: block; text-decoration: none; box-sizing: border-box; z-index: 100; margin-top: 0 !important; }
+        .btn-block-lg { 
+            position: fixed; 
+            bottom: 21px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: calc(100% - 32px); 
+            max-width: 416px; 
+            
+            /* 🛠️ 改成固定高度 54px 並且讓文字垂直置中 */
+            height: 54px;
+            line-height: 54px;
+            padding: 0; 
+            
+            font-size: 16px; 
+            border-radius: 33px; /* 圓弧保持一致 */
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.08); 
+            text-align: center; 
+            display: block; 
+            text-decoration: none; 
+            box-sizing: border-box; 
+            z-index: 100; 
+            margin-top: 0 !important; 
+        }
         
         /* 底部按鈕群組 */
         .bottom-btn-group { position: fixed; bottom: 21px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; gap: 8px; margin-top: 0 !important; flex-shrink: 0; z-index: 100; background-color: transparent; }
@@ -116,13 +138,11 @@
     <header>
         <div id="headerLeftZone" style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
             <button id="btnBack" class="hidden btn-blue">←</button>
-            <button id="btnHomeManage" onclick="navigateTo('manage')" class="btn-slate">⚙️ 設定</button>
-            <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
-            <button id="btnHomeImport" onclick="document.getElementById('importFile').click()" class="btn-amber">📥匯入系統備份檔(JSON)</button>
         </div>
         <h1 id="appTitle" class="header-title"></h1>
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
             <button id="btnExportTop" onclick="exportJSON()" class="btn-slate">匯出系統備份</button>
+            <button id="btnHomeManage" onclick="navigateTo('manage')" class="btn-slate">⚙️ 設定</button>
         </div>
     </header>
 
@@ -130,6 +150,9 @@
 
         <section id="pageSites" class="page">
             <div class="list-container" style="overflow: hidden; flex: 1;">
+                <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
+                <button id="btnHomeImport" onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 12px; font-size: 14px; border-radius: 8px; margin-bottom: 4px;">📥 匯入系統備份檔(JSON)</button>
+                
                 <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇要填單的工地：</h3>
                 <div id="listSites" class="scroll-list-body"></div>
             </div>
@@ -531,16 +554,12 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             
             document.getElementById('btnBack').classList.remove('hidden');
-            document.getElementById('btnHomeManage').classList.add('hidden');
-            document.getElementById('btnHomeImport').classList.add('hidden');
             document.getElementById('btnExportTop').classList.remove('hidden');
 
             if (page === 'sites') {
                 document.getElementById('pageSites').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('btnBack').classList.add('hidden');
-                document.getElementById('btnHomeManage').classList.remove('hidden');
-                document.getElementById('btnHomeImport').classList.remove('hidden');
                 
                 renderSites();
 
@@ -624,7 +643,7 @@
 
         function renderSites() {
             const list = document.getElementById('listSites');
-            list.innerHTML = db.sites.length === 0 ? '<p class="text-muted text-center">目前無資料。<br>請點擊左上角「匯入」或「設定」建立。</p>' : '';
+            list.innerHTML = db.sites.length === 0 ? '<p class="text-muted text-center">目前無資料。<br>請點擊上方「匯入」或右上方「設定」建立。</p>' : '';
             db.sites.forEach(site => {
                 const div = document.createElement('div');
                 div.className = "list-item";
