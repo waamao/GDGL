@@ -180,7 +180,7 @@
             <div class="scroll-list-body" style="flex: 1; gap: 12px;">
                 <div class="card">
                     <label style="font-size: 13px; font-weight: bold; color: #4b5563;">請選擇打卡日期：</label>
-                    <input type="date" id="inputPunchDate" onchange="syncPunchDateChange()">
+                    <input type="date" id="inputPunchDate" onchange="syncPunchDateChange()" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none;">
                 </div>
 
                 <div class="card">
@@ -206,6 +206,10 @@
             <div class="alert-box alert-blue">案場名稱：<span id="logSiteName"></span></div>
             <div class="scroll-list-body" style="flex: 1;">
                 <div class="card">
+                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">請選擇紀錄日期：</label>
+                    <input type="date" id="inputLogDate" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none;">
+                </div>
+                <div class="card">
                     <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">施工日誌內容填寫</h3>
                     <div id="logItemsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;"></div>
                     <button onclick="addLogItemRow()" class="btn-slate" style="width: 100%; padding: 10px; margin-top: 4px;">➕ 新增施工項目</button>
@@ -222,6 +226,10 @@
         <section id="pageNotes" class="page">
             <div class="alert-box alert-blue">案場名稱：<span id="notesSiteName"></span></div>
             <div class="scroll-list-body" style="flex: 1;">
+                <div class="card">
+                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">請選擇紀錄日期：</label>
+                    <input type="date" id="inputNotesDate" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none;">
+                </div>
                 <div class="card">
                     <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">工地事項紀錄</h3>
                     <textarea id="txtSiteNotes" rows="12" placeholder="在此輸入各種工地重要記事..." style="width: 100%; resize: none; line-height: 1.6;"></textarea>
@@ -875,7 +883,7 @@
             const logText = getLogRawText();
             if (!logText) return alert('請至少填寫一項項目內容！');
             
-            const dateStr = getTargetDateStr();
+            const dateStr = document.getElementById('inputLogDate').value || getTargetDateStr();
             const logTextWithDate = `${dateStr} ${logText}`;
             if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
             if(!Array.isArray(db.dailyRecords[dateStr].log)) {
@@ -907,7 +915,7 @@
             const notesText = getNotesRawText();
             if (!notesText) return alert('請先輸入記事內容！');
 
-            const dateStr = getTargetDateStr();
+            const dateStr = document.getElementById('inputNotesDate').value || getTargetDateStr();
             const notesTextWithDate = `${dateStr} ${notesText}`;
             if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
             if(!Array.isArray(db.dailyRecords[dateStr].notes)) {
@@ -956,11 +964,13 @@
                 document.getElementById('pageLog').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('logSiteName').innerText = currentState.siteName;
+                document.getElementById('inputLogDate').value = getTargetDateStr();
                 clearLogInputs();
             } else if (page === 'notes') {
                 document.getElementById('pageNotes').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('notesSiteName').innerText = currentState.siteName;
+                document.getElementById('inputNotesDate').value = getTargetDateStr();
                 document.getElementById('txtSiteNotes').value = '';
             } else if (page === 'categories') {
                 document.getElementById('pageCategories').classList.add('active');
