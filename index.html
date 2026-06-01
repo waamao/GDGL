@@ -153,7 +153,7 @@
                 <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
                 <button id="btnHomeImport" onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 12px; font-size: 14px; border-radius: 8px; margin-bottom: 4px;">📥 匯入系統備份檔(JSON)</button>
                 
-                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇要填單的工地：</h3>
+                <h3 style="font-size: 14px; color: #4b5563; margin: 4px 4px 0 4px; flex-shrink: 0;">請選擇要填單的案場：</h3>
                 <div id="listSites" class="scroll-list-body"></div>
             </div>
 
@@ -170,7 +170,7 @@
 
         <section id="pageLog" class="page">
             <div class="alert-box alert-blue">
-                目前工地：<span id="logSiteName"></span>
+                案場名稱：<span id="logSiteName"></span>
             </div>
             <div class="scroll-list-body" style="flex: 1;">
                 <div class="card">
@@ -188,7 +188,7 @@
 
         <section id="pageNotes" class="page">
             <div class="alert-box alert-blue">
-                目前工地：<span id="notesSiteName"></span>
+                案場名稱：<span id="notesSiteName"></span>
             </div>
             <div class="scroll-list-body" style="flex: 1;">
                 <div class="card">
@@ -204,7 +204,7 @@
 
         <section id="pageCategories" class="page">
             <div class="alert-box alert-blue">
-                目前工地：<span id="currentSiteName"></span>
+                案場名稱：<span id="currentSiteName"></span>
             </div>
 
             <div class="card" style="padding: 12px; flex-direction: row; align-items: center; gap: 8px;">
@@ -222,8 +222,8 @@
 
         <section id="pageItems" class="page">
             <div class="alert-box alert-blue" style="font-weight: normal; line-height: 1.6;">
-                <div><strong>工地：</strong> <span id="currentSiteName2"></span></div>
-                <div><strong>分類：</strong> <span id="currentCategoryName"></span></div>
+                <div><strong>案場名稱：</strong> <span id="currentSiteName2"></span></div>
+                <div><strong>分類名稱：</strong> <span id="currentCategoryName"></span></div>
             </div>
 
             <div class="alert-box" style="background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #334155;">
@@ -244,7 +244,7 @@
 
         <section id="pageCart" class="page">
             <div class="alert-box alert-amber" style="line-height: 1.6;">
-                <div><strong>預計送貨工地：</strong> <span id="cartSiteName"></span></div>
+                <div><strong>預計送貨案場：</strong> <span id="cartSiteName"></span></div>
                 <div style="color: #6b7280; font-size: 11px;">提示：您可以在這裡修改最終數量，或點擊 ❌ 取消該品項。</div>
             </div>
 
@@ -265,9 +265,9 @@
 
         <section id="pageManage" class="page" style="overflow-y: auto;">
             <div class="card">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">🏢 工地基本資料維護 <span style="font-size:11px; color:#6b7280; font-weight:normal;">(可拖曳排序)</span></h3>
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">🏢 案場基本資料維護 <span style="font-size:11px; color:#6b7280; font-weight:normal;">(可拖曳排序)</span></h3>
                 <div class="flex-row">
-                    <input type="text" id="inputNewSite" placeholder="輸入新工地名稱">
+                    <input type="text" id="inputNewSite" placeholder="輸入新案場名稱">
                     <button onclick="addSite()" class="btn-green" style="flex-shrink: 0;">新增</button>
                 </div>
                 <div id="manageListSites" class="scroll-box"></div>
@@ -349,7 +349,7 @@
         }
 
         function clearOrderAndHome() {
-            if (confirm('確定要「清除目前的訂購清單」並返回首頁嗎？（這不會刪除您的工地與材料基本資料）')) {
+            if (confirm('確定要「清除目前的訂購清單」並返回首頁嗎？（這不會刪除您的案場與材料基本資料）')) {
                 cart = {};
                 updateCartBadge();
                 if(document.getElementById('globalSearchBar')) document.getElementById('globalSearchBar').value = '';
@@ -480,7 +480,7 @@
             const dateStr = `${year}/${month}/${date}`;
 
             let logText = `【施工日誌】\n`;
-            logText += `工地名稱：${currentState.siteName || '未指定'}\n`;
+            logText += `案場名稱：${currentState.siteName || '未指定'}\n`;
             logText += `填報日期：${dateStr}\n`;
             logText += `--------------------\n`;
             logText += projectLogText;
@@ -520,7 +520,7 @@
             const dateStr = `${year}/${month}/${date}`;
 
             let notesText = `【工地記事】\n`;
-            notesText += `工地名稱：${currentState.siteName || '未指定'}\n`;
+            notesText += `案場名稱：${currentState.siteName || '未指定'}\n`;
             notesText += `記錄日期：${dateStr}\n`;
             notesText += `--------------------\n`;
             notesText += val + `\n`;
@@ -535,7 +535,7 @@
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                     alert('工地記事內容已成功複製到剪貼簿！');
-                }).catch(() => fallbackCopy(text, '📋 工地記事已成功複製！'));
+                }).catch(() => fallbackCopy(text, '工地記事已成功複製！'));
             } else {
                 fallbackCopy(text, '工地記事已成功複製！');
             }
@@ -851,7 +851,7 @@
                 grouped[item.catName].push(`${item.itemName} *${item.qty}`);
             });
 
-            let textOutput = `送貨工地：${currentState.siteName || '未指定'}\n`;
+            let textOutput = `送貨地點：${currentState.siteName || '未指定'}\n`;
             textOutput += `填單日期：${dateStr}\n`;
             textOutput += `--------------------\n`;
 
@@ -958,17 +958,17 @@
 
         function addSite() {
             const name = document.getElementById('inputNewSite').value.trim();
-            if (!name) return alert('請輸入工地名稱');
+            if (!name) return alert('請輸入案場名稱');
             db.sites.push({ id: Date.now().toString(), name });
             saveToLocalStorage(); 
             document.getElementById('inputNewSite').value = '';
             renderManageSites();
         }
         function renameSite(id, oldName) {
-            const newName = prompt(`請輸入工地「${oldName}」的新名稱：`, oldName);
+            const newName = prompt(`請輸入案場「${oldName}」的新名稱：`, oldName);
             if (newName === null) return; 
             const trimmed = newName.trim();
-            if (!trimmed) return alert('工地名稱不能為空！');
+            if (!trimmed) return alert('案場名稱不能為空！');
             
             const site = db.sites.find(s => s.id === id);
             if (site) {
@@ -979,7 +979,7 @@
             }
         }
         function deleteSite(id, name) {
-            if (confirm(`確定要刪除工地「${name}」嗎？`)) {
+            if (confirm(`確定要刪除案場「${name}」嗎？`)) {
                 db.sites = db.sites.filter(site => site.id !== id);
                 if (currentState.siteId === id) { currentState.siteId = null; currentState.siteName = ''; }
                 saveToLocalStorage(); 
@@ -988,7 +988,7 @@
         }
         function renderManageSites() {
             const list = document.getElementById('manageListSites');
-            list.innerHTML = db.sites.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:8px 0;">暫無工地資料。</p>' : '';
+            list.innerHTML = db.sites.length === 0 ? '<p style="color:#9ca3af; text-align:center; margin:8px 0;">暫無案場資料。</p>' : '';
             db.sites.forEach(site => {
                 const div = document.createElement('div');
                 div.className = "manage-item";
