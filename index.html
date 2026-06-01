@@ -505,7 +505,8 @@
             const text = compileLogText();
             if (!text) return alert('請至少填寫一項項目內容後再傳送！');
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-            window.open(lineUrl, '_blank');
+            // 修正：不使用 _blank 新開視窗，直接在當前頁面喚起 LINE
+            window.location.href = lineUrl;
         }
 
         function compileNotesText() {
@@ -544,7 +545,8 @@
             const text = compileNotesText();
             if (!text) return alert('請先輸入記事內容後再進行傳送！');
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-            window.open(lineUrl, '_blank');
+            // 修正：不使用 _blank 新開視窗，直接在當前頁面喚起 LINE
+            window.location.href = lineUrl;
         }
 
         function navigateTo(page) {
@@ -894,7 +896,8 @@
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料，無法操作！');
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(data.text)}`;
-            window.open(lineUrl, '_blank');
+            // 修正：不使用 _blank 新開視窗，直接在當前頁面喚起 LINE
+            window.location.href = lineUrl;
         }
 
         function fallbackCopy(text, msg) {
