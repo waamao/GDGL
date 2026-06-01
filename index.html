@@ -334,7 +334,7 @@
                 <div id="manageListItems" class="scroll-box"></div>
             </div>
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1; margin-bottom: 40px;">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統備份與還原</h3>
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統還原</h3>
                 <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📥 匯入系統備份檔(JSON)</button>
             </div>
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1; margin-bottom: 40px;">
@@ -998,7 +998,7 @@
                 renderCart();
             } else if (page === 'manage') {
                 document.getElementById('pageManage').classList.add('active');
-                document.getElementById('appTitle').innerText = '⚙️系統設定';
+                document.getElementById('appTitle').innerText = '';
                 document.getElementById('btnHomeTop').classList.add('hidden');
                 document.getElementById('inputScriptUrl').value = db.config?.scriptUrl || '';
                 renderManageSites();
