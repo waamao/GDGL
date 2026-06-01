@@ -134,12 +134,12 @@
                 
                 <div class="card" style="padding: 8px; margin-top: 4px;">
                     <div class="calendar-header">
-                        <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 2px 8px; font-size:11px;">上個月</button>
+                        <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 2px 10px; font-size:16px;">‹</button>
                         <div style="display:flex; flex-direction:row; align-items:center; gap:6px;">
                             <button onclick="goToToday()" class="btn-slate" style="padding: 2px 8px; font-size:11px; border-radius:20px;">今天</button>
                             <span id="homeCalendarTitle" style="font-weight: bold; font-size: 13px;">2026 年 06 月</span>
                         </div>
-                        <button onclick="changeHomeMonth(1)" class="btn-slate" style="padding: 2px 8px; font-size:11px;">下個月</button>
+                        <button onclick="changeHomeMonth(1)" class="btn-slate" style="padding: 2px 10px; font-size:16px;">›</button>
                     </div>
                     <div class="calendar-grid" id="homeCalendarGrid"></div>
                 </div>
@@ -190,6 +190,11 @@
                 <div class="card">
                     <label style="font-size: 12px; font-weight: bold; color: #4b5563;">打卡備註 (選填)：</label>
                     <input type="text" id="inputPunchNote" placeholder="輸入備註事項...">
+                </div>
+
+                <div class="card">
+                    <label style="font-size: 12px; font-weight: bold; color: #4b5563;">加班時數 (選填)：</label>
+                    <input type="number" inputmode="numeric" pattern="[0-9]*" id="inputOvertimeHours" placeholder="輸入加班小時數..." min="0" style="width: 100%; max-width: 100%; box-sizing: border-box;">
                 </div>
             </div>
 
@@ -304,6 +309,10 @@
         </section>
 
         <section id="pageManage" class="page" style="overflow-y: auto;">
+            <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1;">
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統還原</h3>
+                <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📥 匯入系統備份檔(JSON)</button>
+            </div>
             <div class="card">
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">案場基本資料維護</h3>
                 <div class="flex-row">
@@ -332,10 +341,6 @@
                     <button onclick="addManageItem()" class="btn-green" style="flex-shrink: 0;">新增</button>
                 </div>
                 <div id="manageListItems" class="scroll-box"></div>
-            </div>
-            <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1; margin-bottom: 40px;">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統還原</h3>
-                <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📥 匯入系統備份檔(JSON)</button>
             </div>
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1; margin-bottom: 40px;">
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">Apps Script 連動網址設定</h3>
@@ -745,6 +750,7 @@
             
             const noteInput = document.getElementById('inputPunchNote');
             noteInput.value = '';
+            document.getElementById('inputOvertimeHours').value = '';
             for(let sId in db.punches) {
                 if(db.punches[sId] && db.punches[sId][dateStr] && db.punches[sId][dateStr].note) {
                     noteInput.value = db.punches[sId][dateStr].note;
@@ -758,7 +764,12 @@
             if(!dateStr) return alert('請先選擇打卡日期！');
 
             const chks = document.querySelectorAll('.punch-site-chk');
-            const note = document.getElementById('inputPunchNote').value.trim();
+            const noteBase = document.getElementById('inputPunchNote').value.trim();
+            const overtime = document.getElementById('inputOvertimeHours').value.trim();
+            let note = noteBase;
+            if(overtime) {
+                note = note ? `${note}、加班${overtime}小時` : `加班${overtime}小時`;
+            }
 
             let selectedCount = 0;
             chks.forEach(chk => {
@@ -964,6 +975,8 @@
                 document.getElementById('pagePunch').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('inputPunchDate').value = getTargetDateStr();
+                document.getElementById('inputPunchNote').value = '';
+                document.getElementById('inputOvertimeHours').value = '';
                 renderPunchSites();
             } else if (page === 'log') {
                 document.getElementById('pageLog').classList.add('active');
@@ -990,6 +1003,8 @@
                 document.getElementById('currentSiteName2').innerText = currentState.siteName;
                 document.getElementById('currentCategoryName').innerText = currentState.catName;
                 renderItems();
+                const listEl = document.getElementById('listItems');
+                if(listEl) listEl.scrollTop = 0;
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
