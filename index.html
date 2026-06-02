@@ -133,8 +133,8 @@
                 <div class="card" style="padding: 8px; flex-shrink: 0;">
                     <div class="calendar-header">
                         <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 3px 15px; font-size:24px;">‹</button>
-                        <div style="display:flex; flex-direction:row; align-items:center; gap:8px;">
-                            <button onclick="goToToday()" class="btn-slate" style="padding: 3px 12px; font-size:16px; border-radius:20px;">今天</button>
+                        <div style="display:flex; flex-direction:row; align-items:center; gap:8px; flex:1; justify-content:center;">
+                            <button onclick="goToToday()" class="btn-slate" style="padding: 3px 12px; font-size:16px; border-radius:20px;">跳到今天</button>
                             <span id="homeCalendarTitle" style="display:none;"></span>
                             <span id="homeCalendarDateDisplay" style="font-size:13px; color:#4b5563; font-weight:500;"></span>
                         </div>
@@ -146,29 +146,27 @@
                 <!-- 單日記錄內嵌區 -->
                 <div id="inlineDayView" class="hidden" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px;">
                     <span id="inlineViewingDateText" class="hidden"></span>
-                    <div id="inlineDayContent" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom: 120px;"></div>
+                    <div id="inlineDayContent" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom: 140px;"></div>
                 </div>
 
             </div>
 
             <!-- 底部按鈕區：平時是4個主功能，勾選紀錄後變成操作按鈕 -->
-            <div style="height: 110px; flex-shrink: 0; position: relative;">
-                <div class="home-fixed-bottom">
-                    <div id="homeMainBtns">
-                        <div class="bottom-btn-group-inner">
-                            <button onclick="navigateTo('log')" class="btn-slate large-bottom-btn" style="background-color: #222222; color: white;">施工日誌</button>
-                            <button onclick="navigateTo('notes')" class="btn-amber large-bottom-btn">工地記事</button>
-                        </div>
-                        <div class="bottom-btn-group-inner" style="margin-top:8px;">
-                            <button onclick="navigateTo('punch')" class="btn-amber large-bottom-btn">出勤紀錄</button>
-                            <button onclick="navigateTo('categories')" class="btn-blue large-bottom-btn">材料訂購</button>
-                        </div>
+            <div class="bottom-btn-group">
+                <div id="homeMainBtns">
+                    <div class="bottom-btn-group-inner">
+                        <button onclick="navigateTo('log')" class="btn-slate large-bottom-btn" style="background-color: #222222; color: white;">施工日誌</button>
+                        <button onclick="navigateTo('notes')" class="btn-amber large-bottom-btn">工地記事</button>
                     </div>
-                    <div id="homeActionBtns" class="hidden">
-                        <div class="bottom-btn-group-inner">
-                            <button onclick="deleteSelectedDateRecords();" class="btn-red large-bottom-btn">刪除記錄</button>
-                            <button onclick="shareCombinedViewToLine(); uncheckAllInline();" class="btn-line large-bottom-btn">傳送到LINE</button>
-                        </div>
+                    <div class="bottom-btn-group-inner" style="margin-top:8px;">
+                        <button onclick="navigateTo('punch')" class="btn-amber large-bottom-btn">出勤紀錄</button>
+                        <button onclick="navigateTo('categories')" class="btn-blue large-bottom-btn">材料訂購</button>
+                    </div>
+                </div>
+                <div id="homeActionBtns" class="hidden">
+                    <div class="bottom-btn-group-inner">
+                        <button onclick="deleteSelectedDateRecords();" class="btn-red large-bottom-btn">刪除記錄</button>
+                        <button onclick="shareCombinedViewToLine(); uncheckAllInline();" class="btn-line large-bottom-btn">傳送到LINE</button>
                     </div>
                 </div>
             </div>
