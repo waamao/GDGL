@@ -919,7 +919,17 @@
         function syncPunchDateChange() {
             const dateStr = document.getElementById('inputPunchDate').value;
             if(!dateStr) return;
+
+            // 換日期前先記住目前手動勾選的案場ID
+            const checkedBefore = new Set();
+            document.querySelectorAll('.punch-site-chk:checked').forEach(el => checkedBefore.add(el.value));
+
             renderPunchSites();
+
+            // 恢復原本勾選的案場（合併資料庫狀態與手動勾選）
+            document.querySelectorAll('.punch-site-chk').forEach(el => {
+                if (checkedBefore.has(el.value)) el.checked = true;
+            });
             
             const noteInput = document.getElementById('inputPunchNote');
             noteInput.value = '';
@@ -1581,9 +1591,43 @@
             }
         }
 
+        // ================= 右滑返回手勢 =================
+        (function() {
+            let touchStartX = 0;
+            let touchStartY = 0;
+            document.addEventListener('touchstart', e => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            document.addEventListener('touchend', e => {
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+                // 右滑超過60px，且水平方向明顯大於垂直方向
+                if (dx > 60 && dy < 40) {
+                    const btn = document.getElementById('btnBack');
+                    if (btn && !btn.classList.contains('hidden')) {
+                        btn.click();
+                    }
+                }
+            }, { passive: true });
+        })();
+
         window.addEventListener('DOMContentLoaded', () => {
             loadFromLocalStorage(); 
             navigateTo('sites');
+
+            // 日期選擇器「重置/清除」時自動回到今天
+            ['inputPunchDate', 'inputLogDate', 'inputNotesDate'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('change', function() {
+                    if (!this.value) {
+                        this.value = getTargetDateStr();
+                        // punchDate 有額外的 sync 邏輯
+                        if (id === 'inputPunchDate') syncPunchDateChange();
+                    }
+                });
+            });
 
             // 預設開啟今天的行事曆記錄
             const todayStr = getTargetDateStr();
