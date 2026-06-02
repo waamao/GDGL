@@ -280,9 +280,9 @@
                 <span style="color: #9ca3af;">🔍</span>
                 <input type="text" id="globalSearchBar" oninput="renderCategories()" style="border: none; padding: 4px; font-size: 14px; width: 100%; outline: none;" placeholder="搜尋全部材料品項...">
             </div>
-            <div class="list-container" style="flex: 1; min-height: 0;">
+            <div class="list-container">
                 <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 4px; flex-shrink: 0;">請選擇材料分類：</h3>
-                <div id="listCategories" class="scroll-list-body"></div>
+                <div id="listCategories" class="scroll-list-body" style="overflow-y: auto; padding-bottom: 80px;"></div>
             </div>
             <div class="bottom-btn-group">
                 <div class="bottom-btn-group-inner">
