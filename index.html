@@ -12,7 +12,7 @@
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         
-        html, body { height: 100%; margin: 0; padding: 0; background-color: #000000; color: #1f2937; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+        html, body { height: 100%; margin: 0; padding: 0; background-color: #dadbdd; color: #1f2937; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         body { display: flex; flex-direction: column; }
         main.max-w-md { max-width: 448px; width: 100%; margin: 0 auto; flex: 1; min-height: 0; padding: 16px; position: relative; display: flex; flex-direction: column; }
         
@@ -127,7 +127,7 @@
     <main class="max-w-md">
 
         <section id="pageSites" class="page">
-            <div style="display: flex; flex-direction: column; gap: 8px; overflow-y: auto; overflow-x: hidden; padding-bottom: 8px;"	>
+            <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0;">
                 <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
                 
                 <div class="card" style="padding: 8px; flex-shrink: 0;">
@@ -144,9 +144,9 @@
                 </div>
 
                 <!-- 單日記錄內嵌區 -->
-                <div id="inlineDayView" class="hidden card" style="padding: 8px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
+                <div id="inlineDayView" class="hidden" style="flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
                     <span id="inlineViewingDateText" class="hidden"></span>
-                    <div id="inlineDayContent" style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom: 130px;"></div>
+                    <div id="inlineDayContent" style="max-height: calc(3 * 110px); overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom: 8px;"></div>
                 </div>
 
             </div>
@@ -664,16 +664,7 @@
             }
 
             inlineView.classList.remove('hidden');
-
-            // 同步記錄捲動框高度與行事曆 card 相同
-            requestAnimationFrame(() => {
-                const calCard = document.querySelector('#pageSites .card');
-                if (calCard) {
-                    const calH = calCard.offsetHeight;
-                    inlineContent.style.height = calH + 'px';
-                    inlineContent.style.maxHeight = calH + 'px';
-                }
-            });
+            inlineContent.scrollTop = 0;
 
             // listen for checkbox changes to toggle action buttons
             inlineContent.querySelectorAll('.inline-day-chk').forEach(chk => {
@@ -1144,13 +1135,17 @@
                 // restore main buttons
                 document.getElementById('homeMainBtns').classList.remove('hidden');
                 document.getElementById('homeActionBtns').classList.add('hidden');
-                // 每次回首頁都顯示今天
-                const todayStr = getTargetDateStr();
-                selectedHomeDateStr = todayStr;
-                document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
-                const todayEl = document.querySelector('.calendar-day.today');
-                if (todayEl) todayEl.classList.add('selected');
-                showInlineDayView(todayStr);
+                // 回首頁時恢復前一次點選的日期
+                if (selectedHomeDateStr) {
+                    document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+                    document.querySelectorAll('.calendar-day:not(.empty)').forEach(el => {
+                        const numEl = el.querySelector('.day-num');
+                        if (!numEl) return;
+                        const ds = `${homeCalYear}-${String(homeCalMonth+1).padStart(2,'0')}-${String(parseInt(numEl.innerText)).padStart(2,'0')}`;
+                        if (ds === selectedHomeDateStr) el.classList.add('selected');
+                    });
+                    showInlineDayView(selectedHomeDateStr);
+                }
             } else if (page === 'dateView') {
                 document.getElementById('pageDateView').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
