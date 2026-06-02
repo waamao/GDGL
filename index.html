@@ -130,7 +130,7 @@
             <div style="display: flex; flex-direction: column; gap: 8px; overflow-y: auto; overflow-x: hidden; padding-bottom: 8px;"	>
                 <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
                 
-                <div class="card" style="padding: 8px; flex-shrink: 0;">
+                <div class="card" style="padding: 8px; flex-shrink: 0; background-color: transparent; border: none; box-shadow: none;">
                     <div class="calendar-header">
                         <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 3px 15px; font-size:24px;">‹</button>
                         <div style="display:flex; flex-direction:row; align-items:center; gap:8px; flex:1; justify-content:center;">
@@ -664,6 +664,9 @@
             }
 
             inlineView.classList.remove('hidden');
+
+            // 切換日期時自動捲動到最上面
+            inlineContent.scrollTop = 0;
 
             // 同步記錄捲動框高度與行事曆 card 相同
             requestAnimationFrame(() => {
