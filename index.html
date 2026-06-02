@@ -221,7 +221,7 @@
 
             <div class="bottom-btn-group">
                 <div class="bottom-btn-group-inner">
-                    <button onclick="saveMultiplePunchStatus('上班')" class="btn-green large-bottom-btn">上傳並複製</button>
+                    <button onclick="saveMultiplePunchStatus('上班')" class="btn-green large-bottom-btn">儲存並複製</button>
                     <button onclick="sharePunchToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
                 </div>
             </div>
@@ -245,7 +245,7 @@
             </div>
             <div class="bottom-btn-group">
                 <div class="bottom-btn-group-inner">
-                    <button onclick="saveLogDataOnly()" class="btn-green large-bottom-btn">上傳並複製</button>
+                    <button onclick="saveLogDataOnly()" class="btn-green large-bottom-btn">儲存並複製</button>
                     <button onclick="shareLogToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
                 </div>
             </div>
@@ -268,7 +268,7 @@
             </div>
             <div class="bottom-btn-group">
                 <div class="bottom-btn-group-inner">
-                    <button onclick="saveNotesDataOnly()" class="btn-green large-bottom-btn">上傳並複製</button>
+                    <button onclick="saveNotesDataOnly()" class="btn-green large-bottom-btn">儲存並複製</button>
                     <button onclick="shareNotesToLine()" class="btn-line large-bottom-btn">傳送到LINE</button>
                 </div>
             </div>
@@ -333,7 +333,7 @@
             </div>
             <div class="bottom-btn-group">
                 <div class="bottom-btn-group-inner">
-                    <button id="btnSubmitCart" onclick="uploadCartToGoogleSheetOnly()" class="btn-green large-bottom-btn">上傳到Google</button>
+                    <button id="btnSubmitCart" onclick="uploadCartToGoogleSheetOnly()" class="btn-green large-bottom-btn">儲存並上傳☁️</button>
                     <button onclick="shareCartToLineOnly()" class="btn-line large-bottom-btn">傳送到LINE</button>
                 </div>
                 <div class="bottom-btn-group-inner">
@@ -1465,7 +1465,7 @@
             saveToLocalStorage();
             initHomeCalendar();
 
-            fallbackCopy(cartTextWithDate, '訂單明細已上傳行事曆！');
+            fallbackCopy(cartTextWithDate, '訂單明細已儲存到行事曆！');
         }
 
         // 純傳送 LINE
