@@ -16,7 +16,7 @@
         body { display: flex; flex-direction: column; }
         main.max-w-md { max-width: 448px; width: 100%; margin: 0 auto; flex: 1; min-height: 0; padding: 16px; position: relative; display: flex; flex-direction: column; }
         
-        header { background-color: #1f2937; color: #ffffff; padding: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
+        header { background-color: #000000; color: #ffffff; padding: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
         .header-title { font-size: 16px; font-weight: bold; margin: 0 8px; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: center; }
         
         button { border: none; cursor: pointer; border-radius: 8px; font-weight: bold; padding: 8px 12px; font-size: 12px; transition: background-color 0.2s; }
@@ -155,12 +155,12 @@
             <div class="bottom-btn-group">
                 <div id="homeMainBtns">
                     <div class="bottom-btn-group-inner">
-                        <button onclick="navigateTo('log')" class="btn-slate large-bottom-btn" style="background-color: #222222; color: white;">施工日誌</button>
-                        <button onclick="navigateTo('notes')" class="btn-amber large-bottom-btn">工地記事</button>
+                        <button onclick="navigateTo('log')" class="btn-slate large-bottom-btn" style="background-color: #000000; color: white;">施工日誌</button>
+                        <button onclick="navigateTo('notes')" class="btn-amber large-bottom-btn" style="background-color: #000000; color: white;">工地記事</button>
                     </div>
                     <div class="bottom-btn-group-inner" style="margin-top:8px;">
-                        <button onclick="navigateTo('punch')" class="btn-amber large-bottom-btn">出勤紀錄</button>
-                        <button onclick="navigateTo('categories')" class="btn-blue large-bottom-btn">材料訂購</button>
+                        <button onclick="navigateTo('punch')" class="btn-amber large-bottom-btn" style="background-color: #000000; color: white;">出勤紀錄</button>
+                        <button onclick="navigateTo('categories')" class="btn-blue large-bottom-btn" style="background-color: #000000; color: white;">材料訂購</button>
                     </div>
                 </div>
                 <div id="homeActionBtns" class="hidden">
@@ -318,7 +318,7 @@
             </div>
             <div class="list-container">
                 <h3 style="font-size: 14px; color: #4b5563; margin: 4px; flex-shrink: 0;">已選材料明細：</h3>
-                <div id="listCartItems" class="scroll-list-body"></div>
+                <div id="listCartItems" class="scroll-list-body" style="max-height: calc(10 * (44px + 8px)); overflow-y: auto;"></div>
             </div>
             <div class="bottom-btn-group">
                 <div class="bottom-btn-group-inner">
@@ -448,6 +448,10 @@
                         if (!db.config) db.config = { scriptUrl: '' };
                         if (!db.punches) db.punches = {}; 
                         if (!db.dailyRecords) db.dailyRecords = {};
+                        // 統一把所有 id 轉成字串，避免型別不符導致無法刪除/改名
+                        db.sites = db.sites.map(s => ({ ...s, id: String(s.id) }));
+                        db.categories = db.categories.map(c => ({ ...c, id: String(c.id) }));
+                        db.items = db.items.map(i => ({ ...i, id: String(i.id), catId: String(i.catId) }));
                         saveToLocalStorage(); 
                         if(document.getElementById('inputScriptUrl')) {
                             document.getElementById('inputScriptUrl').value = db.config.scriptUrl || '';
@@ -1541,9 +1545,11 @@
                 div.className = "manage-item";
                 div.innerHTML = `<span class="manage-text">${item.name}</span>
                     <div class="manage-btns">
-                        <button onclick="renameManageItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')">✏️ 改名</button>
-                        <button onclick="deleteManageItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="btn-del">🗑️ 刪除</button>
+                        <button class="btn-rename-item">✏️ 改名</button>
+                        <button class="btn-delete-item btn-del">🗑️ 刪除</button>
                     </div>`;
+                div.querySelector('.btn-rename-item').addEventListener('click', () => renameManageItem(item.id, item.name));
+                div.querySelector('.btn-delete-item').addEventListener('click', () => deleteManageItem(item.id, item.name));
                 list.appendChild(div);
             });
         }
@@ -1558,12 +1564,12 @@
         function renameManageItem(id, oldName) {
             const newName = prompt(`請輸入品項新名稱：`, oldName);
             if (!newName?.trim()) return;
-            const item = db.items.find(i => i.id === id);
+            const item = db.items.find(i => String(i.id) === String(id));
             if (item) { item.name = newName.trim(); saveToLocalStorage(); renderManageItems(); }
         }
         function deleteManageItem(id, name) {
             if (confirm(`確定要刪除品項「${name}」嗎？`)) {
-                db.items = db.items.filter(item => item.id !== id);
+                db.items = db.items.filter(item => String(item.id) !== String(id));
                 if (cart[id]) delete cart[id];
                 saveToLocalStorage(); renderManageItems();
             }
