@@ -481,7 +481,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
             const downloadAnchorLine = document.createElement('a');
             downloadAnchorLine.setAttribute("href", dataStr);
-            downloadAnchorLine.setAttribute("download", "construction_master_data.json");
+            downloadAnchorLine.setAttribute("download", "工地管理系統_data.json");
             document.body.appendChild(downloadAnchorLine);
             downloadAnchorLine.click();
             downloadAnchorLine.remove();
