@@ -165,10 +165,7 @@
                     </div>
                     <div id="homeActionBtns" class="hidden">
                         <div class="bottom-btn-group-inner">
-                            <button onclick="copyCombinedViewText(); uncheckAllInline();" class="btn-green large-bottom-btn">複製文字</button>
                             <button onclick="deleteSelectedDateRecords();" class="btn-red large-bottom-btn">刪除記錄</button>
-                        </div>
-                        <div class="bottom-btn-group-inner" style="margin-top:8px;">
                             <button onclick="shareCombinedViewToLine(); uncheckAllInline();" class="btn-line large-bottom-btn">傳送到LINE</button>
                         </div>
                     </div>
@@ -1128,7 +1125,7 @@
                 document.getElementById('pagePunch').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('homeTitle').classList.add('hidden');
-                document.getElementById('inputPunchDate').value = getTargetDateStr();
+                document.getElementById('inputPunchDate').value = selectedHomeDateStr || getTargetDateStr();
                 document.getElementById('inputPunchNote').value = '';
                 document.getElementById('inputOvertimeHours').value = '';
                 renderPunchSites();
