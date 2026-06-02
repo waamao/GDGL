@@ -115,6 +115,7 @@
         <div id="headerLeftZone" style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
             <button id="btnBack" class="hidden btn-blue">←</button>
             <button id="btnHomeTop" class="hidden btn-slate" onclick="navigateTo('sites')">⌂ 首頁</button>
+            <span id="homeTitle" style="font-size:14px; font-weight:bold; color:#ffffff; white-space:nowrap;">工地管理系統</span>
         </div>
         <h1 id="appTitle" class="header-title"></h1>
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
@@ -129,11 +130,7 @@
             <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0;">
                 <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
                 
-                <h3 style="font-size: 13px; color: #4b5563; margin: 2px 0; flex-shrink: 0;">請選擇要填單的案場 (超過3個可上下滑動)：</h3>
-                
-                <div id="listSites" class="home-sites-scroll-zone"></div>
-                
-                <div class="card" style="padding: 8px; margin-top: 4px;">
+                <div class="card" style="padding: 8px; flex-shrink: 0;">
                     <div class="calendar-header">
                         <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 2px 10px; font-size:16px;">‹</button>
                         <div style="display:flex; flex-direction:row; align-items:center; gap:6px;">
@@ -144,17 +141,36 @@
                     </div>
                     <div class="calendar-grid" id="homeCalendarGrid"></div>
                 </div>
+
+                <!-- 單日記錄內嵌區 -->
+                <div id="inlineDayView" class="hidden" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px;">
+                    <span id="inlineViewingDateText" class="hidden"></span>
+                    <div id="inlineDayContent" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom: 120px;"></div>
+                </div>
+
             </div>
 
+            <!-- 底部按鈕區：平時是4個主功能，勾選紀錄後變成操作按鈕 -->
             <div style="height: 110px; flex-shrink: 0; position: relative;">
                 <div class="home-fixed-bottom">
-                    <div class="bottom-btn-group-inner">
-                        <button onclick="clickHomeMenu('log')" class="btn-slate large-bottom-btn" style="background-color: #222222; color: white;">施工日誌</button>
-                        <button onclick="clickHomeMenu('notes')" class="btn-amber large-bottom-btn">工地記事</button>
+                    <div id="homeMainBtns">
+                        <div class="bottom-btn-group-inner">
+                            <button onclick="navigateTo('log')" class="btn-slate large-bottom-btn" style="background-color: #222222; color: white;">施工日誌</button>
+                            <button onclick="navigateTo('notes')" class="btn-amber large-bottom-btn">工地記事</button>
+                        </div>
+                        <div class="bottom-btn-group-inner" style="margin-top:8px;">
+                            <button onclick="navigateTo('punch')" class="btn-amber large-bottom-btn">出勤紀錄</button>
+                            <button onclick="navigateTo('categories')" class="btn-blue large-bottom-btn">材料訂購</button>
+                        </div>
                     </div>
-                    <div class="bottom-btn-group-inner">
-                        <button onclick="clickHomeMenu('punch')" class="btn-amber large-bottom-btn">出勤紀錄</button>
-                        <button onclick="clickHomeMenu('categories')" class="btn-blue large-bottom-btn">材料訂購</button>
+                    <div id="homeActionBtns" class="hidden">
+                        <div class="bottom-btn-group-inner">
+                            <button onclick="copyCombinedViewText(); uncheckAllInline();" class="btn-green large-bottom-btn">複製文字</button>
+                            <button onclick="deleteSelectedDateRecords();" class="btn-red large-bottom-btn">刪除記錄</button>
+                        </div>
+                        <div class="bottom-btn-group-inner" style="margin-top:8px;">
+                            <button onclick="shareCombinedViewToLine(); uncheckAllInline();" class="btn-line large-bottom-btn">傳送到LINE</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -188,6 +204,7 @@
                     <div id="punchSitesGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;"></div>
                 </div>
 
+
                 <div class="card">
                     <label style="font-size: 12px; font-weight: bold; color: #4b5563;">打卡備註 (選填)：</label>
                     <input type="text" id="inputPunchNote" placeholder="輸入備註事項...">
@@ -208,8 +225,11 @@
         </section>
 
         <section id="pageLog" class="page">
-            <div class="alert-box alert-blue">案場名稱：<span id="logSiteName"></span></div>
             <div class="scroll-list-body" style="flex: 1;">
+                <div class="card">
+                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">選擇案場：</label>
+                    <div id="logSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
+                </div>
                 <div class="card">
                     <label style="font-size: 13px; font-weight: bold; color: #4b5563;">請選擇紀錄日期：</label>
                     <input type="date" id="inputLogDate" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none;">
@@ -229,8 +249,11 @@
         </section>
 
         <section id="pageNotes" class="page">
-            <div class="alert-box alert-blue">案場名稱：<span id="notesSiteName"></span></div>
             <div class="scroll-list-body" style="flex: 1;">
+                <div class="card">
+                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">選擇案場：</label>
+                    <div id="notesSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
+                </div>
                 <div class="card">
                     <label style="font-size: 13px; font-weight: bold; color: #4b5563;">請選擇紀錄日期：</label>
                     <input type="date" id="inputNotesDate" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none;">
@@ -249,7 +272,10 @@
         </section>
 
         <section id="pageCategories" class="page">
-            <div class="alert-box alert-blue">送貨地點：<span id="currentSiteName"></span></div>
+            <div class="card" style="padding: 10px; flex-shrink: 0;">
+                <label style="font-size: 13px; font-weight: bold; color: #4b5563; margin-bottom: 4px; display:block;">送貨案場：</label>
+                <div id="categoriesSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
+            </div>
             <div class="card" style="padding: 12px; flex-direction: row; align-items: center; gap: 8px;">
                 <span style="color: #9ca3af;">🔍</span>
                 <input type="text" id="globalSearchBar" oninput="renderCategories()" style="border: none; padding: 4px; font-size: 14px; width: 100%; outline: none;" placeholder="搜尋全部材料品項...">
@@ -495,8 +521,11 @@
                 if (dateStr === todayStr) dayEl.classList.add('today');
                 
                 dayEl.onclick = () => {
+                    // deselect previous
+                    document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+                    dayEl.classList.add('selected');
                     selectedHomeDateStr = dateStr;
-                    openDateRecordViewer(dateStr);
+                    showInlineDayView(dateStr);
                 };
 
                 const numEl = document.createElement('span');
@@ -545,7 +574,130 @@
             initHomeCalendar();
         }
 
-        // ================= 檢視歷史紀錄頁面（支援特定勾選） =================
+        // ================= 首頁內嵌單日記錄顯示 =================
+        function showInlineDayView(dateStr) {
+            const inlineView = document.getElementById('inlineDayView');
+            const inlineContent = document.getElementById('inlineDayContent');
+            const inlineDateText = document.getElementById('inlineViewingDateText');
+
+            inlineDateText.innerText = dateStr;
+            inlineContent.innerHTML = '';
+
+            const rec = db.dailyRecords[dateStr] || {};
+            let hasAnyContent = false;
+
+            function addInlineCards(arr, title, prefix) {
+                if (!arr) return;
+                const list = Array.isArray(arr) ? arr : [arr];
+                list.forEach((item, idx) => {
+                    if (!item || !item.text) return;
+                    hasAnyContent = true;
+                    const card = document.createElement('label');
+                    card.className = 'view-box-card';
+                    card.setAttribute('for', `${prefix}_${idx}`);
+                    card.innerHTML = `
+                        <div class="view-box-title">
+                            <input type="checkbox" id="${prefix}_${idx}" class="item-checkbox inline-day-chk">
+                            <span>${title}</span>
+                        </div>
+                        <div class="view-box-content">${item.text}</div>
+                    `;
+                    inlineContent.appendChild(card);
+                });
+            }
+
+            addInlineCards(rec.log, '施工日誌', 'inlineChkLog');
+            addInlineCards(rec.notes, '工地記事', 'inlineChkNotes');
+
+            let punchLines = [];
+            let punchNote = '';
+            if (db.punches) {
+                for (let sId in db.punches) {
+                    if (db.punches[sId] && db.punches[sId][dateStr]) {
+                        const siteObj = db.sites.find(s => s.id === sId);
+                        const sName = siteObj ? siteObj.name : '未知案場';
+                        punchLines.push(sName);
+                        if (!punchNote && db.punches[sId][dateStr].note) punchNote = db.punches[sId][dateStr].note;
+                    }
+                }
+            }
+            if (punchLines.length) {
+                hasAnyContent = true;
+                const card = document.createElement('label');
+                card.className = 'view-box-card';
+                card.setAttribute('for', 'inlineChkPunch');
+                const punchDisplayText = `${dateStr} 出勤：${punchLines.join('、')}${punchNote ? `（${punchNote}）` : ''}`;
+                card.innerHTML = `
+                    <div class="view-box-title">
+                        <input type="checkbox" id="inlineChkPunch" class="item-checkbox inline-day-chk">
+                        <span>出勤紀錄</span>
+                    </div>
+                    <div class="view-box-content">${punchDisplayText}</div>
+                `;
+                inlineContent.appendChild(card);
+            }
+
+            addInlineCards(rec.order, '材料訂購', 'inlineChkOrder');
+
+            if (!hasAnyContent) {
+                inlineContent.innerHTML = '<p class="text-muted text-center" style="padding:12px;">本日無任何填報紀錄。</p>';
+            }
+
+            inlineView.classList.remove('hidden');
+
+            // listen for checkbox changes to toggle action buttons
+            inlineContent.querySelectorAll('.inline-day-chk').forEach(chk => {
+                chk.addEventListener('change', updateHomeBottomBtns);
+            });
+            updateHomeBottomBtns();
+        }
+
+        function updateHomeBottomBtns() {
+            const anyChecked = document.querySelectorAll('.inline-day-chk:checked').length > 0;
+            document.getElementById('homeMainBtns').classList.toggle('hidden', anyChecked);
+            document.getElementById('homeActionBtns').classList.toggle('hidden', !anyChecked);
+        }
+
+        function uncheckAllInline() {
+            document.querySelectorAll('.inline-day-chk').forEach(chk => { chk.checked = false; });
+            updateHomeBottomBtns();
+        }
+
+        // ================= 案場選擇器（施工日誌、工地記事、材料訂購） =================
+        function renderPageSiteSelector(containerId, page) {
+            const box = document.getElementById(containerId);
+            if (!box) return;
+            box.innerHTML = '';
+            if (db.sites.length === 0) {
+                box.innerHTML = '<p class="text-muted">請先至設定新增案場。</p>';
+                return;
+            }
+            db.sites.forEach(site => {
+                const label = document.createElement('label');
+                label.className = 'item-label';
+                label.style.cssText = 'padding:4px 0; cursor:pointer;';
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = `${page}SiteRadio`;
+                radio.value = site.id;
+                radio.className = 'item-checkbox';
+                if (currentState.siteId === site.id) radio.checked = true;
+                radio.addEventListener('change', () => {
+                    currentState.siteId = site.id;
+                    currentState.siteName = site.name;
+                    // update site name displays
+                    const sn1 = document.getElementById('currentSiteName');
+                    const sn2 = document.getElementById('currentSiteName2');
+                    if (sn1) sn1.innerText = site.name;
+                    if (sn2) sn2.innerText = site.name;
+                });
+                const span = document.createElement('span');
+                span.innerText = site.name;
+                label.appendChild(radio);
+                label.appendChild(span);
+                box.appendChild(label);
+            });
+        }
         function openDateRecordViewer(dateStr) {
             navigateTo('dateView');
             document.getElementById('viewingDateText').innerText = dateStr;
@@ -596,7 +748,7 @@
                 const card = document.createElement('label');
                 card.className = 'view-box-card';
                 card.setAttribute('for', 'copyChkPunch');
-                const punchDisplayText = `日期：${dateStr} 出勤紀錄：${punchLines.join('、')}${punchNote ? `（${punchNote}）` : ''}`;
+                const punchDisplayText = `${dateStr} 出勤：${punchLines.join('、')}${punchNote ? `（${punchNote}）` : ''}`;
                 card.innerHTML = `
                     <div class="view-box-title">
                         <input type="checkbox" id="copyChkPunch" class="item-checkbox">
@@ -624,8 +776,8 @@
 
             ['log','notes','order'].forEach(type=>{
                 const arr = rec[type] ? (Array.isArray(rec[type]) ? rec[type] : [rec[type]]) : [];
+                const prefix = type==='log'?'inlineChkLog':type==='notes'?'inlineChkNotes':'inlineChkOrder';
                 arr.forEach((item, idx)=>{
-                    const prefix = type==='log'?'copyChkLog':type==='notes'?'copyChkNotes':'copyChkOrder';
                     const chk = document.getElementById(prefix + '_' + idx);
                     if(chk && chk.checked && item?.text){
                         finalText += item.text + '\n\n';
@@ -634,7 +786,7 @@
                 });
             });
 
-            const chkPunch = document.getElementById('copyChkPunch');
+            const chkPunch = document.getElementById('inlineChkPunch');
             if(chkPunch && chkPunch.checked){
                 let lines = [];
                 let note = '';
@@ -678,30 +830,18 @@
                 // 1. 處理 施工日誌、工地記事、材料訂購
                 ['log', 'notes', 'order'].forEach(type => {
                     const arr = rec[type] ? (Array.isArray(rec[type]) ? rec[type] : [rec[type]]) : [];
-                    // 倒序刪除避免索引偏移錯位
+                    const prefix = type === 'log' ? 'inlineChkLog' : type === 'notes' ? 'inlineChkNotes' : 'inlineChkOrder';
                     for (let i = arr.length - 1; i >= 0; i--) {
-                        const prefix = type === 'log' ? 'copyChkLog' : type === 'notes' ? 'copyChkNotes' : 'copyChkOrder';
                         const chk = document.getElementById(prefix + '_' + i);
-                        // 只有勾選的才刪除
-                        if (chk && chk.checked) {
-                            arr.splice(i, 1);
-                        }
+                        if (chk && chk.checked) { arr.splice(i, 1); }
                     }
-                    // 如果該類別已被刪空，就從 dailyRecords 中移除該欄位
-                    if (arr.length === 0) {
-                        delete rec[type];
-                    } else {
-                        rec[type] = arr;
-                    }
+                    if (arr.length === 0) { delete rec[type]; } else { rec[type] = arr; }
                 });
 
-                // 如果當天 dailyRecords 內已無任何內容，則清除該日期節點
-                if (Object.keys(rec).length === 0) {
-                    delete db.dailyRecords[dateStr];
-                }
+                if (Object.keys(rec).length === 0) { delete db.dailyRecords[dateStr]; }
 
                 // 2. 處理 出勤紀錄
-                const chkPunch = document.getElementById('copyChkPunch');
+                const chkPunch = document.getElementById('inlineChkPunch');
                 if (chkPunch && chkPunch.checked) {
                     if (db.punches) {
                         for (let sId in db.punches) {
@@ -712,12 +852,11 @@
                     }
                 }
 
-                // 儲存重整畫面
                 saveToLocalStorage();
                 initHomeCalendar();
                 alert('所選取的勾選紀錄已成功刪除！');
-                // 刪除後重新整理單日檢視頁面（留在當頁）
-                openDateRecordViewer(dateStr);
+                showInlineDayView(dateStr);
+                uncheckAllInline();
             }
         }
 
@@ -870,8 +1009,6 @@
         }
 
         function clickHomeMenu(targetPage) {
-            if(targetPage === 'punch') { navigateTo('punch'); return; }
-            if(!currentState.siteId) return alert('⚠️ 請先在上方列表中點擊選擇一個要填單的案場！');
             navigateTo(targetPage);
         }
 
@@ -892,11 +1029,12 @@
                 }
             }
             if (!hasContent) return null;
-            return `施工日誌\n案場名稱：${currentState.siteName}\n--------------------\n${projectLogText}--------------------`;
+            return `施工日誌\n案場名稱：${currentState.siteName}\n------------------------\n${projectLogText}`;
         }
 
         // 純儲存 (上傳行事曆功能鈕) — 陣列追加模式，不覆蓋舊紀錄
         function saveLogDataOnly() {
+            if(!currentState.siteId) return alert('⚠️ 請先在上方選擇案場！');
             const logText = getLogRawText();
             if (!logText) return alert('請至少填寫一項項目內容！');
             
@@ -915,6 +1053,7 @@
         }
 
         function shareLogToLine() {
+            if(!currentState.siteId) return alert('⚠️ 請先在上方選擇案場！');
             const logText = getLogRawText();
             if (!logText) return alert('請至少填寫一項項目內容！');
             const dateStr = document.getElementById('inputLogDate').value || getTargetDateStr();
@@ -925,11 +1064,12 @@
         function getNotesRawText() {
             const val = document.getElementById('txtSiteNotes').value.trim();
             if (!val) return null;
-            return `工地記事\n案場名稱：${currentState.siteName}\n--------------------\n${val}\n--------------------`;
+            return `工地記事\n案場名稱：${currentState.siteName}\n------------------------\n${val}\n`;
         }
 
         // 純儲存 (上傳行事曆功能鈕) — 陣列追加模式，不覆蓋舊紀錄
         function saveNotesDataOnly() {
+            if(!currentState.siteId) return alert('⚠️ 請先在上方選擇案場！');
             const notesText = getNotesRawText();
             if (!notesText) return alert('請先輸入記事內容！');
 
@@ -947,6 +1087,7 @@
         }
 
         function shareNotesToLine() {
+            if(!currentState.siteId) return alert('⚠️ 請先在上方選擇案場！');
             const notesText = getNotesRawText();
             if (!notesText) return alert('請先輸入記事內容！');
             const dateStr = document.getElementById('inputNotesDate').value || getTargetDateStr();
@@ -968,15 +1109,20 @@
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('btnBack').classList.add('hidden');
                 document.getElementById('btnHomeTop').classList.add('hidden');
-                renderSites();
+                document.getElementById('homeTitle').classList.remove('hidden');
                 initHomeCalendar();
-                if (currentState.siteId) selectSiteOnHome(currentState.siteId, currentState.siteName);
+                // restore main buttons
+                document.getElementById('homeMainBtns').classList.remove('hidden');
+                document.getElementById('homeActionBtns').classList.add('hidden');
+                document.getElementById('inlineDayView').classList.add('hidden');
+                selectedHomeDateStr = '';
             } else if (page === 'dateView') {
                 document.getElementById('pageDateView').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
             } else if (page === 'punch') {
                 document.getElementById('pagePunch').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
+                document.getElementById('homeTitle').classList.add('hidden');
                 document.getElementById('inputPunchDate').value = getTargetDateStr();
                 document.getElementById('inputPunchNote').value = '';
                 document.getElementById('inputOvertimeHours').value = '';
@@ -984,24 +1130,28 @@
             } else if (page === 'log') {
                 document.getElementById('pageLog').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
-                document.getElementById('logSiteName').innerText = currentState.siteName;
-                document.getElementById('inputLogDate').value = getTargetDateStr();
+                document.getElementById('homeTitle').classList.add('hidden');
+                document.getElementById('inputLogDate').value = selectedHomeDateStr || getTargetDateStr();
+                renderPageSiteSelector('logSiteGroup', 'log');
                 clearLogInputs();
             } else if (page === 'notes') {
                 document.getElementById('pageNotes').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
-                document.getElementById('notesSiteName').innerText = currentState.siteName;
-                document.getElementById('inputNotesDate').value = getTargetDateStr();
+                document.getElementById('homeTitle').classList.add('hidden');
+                document.getElementById('inputNotesDate').value = selectedHomeDateStr || getTargetDateStr();
+                renderPageSiteSelector('notesSiteGroup', 'notes');
                 document.getElementById('txtSiteNotes').value = '';
             } else if (page === 'categories') {
                 document.getElementById('pageCategories').classList.add('active');
                 document.getElementById('appTitle').innerText = ''; 
+                document.getElementById('homeTitle').classList.add('hidden');
                 document.getElementById('globalSearchBar').value = ''; 
-                document.getElementById('currentSiteName').innerText = currentState.siteName;
+                renderPageSiteSelector('categoriesSiteGroup', 'categories');
                 renderCategories();
             } else if (page === 'items') {
                 document.getElementById('pageItems').classList.add('active');
                 document.getElementById('appTitle').innerText = ''; 
+                document.getElementById('homeTitle').classList.add('hidden');
                 document.getElementById('inputQuickItem').value = ''; 
                 document.getElementById('currentSiteName2').innerText = currentState.siteName;
                 document.getElementById('currentCategoryName').innerText = currentState.catName;
@@ -1011,12 +1161,14 @@
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
+                document.getElementById('homeTitle').classList.add('hidden');
                 document.getElementById('btnBack').dataset.backTo = prevPage === 'cart' ? 'items' : prevPage;
                 document.getElementById('cartSiteName').innerText = currentState.siteName;
                 renderCart();
             } else if (page === 'manage') {
                 document.getElementById('pageManage').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
+                document.getElementById('homeTitle').classList.add('hidden');
                 document.getElementById('btnHomeTop').classList.add('hidden');
                 document.getElementById('inputScriptUrl').value = db.config?.scriptUrl || '';
                 renderManageSites();
@@ -1028,7 +1180,7 @@
 
         document.getElementById('btnBack').addEventListener('click', (e) => {
             const p = currentState.page;
-            if (p === 'manage' || p === 'log' || p === 'notes' || p === 'punch' || p === 'categories' || p === 'dateView') navigateTo('sites');
+            if (p === 'manage' || p === 'log' || p === 'notes' || p === 'punch' || p === 'categories') navigateTo('sites');
             else if (p === 'items') navigateTo('categories');
             else if (p === 'cart') {
                 const target = e.target.dataset.backTo || 'items';
@@ -1194,15 +1346,16 @@
                 grouped[item.catName].push(`${item.itemName} *${item.qty}`);
             });
 
-            let textOutput = `材料訂單\n送貨地點：${currentState.siteName}\n--------------------\n`;
+            let textOutput = `材料訂單\n送貨地點：${currentState.siteName}\n------------------------\n`;
             for (const catName in grouped) { textOutput += `【${catName}】\n` + grouped[catName].join('\n') + `\n`; }
-            textOutput += `--------------------`;
+            textOutput += ``;
 
             return { text: textOutput.trim(), items: selectedItems };
         }
 
         // 純上傳至 Google Sheet，不再綁定文字複製彈窗
         function uploadCartToGoogleSheetOnly() {
+            if(!currentState.siteId) return alert('⚠️ 請先在上方選擇送貨案場！');
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料！');
             sendOrderToGoogleSheet(data.items);
@@ -1210,6 +1363,7 @@
 
         // 純儲存 (材料單上傳行事曆功能鈕) — 陣列追加模式，不覆蓋舊紀錄
         function saveCartDataOnly() {
+            if(!currentState.siteId) return alert('⚠️ 請先在上方選擇送貨案場！');
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料！');
             
@@ -1228,6 +1382,7 @@
 
         // 純傳送 LINE
         function shareCartToLineOnly() {
+            if(!currentState.siteId) return alert('⚠️ 請先在上方選擇送貨案場！');
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料！');
             const dateStr = getTargetDateStr();
