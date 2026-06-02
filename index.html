@@ -227,12 +227,12 @@
         <section id="pageLog" class="page">
             <div class="scroll-list-body" style="flex: 1;">
                 <div class="card">
-                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">選擇案場：</label>
-                    <div id="logSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
-                </div>
-                <div class="card">
                     <label style="font-size: 13px; font-weight: bold; color: #4b5563;">請選擇紀錄日期：</label>
                     <input type="date" id="inputLogDate" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none;">
+                </div>
+                <div class="card">
+                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">選擇案場：</label>
+                    <div id="logSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
                 </div>
                 <div class="card">
                     <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">施工日誌內容填寫</h3>
@@ -251,12 +251,12 @@
         <section id="pageNotes" class="page">
             <div class="scroll-list-body" style="flex: 1;">
                 <div class="card">
-                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">選擇案場：</label>
-                    <div id="notesSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
-                </div>
-                <div class="card">
                     <label style="font-size: 13px; font-weight: bold; color: #4b5563;">請選擇紀錄日期：</label>
                     <input type="date" id="inputNotesDate" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none;">
+                </div>
+                <div class="card">
+                    <label style="font-size: 13px; font-weight: bold; color: #4b5563;">選擇案場：</label>
+                    <div id="notesSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
                 </div>
                 <div class="card">
                     <h3 style="font-size: 14px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; color: #374151;">工地事項紀錄</h3>
@@ -282,7 +282,7 @@
             </div>
             <div class="list-container">
                 <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 4px; flex-shrink: 0;">請選擇材料分類：</h3>
-                <div id="listCategories" class="scroll-list-body"></div>
+                <div id="listCategories" class="scroll-list-body" style="overflow-y: auto;"></div>
             </div>
             <div class="bottom-btn-group">
                 <div class="bottom-btn-group-inner">
@@ -1540,6 +1540,13 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadFromLocalStorage(); 
             navigateTo('sites');
+
+            // 預設開啟今天的行事曆記錄
+            const todayStr = getTargetDateStr();
+            selectedHomeDateStr = todayStr;
+            const todayEl = document.querySelector('.calendar-day.today');
+            if (todayEl) todayEl.classList.add('selected');
+            showInlineDayView(todayStr);
 
             new Sortable(document.getElementById('manageListSites'), {
                 animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost',
