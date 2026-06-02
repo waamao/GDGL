@@ -1153,6 +1153,8 @@
                 document.getElementById('globalSearchBar').value = ''; 
                 renderPageSiteSelector('categoriesSiteGroup', 'categories');
                 renderCategories();
+                const listCatEl = document.getElementById('listCategories');
+                if (listCatEl) listCatEl.scrollTop = 0;
             } else if (page === 'items') {
                 document.getElementById('pageItems').classList.add('active');
                 document.getElementById('appTitle').innerText = ''; 
