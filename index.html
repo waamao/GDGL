@@ -12,7 +12,7 @@
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         
-        html, body { height: 100%; margin: 0; padding: 0; background-color: #dadbdd; color: #1f2937; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+        html, body { height: 100%; margin: 0; padding: 0; background-color: #000000; color: #1f2937; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         body { display: flex; flex-direction: column; }
         main.max-w-md { max-width: 448px; width: 100%; margin: 0 auto; flex: 1; min-height: 0; padding: 16px; position: relative; display: flex; flex-direction: column; }
         
@@ -127,7 +127,7 @@
     <main class="max-w-md">
 
         <section id="pageSites" class="page">
-            <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0;">
+            <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; overflow: hidden;">
                 <input type="file" id="importFile" accept=".json" onchange="importJSON(this)" class="hidden">
                 
                 <div class="card" style="padding: 8px; flex-shrink: 0;">
@@ -144,9 +144,9 @@
                 </div>
 
                 <!-- 單日記錄內嵌區 -->
-                <div id="inlineDayView" class="hidden" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px;">
+                <div id="inlineDayView" class="hidden" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; overflow: hidden;">
                     <span id="inlineViewingDateText" class="hidden"></span>
-                    <div id="inlineDayContent" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom: 140px;"></div>
+                    <div id="inlineDayContent" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom: 130px;"></div>
                 </div>
 
             </div>
