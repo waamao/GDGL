@@ -107,6 +107,13 @@
         .view-box-card:active { background-color: #f0f0f0; }
         .view-box-title { font-size: 13px; font-weight: bold; color: #374151; display: flex; align-items: center; gap: 6px; }
         .view-box-content { font-size: 13px; background: white; border: 1px solid #e5e7eb; padding: 6px; border-radius: 6px; min-height: 40px; white-space: pre-wrap; word-break: break-all; }
+
+        /* 黑色捲動條 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #000000; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #333333; }
+        * { scrollbar-color: #000000 transparent; scrollbar-width: thin; }
     </style>
 </head>
 <body>
@@ -132,13 +139,13 @@
                 
                 <div class="card" style="padding: 8px; flex-shrink: 0;">
                     <div class="calendar-header">
-                        <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 3px 15px; font-size:24px;">‹</button>
-                        <div style="display:flex; flex-direction:row; align-items:center; gap:8px; flex:1; justify-content:center;">
-                            <button onclick="goToToday()" class="btn-slate" style="padding: 3px 12px; font-size:16px; border-radius:20px;">跳到今天</button>
+                        <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 0; font-size:24px; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">‹</button>
+                        <div style="display:flex; flex-direction:row; align-items:center; gap:6px; flex:1; justify-content:center;">
+                            <button onclick="goToToday()" class="btn-slate" style="padding: 3px 10px; font-size:13px; border-radius:18px;">今天</button>
                             <span id="homeCalendarTitle" style="display:none;"></span>
-                            <span id="homeCalendarDateDisplay" style="font-size:13px; color:#4b5563; font-weight:500;"></span>
+                            <span id="homeCalendarDateDisplay" style="font-size:13px; color:#ffffff; font-weight:500; background-color:#222222; padding:3px 10px; border-radius:18px; white-space:nowrap;"></span>
                         </div>
-                        <button onclick="changeHomeMonth(1)" class="btn-slate" style="padding: 3px 15px; font-size:24px;">›</button>
+                        <button onclick="changeHomeMonth(1)" class="btn-slate" style="padding: 0; font-size:24px; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">›</button>
                     </div>
                     <div class="calendar-grid" id="homeCalendarGrid"></div>
                 </div>
@@ -269,8 +276,8 @@
 
         <section id="pageCategories" class="page">
             <div class="card" style="padding: 10px; flex-shrink: 0;">
-                <label style="font-size: 13px; font-weight: bold; color: #4b5563; margin-bottom: 4px; display:block;">送貨案場：</label>
-                <div id="categoriesSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
+                <label style="font-size: 13px; font-weight: bold; color: #4b5563; margin-bottom: 4px; display:block;">預計送貨地點：</label>
+                <div id="categoriesSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 102px; overflow-y: auto;"></div>
             </div>
             <div class="card" style="padding: 12px; flex-direction: row; align-items: center; gap: 8px;">
                 <span style="color: #9ca3af;">🔍</span>
@@ -488,7 +495,7 @@
         // ================= 月曆控制模組 =================
         function initHomeCalendar() {
             const titleEl = document.getElementById('homeCalendarTitle');
-            titleEl.innerText = `${homeCalYear} 年 ${String(homeCalMonth + 1).padStart(2, '0')} 月`;
+            titleEl.innerText = `${homeCalYear}年${String(homeCalMonth + 1).padStart(2, '0')}月`;
 
             const gridEl = document.getElementById('homeCalendarGrid');
             gridEl.innerHTML = '';
@@ -592,9 +599,8 @@
         function updateCalendarDateDisplay(dateStr) {
             const el = document.getElementById('homeCalendarDateDisplay');
             if (!el || !dateStr) return;
-            const weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
             const d = new Date(dateStr + 'T00:00:00');
-            el.innerText = `${dateStr} ${weekdays[d.getDay()]}`;
+            el.innerText = `${d.getFullYear()}年${String(d.getMonth()+1).padStart(2,'0')}月`;
         }
 
         // ================= 首頁內嵌單日記錄顯示 =================
