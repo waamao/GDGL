@@ -276,6 +276,10 @@
 
         <section id="pageCategories" class="page">
             <div class="card" style="padding: 10px; flex-shrink: 0;">
+                <label style="font-size: 13px; font-weight: bold; color: #4b5563; margin-bottom: 4px; display:block;">請選擇訂購日期：</label>
+                <input type="date" id="inputOrderDate" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none;">
+            </div>
+            <div class="card" style="padding: 10px; flex-shrink: 0;">
                 <label style="font-size: 13px; font-weight: bold; color: #4b5563; margin-bottom: 4px; display:block;">預計送貨地點：</label>
                 <div id="categoriesSiteGroup" style="display: flex; flex-direction: column; gap: 6px; max-height: 93px; overflow-y: auto;"></div>
             </div>
@@ -342,6 +346,10 @@
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1;">
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統還原</h3>
                 <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📥 匯入系統備份檔(JSON)</button>
+                <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                    <input type="month" id="inputExportOrderMonth" style="flex:1; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; background-color: white;">
+                    <button onclick="exportOrderExcel()" class="btn-slate" style="flex-shrink:0; padding: 10px 14px; font-size: 13px; border-radius: 8px;">📊 匯出Excel</button>
+                </div>
             </div>
             <div class="card">
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">案場基本資料維護</h3>
@@ -1195,6 +1203,7 @@
                 document.getElementById('pageCategories').classList.add('active');
                 document.getElementById('appTitle').innerText = ''; 
                 document.getElementById('homeTitle').classList.add('hidden');
+                document.getElementById('inputOrderDate').value = selectedHomeDateStr || getTargetDateStr();
                 document.getElementById('globalSearchBar').value = ''; 
                 renderPageSiteSelector('categoriesSiteGroup', 'categories');
                 renderCategories();
@@ -1223,6 +1232,11 @@
                 document.getElementById('homeTitle').classList.add('hidden');
                 document.getElementById('btnHomeTop').classList.add('hidden');
                 document.getElementById('inputScriptUrl').value = db.config?.scriptUrl || '';
+                // 初始化匯出月份為本月
+                const now = new Date();
+                const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+                const exportMonthEl = document.getElementById('inputExportOrderMonth');
+                if (exportMonthEl && !exportMonthEl.value) exportMonthEl.value = thisMonth;
                 renderManageSites();
                 renderManageCategories();
                 renderManageCategoryDropdown(); 
@@ -1405,11 +1419,33 @@
             return { text: textOutput.trim(), items: selectedItems };
         }
 
-        // 純上傳至 Google Sheet，不再綁定文字複製彈窗
+        // 上傳至 Google Sheet：先存紀錄欄，再上傳Google
         function uploadCartToGoogleSheetOnly() {
             if(!currentState.siteId) return alert('⚠️ 請先在上方選擇送貨案場！');
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料！');
+
+            // 先存到紀錄欄
+            const dateStr = document.getElementById('inputOrderDate')?.value || getTargetDateStr();
+            const cartTextWithDate = `${dateStr} ${data.text}`;
+            if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
+            if(!Array.isArray(db.dailyRecords[dateStr].order)) {
+                db.dailyRecords[dateStr].order = db.dailyRecords[dateStr].order ? [db.dailyRecords[dateStr].order] : [];
+            }
+            // 避免重複存入同一筆
+            const alreadySaved = db.dailyRecords[dateStr].order.some(r => r.text === cartTextWithDate && r.siteId === currentState.siteId);
+            if (!alreadySaved) {
+                db.dailyRecords[dateStr].order.push({ siteId: currentState.siteId, text: cartTextWithDate });
+            }
+            saveToLocalStorage();
+            initHomeCalendar();
+
+            // 再嘗試傳到Google
+            const SCRIPT_URL = db.config?.scriptUrl?.trim() || '';
+            if (!SCRIPT_URL) {
+                alert('訂單資料已儲存，未連結Google');
+                return;
+            }
             sendOrderToGoogleSheet(data.items);
         }
 
@@ -1419,7 +1455,7 @@
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料！');
             
-            const dateStr = getTargetDateStr();
+            const dateStr = document.getElementById('inputOrderDate')?.value || getTargetDateStr();
             const cartTextWithDate = `${dateStr} ${data.text}`;
             if(!db.dailyRecords[dateStr]) db.dailyRecords[dateStr] = {};
             if(!Array.isArray(db.dailyRecords[dateStr].order)) {
@@ -1437,7 +1473,7 @@
             if(!currentState.siteId) return alert('⚠️ 請先在上方選擇送貨案場！');
             const data = compileCartData();
             if (!data) return alert('訂單裡沒有材料！');
-            const dateStr = getTargetDateStr();
+            const dateStr = document.getElementById('inputOrderDate')?.value || getTargetDateStr();
             window.location.href = `https://line.me/R/msg/text/?${encodeURIComponent(dateStr + ' ' + data.text)}`;
         }
 
@@ -1611,6 +1647,56 @@
                 }
             }, { passive: true });
         })();
+
+        // ================= 材料訂購 Excel 匯出 =================
+        function exportOrderExcel() {
+            const monthVal = document.getElementById('inputExportOrderMonth').value;
+            if (!monthVal) return alert('請先選擇要匯出的年月！');
+            const [yyyy, mm] = monthVal.split('-');
+            const prefix = `${yyyy}-${mm}`;
+
+            // 收集該月份所有 order 紀錄
+            const rows = [];
+            Object.keys(db.dailyRecords).sort().forEach(dateStr => {
+                if (!dateStr.startsWith(prefix)) return;
+                const rec = db.dailyRecords[dateStr];
+                if (!rec || !rec.order) return;
+                const orderArr = Array.isArray(rec.order) ? rec.order : [rec.order];
+                orderArr.forEach(orderEntry => {
+                    if (!orderEntry || !orderEntry.text) return;
+                    const siteObj = db.sites.find(s => s.id === orderEntry.siteId);
+                    const siteName = siteObj ? siteObj.name : orderEntry.siteId || '';
+                    // 解析 text 內容：找品項行
+                    const lines = orderEntry.text.split('\n');
+                    let currentCat = '';
+                    lines.forEach(line => {
+                        const catMatch = line.match(/^【(.+)】$/);
+                        if (catMatch) { currentCat = catMatch[1]; return; }
+                        // 品項行格式：品項名稱 *數量
+                        const itemMatch = line.match(/^(.+?) \*(.+)$/);
+                        if (itemMatch && currentCat) {
+                            rows.push({ date: dateStr, site: siteName, cat: currentCat, item: itemMatch[1].trim(), qty: itemMatch[2].trim() });
+                        }
+                    });
+                });
+            });
+
+            if (rows.length === 0) return alert(`${yyyy}年${mm}月 無任何材料訂購紀錄！`);
+
+            // 產生 CSV (Excel 相容 UTF-8 BOM)
+            const header = ['日期', '案場', '分類', '品項名稱', '數量'];
+            const csvRows = [header, ...rows.map(r => [r.date, r.site, r.cat, r.item, r.qty])];
+            const csvContent = '\uFEFF' + csvRows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `材料訂購${yyyy}-${mm}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             loadFromLocalStorage(); 
