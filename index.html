@@ -371,7 +371,10 @@
             <div class="card" style="flex-shrink:0; padding:10px 14px;">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                     <span style="font-size:13px; font-weight:bold; color:#4b5563;">選擇案場</span>
-                    <button onclick="showAddSiteInline()" style="background:#1f2937; color:white; font-size:12px; font-weight:bold; padding:5px 14px; border-radius:8px;">＋ 新增</button>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <button id="btnSiteInfoSort" onclick="toggleSiteInfoSort()" style="background:#374151; color:white; font-size:12px; font-weight:bold; padding:5px 12px; border-radius:8px;">排序</button>
+                        <button onclick="showAddSiteInline()" style="background:#1f2937; color:white; font-size:12px; font-weight:bold; padding:5px 14px; border-radius:8px;">＋ 新增</button>
+                    </div>
                 </div>
                 <div id="addSiteInlineWrap" style="display:none; margin-bottom:8px;">
                     <div style="display:flex; gap:8px;">
@@ -481,7 +484,10 @@
                 </div>
             </div>
             <div class="card">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; color: #374151;">材料分類維護</h3>
+                <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e5e7eb; padding-bottom:4px; margin-bottom:0;">
+                    <h3 style="font-size: 14px; margin: 0; color: #374151;">材料分類維護</h3>
+                    <button id="btnCategorySort" onclick="toggleCategorySort()" style="background:#374151; color:white; font-size:11px; font-weight:bold; padding:4px 10px; border-radius:8px;">排序</button>
+                </div>
                 <div class="flex-row">
                     <input type="text" id="inputNewCategory" placeholder="如：水泥類、五金類">
                     <button onclick="addCategory()" class="btn-green" style="flex-shrink: 0;">新增</button>
@@ -816,14 +822,27 @@
             if (homeCalMonth > 11) { homeCalMonth = 0; homeCalYear++; }
             else if (homeCalMonth < 0) { homeCalMonth = 11; homeCalYear--; }
             initHomeCalendar();
-            // 預設開啟當月 1 號
-            const firstDateStr = `${homeCalYear}-${String(homeCalMonth + 1).padStart(2, '0')}-01`;
-            document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
-            const allDays = document.querySelectorAll('.calendar-day:not(.empty)');
-            if (allDays.length > 0) allDays[0].classList.add('selected');
-            selectedHomeDateStr = firstDateStr;
-            updateCalendarDateDisplay(firstDateStr);
-            showInlineDayView(firstDateStr);
+            // 若回到本月，跳回今天
+            const today = new Date();
+            const isCurrentMonth = (homeCalYear === today.getFullYear() && homeCalMonth === today.getMonth());
+            if (isCurrentMonth) {
+                const todayStr = getTargetDateStr();
+                document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+                const todayEl = document.querySelector('.calendar-day.today');
+                if (todayEl) todayEl.classList.add('selected');
+                selectedHomeDateStr = todayStr;
+                updateCalendarDateDisplay(todayStr);
+                showInlineDayView(todayStr);
+            } else {
+                // 預設開啟當月 1 號
+                const firstDateStr = `${homeCalYear}-${String(homeCalMonth + 1).padStart(2, '0')}-01`;
+                document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+                const allDays = document.querySelectorAll('.calendar-day:not(.empty)');
+                if (allDays.length > 0) allDays[0].classList.add('selected');
+                selectedHomeDateStr = firstDateStr;
+                updateCalendarDateDisplay(firstDateStr);
+                showInlineDayView(firstDateStr);
+            }
         }
 
         function goToToday() {
@@ -1353,7 +1372,8 @@
         }
 
         // ---- 渲染案場清單 ----
-        function renderSiteInfoList() {
+        function renderSiteInfoList(sortMode) {
+            if (sortMode === undefined) sortMode = _siteInfoSortMode;
             const box = document.getElementById('siteInfoList');
             box.innerHTML = '';
             if (db.sites.length === 0) {
@@ -1366,12 +1386,18 @@
                 div.setAttribute('data-id', site.id);
                 div.style.cssText = 'cursor:pointer; border-radius:8px;';
                 const isSel = site.id === _siSelectedSiteId;
-                if (isSel) { div.style.background = '#1f2937'; div.style.borderColor = '#1f2937'; }
-                div.innerHTML = `
-                    <span class="drag-handle" style="flex-shrink:0; color:#9ca3af;">☰</span>
-                    <span class="manage-text" style="font-size:14px; font-weight:600; color:${isSel?'#ffffff':'#1f2937'};">${site.name}</span>
-                `;
-                div.addEventListener('click', () => selectSiteInfoSite(site.id));
+                if (isSel && !sortMode) { div.style.background = '#1f2937'; div.style.borderColor = '#1f2937'; }
+                if (sortMode) {
+                    div.innerHTML = `
+                        <span class="drag-handle" style="flex-shrink:0; color:#374151; font-size:16px; padding-right:6px;">☰</span>
+                        <span class="manage-text" style="font-size:14px; font-weight:600; color:#1f2937;">${site.name}</span>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <span class="manage-text" style="font-size:14px; font-weight:600; color:${isSel?'#ffffff':'#1f2937'};">${site.name}</span>
+                    `;
+                    div.addEventListener('click', () => selectSiteInfoSite(site.id));
+                }
                 box.appendChild(div);
             });
         }
@@ -1382,6 +1408,43 @@
             document.getElementById('siteInfoDetailWrap').style.display = '';
             document.getElementById('progressDetailWrap').style.display = 'flex';
             _renderAllSiteInfo();
+        }
+
+        let _siteInfoSortMode = false;
+        let _siteInfoSortable = null;
+        function toggleSiteInfoSort() {
+            const btn = document.getElementById('btnSiteInfoSort');
+            const siList = document.getElementById('siteInfoList');
+            if (!_siteInfoSortMode) {
+                // 進入排序模式
+                _siteInfoSortMode = true;
+                btn.innerText = '儲存';
+                btn.style.background = '#06C755';
+                renderSiteInfoList(true);
+                // 初始化 Sortable（若尚未）
+                if (!_siteInfoSortable) {
+                    _siteInfoSortable = new Sortable(siList, {
+                        animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', threshold: 5,
+                        onEnd: function() {}
+                    });
+                }
+                _siteInfoSortable.option('disabled', false);
+            } else {
+                // 儲存排序
+                _siteInfoSortMode = false;
+                btn.innerText = '排序';
+                btn.style.background = '#374151';
+                const sorted = [];
+                siList.querySelectorAll('.manage-item').forEach(el => {
+                    const s = db.sites.find(s => s.id === el.getAttribute('data-id'));
+                    if (s) sorted.push(s);
+                });
+                db.sites = sorted;
+                saveToLocalStorage();
+                if (_siteInfoSortable) _siteInfoSortable.option('disabled', true);
+                renderSiteInfoList();
+                if (_siSelectedSiteId) selectSiteInfoSite(_siSelectedSiteId);
+            }
         }
 
         // ---- 格式化金額 ----
@@ -2072,7 +2135,12 @@
                 const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
                 const exportMonthEl = document.getElementById('inputExportOrderMonth');
                 if (exportMonthEl && !exportMonthEl.value) exportMonthEl.value = thisMonth;
-                renderManageCategories();
+                // 重置排序模式
+                _categorySortMode = false;
+                const catSortBtn = document.getElementById('btnCategorySort');
+                if (catSortBtn) { catSortBtn.innerText = '排序'; catSortBtn.style.background = '#374151'; }
+                if (_categorySortable) _categorySortable.option('disabled', true);
+                renderManageCategories(false);
                 renderManageCategoryDropdown();
                 document.getElementById('pageManage').scrollTop = 0;
                 document.getElementById('manageListCategories').scrollTop = 0;
@@ -2085,28 +2153,17 @@
                 document.getElementById('siteInfoDetailWrap').style.display  = 'none';
                 document.getElementById('progressDetailWrap').style.display  = 'none';
                 document.getElementById('addSiteInlineWrap').style.display   = 'none';
+                // 重置排序模式
+                _siteInfoSortMode = false;
+                const sortBtn = document.getElementById('btnSiteInfoSort');
+                if (sortBtn) { sortBtn.innerText = '排序'; sortBtn.style.background = '#374151'; }
+                if (_siteInfoSortable) _siteInfoSortable.option('disabled', true);
                 renderSiteInfoList();
                 if (db.sites.length > 0) selectSiteInfoSite(db.sites[0].id);
                 // 捲動到最上
                 const siScroll = document.querySelector('#pageSiteInfo > div:last-child');
                 if (siScroll) siScroll.scrollTop = 0;
                 document.getElementById('siteInfoList').scrollTop = 0;
-                // 初始化可拖動排序
-                const siList = document.getElementById('siteInfoList');
-                if (siList && !siList._sortableInit) {
-                    siList._sortableInit = true;
-                    new Sortable(siList, {
-                        animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', threshold: 5,
-                        onEnd: function() {
-                            const sorted = [];
-                            siList.querySelectorAll('.manage-item').forEach(el => {
-                                const s = db.sites.find(s => s.id === el.getAttribute('data-id'));
-                                if (s) sorted.push(s);
-                            });
-                            db.sites = sorted; saveToLocalStorage();
-                        }
-                    });
-                }
             }
             updateCartBadge();
         }
@@ -2451,20 +2508,54 @@
                 saveToLocalStorage(); renderManageCategories();
             }
         }
-        function renderManageCategories() {
+        function renderManageCategories(sortMode) {
+            if (sortMode === undefined) sortMode = _categorySortMode;
             const list = document.getElementById('manageListCategories');
             list.innerHTML = db.categories.length === 0 ? '<p style="color:#9ca3af; text-align:center;">暫無資料。</p>' : '';
             db.categories.forEach(cat => {
                 const div = document.createElement('div');
-                div.className = "manage-item"; div.setAttribute('data-id', cat.id); 
-                div.innerHTML = `<span class="manage-text"><span class="drag-handle">☰</span> ${cat.name}</span>
-                    <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
-                        <button onclick="renameCategory('${cat.id}', '${cat.name}')" class="btn-rename">改名</button>
-                        <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="btn-del">刪除</button>
-                    </div>`;
+                div.className = "manage-item"; div.setAttribute('data-id', cat.id);
+                if (sortMode) {
+                    div.innerHTML = `<span class="manage-text"><span class="drag-handle" style="color:#374151; font-size:16px; padding-right:6px;">☰</span> ${cat.name}</span>`;
+                } else {
+                    div.innerHTML = `<span class="manage-text"><span class="drag-handle" style="opacity:0; pointer-events:none;">☰</span> ${cat.name}</span>
+                        <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
+                            <button onclick="renameCategory('${cat.id}', '${cat.name}')" class="btn-rename">改名</button>
+                            <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="btn-del">刪除</button>
+                        </div>`;
+                }
                 list.appendChild(div);
             });
             renderManageCategoryDropdown();
+        }
+
+        let _categorySortMode = false;
+        let _categorySortable = null;
+        function toggleCategorySort() {
+            const btn = document.getElementById('btnCategorySort');
+            const list = document.getElementById('manageListCategories');
+            if (!_categorySortMode) {
+                // 進入排序模式
+                _categorySortMode = true;
+                btn.innerText = '儲存';
+                btn.style.background = '#06C755';
+                renderManageCategories(true);
+                if (_categorySortable) _categorySortable.option('disabled', false);
+            } else {
+                // 儲存排序
+                _categorySortMode = false;
+                btn.innerText = '排序';
+                btn.style.background = '#374151';
+                const sorted = [];
+                list.querySelectorAll('.manage-item').forEach(el => {
+                    const cat = db.categories.find(c => c.id === el.getAttribute('data-id'));
+                    if (cat) sorted.push(cat);
+                });
+                db.categories = sorted;
+                saveToLocalStorage();
+                if (_categorySortable) _categorySortable.option('disabled', true);
+                renderManageCategories(false);
+            }
         }
 
         function renderManageCategoryDropdown() {
@@ -3071,16 +3162,10 @@
             showInlineDayView(todayStr);
             updateHomeImportBtn();
 
-            new Sortable(document.getElementById('manageListCategories'), {
+            _categorySortable = new Sortable(document.getElementById('manageListCategories'), {
                 animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', threshold: 5,
-                onEnd: function () {
-                    const sorted = [];
-                    document.querySelectorAll('#manageListCategories .manage-item').forEach(el => {
-                        const cat = db.categories.find(c => c.id === el.getAttribute('data-id'));
-                        if(cat) sorted.push(cat);
-                    });
-                    db.categories = sorted; saveToLocalStorage();
-                }
+                disabled: true,
+                onEnd: function () {}
             });
         });
     </script>
