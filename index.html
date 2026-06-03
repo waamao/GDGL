@@ -2888,28 +2888,41 @@
 
         // ================= 首頁記錄卡左滑刪除 =================
         function _attachSwipeDelete(card, prefix, idx, dateStr) {
-            let startX = 0, startY = 0, sliding = false, confirmed = false;
-            const THRESHOLD = 80; // 觸發刪除的最小位移
+            let startX = 0, startY = 0, sliding = false, revealed = false;
+            const THRESHOLD = 80;
 
-            // 建立紅色刪除背景層
-            const bg = document.createElement('div');
-            bg.style.cssText = 'position:absolute; inset:0; background:#ef4444; border-radius:12px; display:flex; align-items:center; justify-content:flex-end; padding-right:20px; opacity:0; transition:opacity 0.1s; z-index:0; pointer-events:none;';
-            bg.innerHTML = '<span style="color:white; font-size:13px; font-weight:bold;">刪除</span>';
+            // 刪除按鈕層（固定在卡片右側底下，初始隱藏）
+            const btnLayer = document.createElement('div');
+            btnLayer.style.cssText = [
+                'position:absolute', 'top:0', 'right:0', 'bottom:0',
+                'width:80px', 'background:#ef4444', 'border-radius:0 12px 12px 0',
+                'display:flex', 'align-items:center', 'justify-content:center',
+                'z-index:0', 'opacity:0', 'pointer-events:none',
+                'transition:opacity 0.15s'
+            ].join(';');
+            btnLayer.innerHTML = '<button type="button" style="background:none;color:white;font-size:13px;font-weight:bold;padding:0;border:none;cursor:pointer;pointer-events:auto;">刪除</button>';
             card.style.position = 'relative';
             card.style.overflow = 'hidden';
-            card.insertBefore(bg, card.firstChild);
+            card.appendChild(btnLayer);
 
-            // 讓卡片內容在背景層上方
+            // 卡片內容層在刪除按鈕上方
             Array.from(card.children).forEach(child => {
-                if (child !== bg) child.style.position = 'relative';
+                if (child !== btnLayer) child.style.position = 'relative';
+            });
+
+            // 刪除按鈕點擊 → 動畫收縮後刪除
+            btnLayer.querySelector('button').addEventListener('click', e => {
+                e.stopPropagation();
+                e.preventDefault();
+                _doDeleteCard(card, prefix, idx, dateStr);
             });
 
             card.addEventListener('touchstart', e => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 sliding = false;
-                confirmed = false;
                 card.style.transition = 'none';
+                btnLayer.style.transition = 'none';
             }, { passive: true });
 
             card.addEventListener('touchmove', e => {
@@ -2917,30 +2930,69 @@
                 const dy = Math.abs(e.touches[0].clientY - startY);
                 if (!sliding && dx < -8 && dy < 30) sliding = true;
                 if (!sliding) return;
-                const shift = Math.min(0, dx); // 只允許左移
+                // 已展開時允許右滑回去
+                const base = revealed ? -THRESHOLD : 0;
+                const shift = Math.min(0, Math.max(base + dx, -THRESHOLD));
                 card.style.transform = `translateX(${shift}px)`;
                 const ratio = Math.min(1, Math.abs(shift) / THRESHOLD);
-                bg.style.opacity = ratio;
-                confirmed = Math.abs(shift) >= THRESHOLD;
+                btnLayer.style.opacity = ratio;
+                btnLayer.style.pointerEvents = ratio >= 1 ? 'auto' : 'none';
             }, { passive: true });
 
-            card.addEventListener('touchend', () => {
+            card.addEventListener('touchend', e => {
                 if (!sliding) return;
-                if (confirmed) {
-                    // 滑出並刪除
-                    card.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-                    card.style.transform = 'translateX(-100%)';
-                    card.style.opacity = '0';
-                    setTimeout(() => deleteOneInlineRecord(prefix, idx, dateStr), 200);
+                const dx = e.changedTouches[0].clientX - startX;
+                const finalShift = revealed ? -THRESHOLD + dx : dx;
+
+                if (finalShift <= -THRESHOLD) {
+                    // 定格：顯示刪除按鈕
+                    revealed = true;
+                    card.style.transition = 'transform 0.2s ease';
+                    btnLayer.style.transition = 'opacity 0.2s';
+                    card.style.transform = `translateX(-${THRESHOLD}px)`;
+                    btnLayer.style.opacity = '1';
+                    btnLayer.style.pointerEvents = 'auto';
                 } else {
                     // 彈回
+                    revealed = false;
                     card.style.transition = 'transform 0.2s ease';
+                    btnLayer.style.transition = 'opacity 0.2s';
                     card.style.transform = '';
-                    bg.style.opacity = '0';
-                    setTimeout(() => { card.style.transition = ''; }, 200);
+                    btnLayer.style.opacity = '0';
+                    btnLayer.style.pointerEvents = 'none';
+                    setTimeout(() => { card.style.transition = ''; btnLayer.style.transition = 'opacity 0.15s'; }, 200);
                 }
                 sliding = false;
             }, { passive: true });
+
+            // 點擊卡片其他位置時收回
+            card.addEventListener('click', e => {
+                if (revealed && !e.target.closest('button')) {
+                    revealed = false;
+                    card.style.transition = 'transform 0.2s ease';
+                    btnLayer.style.transition = 'opacity 0.2s';
+                    card.style.transform = '';
+                    btnLayer.style.opacity = '0';
+                    btnLayer.style.pointerEvents = 'none';
+                    setTimeout(() => { card.style.transition = ''; btnLayer.style.transition = 'opacity 0.15s'; }, 200);
+                }
+            });
+        }
+
+        function _doDeleteCard(card, prefix, idx, dateStr) {
+            // 先收縮高度（下方卡片遞補動畫），再執行刪除
+            const h = card.offsetHeight;
+            card.style.transition = 'none';
+            card.style.transform = 'translateX(-100%)';
+            card.style.opacity = '0';
+            card.style.overflow = 'hidden';
+            card.style.height = h + 'px';
+            // 強制 reflow
+            card.getBoundingClientRect();
+            card.style.transition = 'height 0.22s ease, margin-bottom 0.22s ease, opacity 0.15s';
+            card.style.height = '0';
+            card.style.marginBottom = '0';
+            setTimeout(() => deleteOneInlineRecord(prefix, idx, dateStr), 220);
         }
 
         // ================= 材料訂購 Excel 匯出 =================
