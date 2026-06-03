@@ -478,6 +478,7 @@
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統</h3>
                 <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📥 匯入系統備份檔(JSON)</button>
                 <button onclick="exportJSON()" class="btn-slate" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📤 匯出系統備份</button>
+                <div id="lastExportInfo" style="font-size: 12px; color: #6b7280; padding: 4px 2px; min-height: 18px;"></div>
                 <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
                     <input type="month" id="inputExportOrderMonth" style="flex:1; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; background-color: white;">
                     <button onclick="exportOrderExcel()" class="btn-slate" style="flex-shrink:0; padding: 10px 14px; font-size: 13px; border-radius: 8px;">📊 匯出Excel</button>
@@ -704,6 +705,15 @@
             if (db.sites.length === 0 && db.categories.length === 0 && db.items.length === 0) {
                 if(!confirm('目前系統內無資料，確定要匯出空白的備份檔嗎？')) return;
             }
+            // 記錄匯出時間
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const exportTimeStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+            if (!db.config) db.config = { scriptUrl: '' };
+            db.config.lastExportAt = exportTimeStr;
+            saveToLocalStorage();
+            updateLastExportInfo();
+
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
             const downloadAnchorLine = document.createElement('a');
             downloadAnchorLine.setAttribute("href", dataStr);
@@ -711,6 +721,27 @@
             document.body.appendChild(downloadAnchorLine);
             downloadAnchorLine.click();
             downloadAnchorLine.remove();
+        }
+
+        function updateLastExportInfo() {
+            const el = document.getElementById('lastExportInfo');
+            if (!el) return;
+            const t = db.config && db.config.lastExportAt;
+            if (!t) {
+                el.textContent = '⚠️ 尚未匯出備份，請盡快備份！';
+                el.style.cssText = 'font-size:12px; color:#dc2626; font-weight:bold; padding:6px 8px; min-height:18px; background:#fef2f2; border:1px solid #fca5a5; border-radius:6px;';
+                return;
+            }
+            const lastDate = new Date(t.replace(' ', 'T'));
+            const diffDays = (Date.now() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
+            if (diffDays >= 3) {
+                const days = Math.floor(diffDays);
+                el.textContent = `⚠️ 已 ${days} 天未備份（上次：${t}）`;
+                el.style.cssText = 'font-size:12px; color:#dc2626; font-weight:bold; padding:6px 8px; min-height:18px; background:#fef2f2; border:1px solid #fca5a5; border-radius:6px;';
+            } else {
+                el.textContent = `✅ 上次備份：${t}`;
+                el.style.cssText = 'font-size:12px; color:#6b7280; padding:4px 2px; min-height:18px;';
+            }
         }
 
         function getTargetDateStr() {
@@ -2142,6 +2173,7 @@
                 if (_categorySortable) _categorySortable.option('disabled', true);
                 renderManageCategories(false);
                 renderManageCategoryDropdown();
+                updateLastExportInfo();
                 document.getElementById('pageManage').scrollTop = 0;
                 document.getElementById('manageListCategories').scrollTop = 0;
             } else if (page === 'siteInfo') {
