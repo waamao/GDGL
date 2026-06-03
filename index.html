@@ -481,6 +481,8 @@
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統</h3>
                 <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📥 匯入系統備份檔(JSON)</button>
                 <button onclick="exportJSON()" class="btn-slate" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📤 匯出系統備份</button>
+                <div id="backupWarningBanner" style="display:none; background:#fff7ed; border:1px solid #fb923c; border-radius:8px; padding:8px 12px; font-size:12px; color:#9a3412; font-weight:600;">⚠️ <span id="backupWarningText"></span></div>
+                <div id="lastExportTimeDisplay" style="display:none; font-size:12px; color:#64748b; text-align:right; margin-top:-4px;">上次備份：<span id="lastExportTimeText"></span></div>
                 <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
                     <select id="inputExportOrderMonth" style="flex:1; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; background-color: white;"></select>
                     <button onclick="exportOrderExcel()" class="btn-slate" style="flex-shrink:0; padding: 10px 14px; font-size: 13px; border-radius: 8px;">📊 匯出Excel</button>
@@ -635,8 +637,10 @@
         }
 
         function saveToLocalStorage() {
-            try { localStorage.setItem('construction_order_db', JSON.stringify(db)); } 
-            catch (e) { console.error("寫入本機存檔失敗", e); }
+            try {
+                localStorage.setItem('construction_order_db', JSON.stringify(db));
+                localStorage.setItem('_hasUnbackedChanges', '1');
+            } catch (e) { console.error("寫入本機存檔失敗", e); }
         }
 
         function saveScriptUrl() {
@@ -714,6 +718,51 @@
             document.body.appendChild(downloadAnchorLine);
             downloadAnchorLine.click();
             downloadAnchorLine.remove();
+            // 記錄匯出時間，清除未備份標記
+            const now = new Date();
+            const ts = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+            try {
+                localStorage.setItem('_lastExportTime', ts);
+                localStorage.removeItem('_hasUnbackedChanges');
+            } catch(e) {}
+            _refreshLastExportDisplay();
+        }
+
+        function _refreshLastExportDisplay() {
+            const ts = (() => { try { return localStorage.getItem('_lastExportTime'); } catch(e) { return null; } })();
+            const hasChanges = (() => { try { return localStorage.getItem('_hasUnbackedChanges') === '1'; } catch(e) { return false; } })();
+            const wrap = document.getElementById('lastExportTimeDisplay');
+            const txt = document.getElementById('lastExportTimeText');
+            const banner = document.getElementById('backupWarningBanner');
+            const bannerTxt = document.getElementById('backupWarningText');
+
+            // 顯示上次備份時間
+            if (wrap && txt) {
+                if (ts) { txt.innerText = ts; wrap.style.display = ''; }
+                else { wrap.style.display = 'none'; }
+            }
+
+            // 判斷是否需要顯示警示：有未備份變更 + 超過 7 天未備份
+            if (banner && bannerTxt) {
+                let needWarn = false;
+                let msg = '';
+                if (hasChanges) {
+                    if (!ts) {
+                        needWarn = true;
+                        msg = '尚未進行過系統備份，建議立即匯出！';
+                    } else {
+                        // 計算距上次備份天數
+                        const lastDate = new Date(ts.replace(/\//g, '-').replace(' ', 'T'));
+                        const diffDays = Math.floor((Date.now() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+                        if (diffDays >= 7) {
+                            needWarn = true;
+                            msg = `距上次備份已 ${diffDays} 天且有新變更，建議立即匯出！`;
+                        }
+                    }
+                }
+                banner.style.display = needWarn ? '' : 'none';
+                if (needWarn) bannerTxt.innerText = msg;
+            }
         }
 
         function getTargetDateStr() {
@@ -2210,6 +2259,7 @@
                 if(chkDisable) chkDisable.checked = db.config?.disableUpload || false;
                 // 填充匯出月份下拉選單，預設當月
                 _populateExportMonthSelect();
+                _refreshLastExportDisplay();
                 // 重置排序模式
                 _categorySortMode = false;
                 const catSortBtn = document.getElementById('btnCategorySort');
