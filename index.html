@@ -388,19 +388,22 @@
                         </div>
                         <!-- 唯讀 -->
                         <div id="mainInfoViewArea" style="display:flex; flex-direction:column; gap:8px;">
-                            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
-                                <div style="flex:1; min-width:0;">
-                                    <div style="font-size:11px; font-weight:bold; color:#9ca3af; margin-bottom:2px; letter-spacing:0.04em;">地址</div>
-                                    <div id="siteInfoViewAddress" style="font-size:14px; color:#374151; line-height:1.5; -webkit-user-select:text; user-select:text;">—</div>
-                                </div>
-                                <div style="flex-shrink:0; text-align:right;">
+                            <div>
+                                <div style="font-size:11px; font-weight:bold; color:#9ca3af; margin-bottom:2px; letter-spacing:0.04em;">地址</div>
+                                <div id="siteInfoViewAddress" style="font-size:14px; color:#374151; line-height:1.5; -webkit-user-select:text; user-select:text;">—</div>
+                            </div>
+                            <div id="siteInfoViewNotesWrap" style="display:none;">
+                                <div id="siteInfoViewNotes" style="font-size:14px; color:#374151; line-height:1.6; white-space:pre-wrap; -webkit-user-select:text; user-select:text;"></div>
+                            </div>
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding-top:6px; border-top:1px solid #f3f4f6;">
+                                <div>
                                     <div style="font-size:11px; font-weight:bold; color:#9ca3af; margin-bottom:2px; letter-spacing:0.04em;">承攬總價</div>
                                     <div id="siteInfoViewTotal" style="font-size:14px; font-weight:600; color:#1f2937;">—</div>
                                 </div>
-                            </div>
-                            <div style="display:flex; align-items:center; justify-content:space-between; padding-top:6px; border-top:1px solid #f3f4f6;">
-                                <span style="font-size:12px; font-weight:bold; color:#9ca3af; letter-spacing:0.04em;">總計價進度</span>
-                                <span id="siteInfoViewTotalPct" style="font-size:14px; font-weight:700; color:#1f2937;">—</span>
+                                <div style="text-align:right;">
+                                    <div style="font-size:11px; font-weight:bold; color:#9ca3af; margin-bottom:2px; letter-spacing:0.04em;">總計價進度</div>
+                                    <div id="siteInfoViewTotalPct" style="font-size:14px; font-weight:700; color:#1f2937;">—</div>
+                                </div>
                             </div>
                         </div>
                         <!-- 編輯 -->
@@ -409,6 +412,7 @@
                                 <label style="font-size:13px; font-weight:bold; color:#4b5563; display:block; margin-bottom:4px;">地址</label>
                                 <input type="text" id="inputSiteInfoAddress" placeholder="請輸入工地地址..." style="-webkit-user-select:text; user-select:text;">
                             </div>
+                            <textarea id="inputSiteInfoNotes" rows="3" placeholder="" style="width:100%; border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-size:14px; resize:none; line-height:1.6; -webkit-user-select:text; user-select:text;"></textarea>
                             <div>
                                 <label style="font-size:13px; font-weight:bold; color:#4b5563; display:block; margin-bottom:4px;">承攬總價</label>
                                 <input type="number" inputmode="numeric" id="inputSiteInfoTotal" placeholder="請輸入承攬總價..." style="-webkit-user-select:text; user-select:text;">
@@ -435,8 +439,6 @@
                 <!-- 標題列 -->
                 <div style="padding:14px 16px 10px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e5e7eb; flex-shrink:0; gap:8px;">
                     <span id="progressModalTitleView" style="flex:1; font-size:15px; font-weight:bold; color:#1f2937; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
-                    <input type="text" id="progressEditTitle" placeholder="計價進度名稱..."
-                        style="display:none; flex:1; min-width:0; border:1px solid #d1d5db; border-radius:8px; padding:8px 10px; font-size:14px; font-weight:bold; color:#1f2937; background:white; -webkit-user-select:text; user-select:text;">
                     <button id="btnProgressModalEdit" onclick="_enterProgressModalEdit()"
                         style="background:#374151; color:white; font-size:12px; font-weight:bold; padding:6px 14px; border-radius:8px; flex-shrink:0;">編輯</button>
                     <button id="btnProgressModalSave" onclick="_saveProgressModal()"
@@ -1382,6 +1384,15 @@
             // 資訊欄
             document.getElementById('siteInfoViewAddress').innerText = info.caseAddress || '—';
             document.getElementById('siteInfoViewTotal').innerText   = info.contractTotal ? _fmtAmount(info.contractTotal) : '—';
+            // 備注欄：有內容才顯示
+            const notesWrap = document.getElementById('siteInfoViewNotesWrap');
+            const notesEl   = document.getElementById('siteInfoViewNotes');
+            if (info.notes && info.notes.trim()) {
+                notesEl.innerText = info.notes.trim();
+                notesWrap.style.display = '';
+            } else {
+                notesWrap.style.display = 'none';
+            }
             _updateTotalProgressPct();
             document.getElementById('mainInfoViewArea').style.display  = 'flex';
             document.getElementById('mainInfoEditArea').style.display  = 'none';
@@ -1429,20 +1440,19 @@
             if (!db.siteInfo) db.siteInfo = {};
             const info = db.siteInfo[_siSelectedSiteId] || {};
             const site = db.sites.find(s => s.id === _siSelectedSiteId);
-            // 標題列：案場名稱改為輸入框
             document.getElementById('siteInfoViewSiteName').style.display = 'none';
             const nameInput = document.getElementById('inputSiteInfoName');
             nameInput.value = site ? site.name : '';
             nameInput.style.display = '';
-            // 資訊欄
             document.getElementById('inputSiteInfoAddress').value = info.caseAddress   || '';
+            document.getElementById('inputSiteInfoNotes').value   = info.notes         || '';
             document.getElementById('inputSiteInfoTotal').value   = info.contractTotal || '';
             document.getElementById('mainInfoViewArea').style.display  = 'none';
             document.getElementById('mainInfoEditArea').style.display  = 'flex';
             document.getElementById('btnMainInfoEdit').style.display   = 'none';
             document.getElementById('btnMainInfoSave').style.display   = '';
             document.getElementById('siteInfoEditActions').style.display = 'flex';
-            _setProgressEditBtnsVisible(false);
+            _renderAllProgressBlocks(); // 重繪為編輯模式卡片
         }
 
         function cancelMainInfoEdit() {
@@ -1452,8 +1462,8 @@
         function saveMainInfo() {
             const newName       = document.getElementById('inputSiteInfoName').value.trim();
             const caseAddress   = document.getElementById('inputSiteInfoAddress').value.trim();
+            const notes         = document.getElementById('inputSiteInfoNotes').value.trim();
             const contractTotal = document.getElementById('inputSiteInfoTotal').value.trim();
-            // 更新案場名稱（從標題列輸入框取得）
             if (newName) {
                 const site = db.sites.find(s => s.id === _siSelectedSiteId);
                 if (site && site.name !== newName) {
@@ -1471,25 +1481,18 @@
                     renderPunchSites();
                 }
             }
-            // 更新地址與總價
             if (!db.siteInfo) db.siteInfo = {};
             if (!db.siteInfo[_siSelectedSiteId]) db.siteInfo[_siSelectedSiteId] = {};
             db.siteInfo[_siSelectedSiteId].caseAddress   = caseAddress;
+            db.siteInfo[_siSelectedSiteId].notes         = notes;
             db.siteInfo[_siSelectedSiteId].contractTotal = contractTotal;
             saveToLocalStorage();
             _renderMainInfoView();
             _renderAllProgressBlocks();
         }
 
-        // ---- 控制計價進度框的按鈕顯示 ----
-        function _setProgressEditBtnsVisible(viewMode) {
-            document.querySelectorAll('.progress-block-edit-btn').forEach(btn => {
-                btn.style.display = viewMode ? '' : 'none';
-            });
-            document.querySelectorAll('.progress-block-delete-btn').forEach(btn => {
-                btn.style.display = viewMode ? 'none' : '';
-            });
-        }
+        // ---- 控制計價進度框的按鈕顯示（卡片在 _renderAllProgressBlocks 中依模式重建，此函式保留為相容空殼） ----
+        function _setProgressEditBtnsVisible(viewMode) { /* no-op: cards rebuilt in _renderAllProgressBlocks */ }
 
         // ---- 取得/初始化 blocks ----
         function _getBlocks() {
@@ -1519,6 +1522,7 @@
             const items = blk.items || [];
             const totalAmt = items.reduce((s, r) => s + (Number(r.amount)||0), 0);
             const totalPct = ct > 0 ? (totalAmt / ct * 100).toFixed(1) + '%' : '';
+            const isMainEditing = document.getElementById('mainInfoEditArea').style.display !== 'none';
 
             const card = document.createElement('div');
             card.className = 'card';
@@ -1526,16 +1530,42 @@
 
             const titleBar = document.createElement('div');
             titleBar.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:8px;';
-            titleBar.innerHTML = `
-                <span style="font-size:13px; font-weight:bold; color:#374151; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${blk.title || '計價進度'}</span>
-                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-                    <span style="font-size:13px; font-weight:600; color:#1f2937;">${totalPct}</span>
-                    <button class="progress-block-edit-btn" onclick="_openProgressModal(${bIdx})"
-                        style="background:#374151; color:white; font-size:12px; font-weight:bold; padding:5px 12px; border-radius:8px;">查看</button>
-                    <button class="progress-block-delete-btn" onclick="_deleteProgressBlock(${bIdx})"
-                        style="display:none; background:#ef4444; color:white; font-size:12px; font-weight:bold; padding:5px 12px; border-radius:8px;">刪除</button>
-                </div>
-            `;
+
+            if (isMainEditing) {
+                // 編輯模式：名稱可直接輸入，失焦儲存
+                titleBar.innerHTML = `
+                    <input type="text" value="${blk.title || '計價進度'}"
+                        class="progress-title-input"
+                        data-bidx="${bIdx}"
+                        style="flex:1; min-width:0; font-size:13px; font-weight:bold; color:#374151; border:1px solid #d1d5db; border-radius:8px; padding:6px 10px; background:white; -webkit-user-select:text; user-select:text;">
+                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                        <span style="font-size:13px; font-weight:600; color:#1f2937;">${totalPct}</span>
+                        <button class="progress-block-delete-btn" onclick="_deleteProgressBlock(${bIdx})"
+                            style="background:#ef4444; color:white; font-size:12px; font-weight:bold; padding:5px 12px; border-radius:8px;">刪除</button>
+                    </div>
+                `;
+                // 失焦立即儲存名稱
+                const inp = titleBar.querySelector('.progress-title-input');
+                inp.addEventListener('blur', () => {
+                    const blocks = _getBlocks();
+                    const val = inp.value.trim() || '計價進度';
+                    if (blocks[bIdx] && blocks[bIdx].title !== val) {
+                        blocks[bIdx].title = val;
+                        saveToLocalStorage();
+                    }
+                });
+                inp.addEventListener('click', e => e.stopPropagation());
+            } else {
+                // 唯讀模式：純文字 + 查看按鈕
+                titleBar.innerHTML = `
+                    <span style="font-size:13px; font-weight:bold; color:#374151; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${blk.title || '計價進度'}</span>
+                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                        <span style="font-size:13px; font-weight:600; color:#1f2937;">${totalPct}</span>
+                        <button class="progress-block-edit-btn" onclick="_openProgressModal(${bIdx})"
+                            style="background:#374151; color:white; font-size:12px; font-weight:bold; padding:5px 12px; border-radius:8px;">查看</button>
+                    </div>
+                `;
+            }
             card.appendChild(titleBar);
             return card;
         }
@@ -1556,9 +1586,7 @@
             const ct = _getContractTotal();
 
             document.getElementById('progressModalTitleView').innerText = blk.title || '計價進度';
-            document.getElementById('progressEditTitle').value = blk.title || '計價進度';
             document.getElementById('progressModalTitleView').style.display = '';
-            document.getElementById('progressEditTitle').style.display = 'none';
             document.getElementById('btnProgressModalEdit').style.display = '';
             document.getElementById('btnProgressModalSave').style.display = 'none';
             document.getElementById('progressModalAddBtn').style.display = 'none';
@@ -1579,8 +1607,7 @@
             const blk = blocks[_siEditingBlockIdx];
             const ct = _getContractTotal();
 
-            document.getElementById('progressModalTitleView').style.display = 'none';
-            document.getElementById('progressEditTitle').style.display = '';
+            document.getElementById('progressModalTitleView').style.display = '';
             document.getElementById('btnProgressModalEdit').style.display = 'none';
             document.getElementById('btnProgressModalSave').style.display = '';
             document.getElementById('progressModalAddBtn').style.display = '';
@@ -1680,7 +1707,8 @@
 
         function _saveProgressModal() {
             const blocks = _getBlocks();
-            const title = document.getElementById('progressEditTitle').value.trim() || '計價進度';
+            // 名稱已由卡片 blur 即時儲存，直接沿用
+            const title = (blocks[_siEditingBlockIdx] && blocks[_siEditingBlockIdx].title) || '計價進度';
             const rows  = document.querySelectorAll('#progressModalItems div[data-modal-row]');
             const items = [];
             rows.forEach(row => {
