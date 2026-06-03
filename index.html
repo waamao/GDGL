@@ -29,7 +29,7 @@
         button { border: none; cursor: pointer; border-radius: 8px; font-weight: bold; padding: 8px 12px; font-size: 12px; transition: background-color 0.2s; }
         button:active { opacity: 0.8; }
         .btn-blue { background-color: #374151; color: white; }
-        .btn-red { background-color: #ef4444; color: white; }
+        .btn-red { background-color: #D9006C; color: white; }
         .btn-green { background-color: #222222; color: white; }
         .btn-amber { background-color: #222222; color: white; }
         .btn-slate { background-color: #222222; color: white; }
@@ -79,7 +79,7 @@
         .manage-btns { display: flex; gap: 4px; flex-shrink: 0; }
         .manage-btns button { padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 6px; }
         .manage-btns .btn-rename { background-color: #374151; color: #ffffff; }
-        .manage-btns .btn-del { background-color: #ef4444; color: #ffffff; }
+        .manage-btns .btn-del { background-color: #D9006C; color: #ffffff; }
         
         .bottom-btn-group, .home-fixed-bottom { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 416px; display: flex; flex-direction: column; gap: 8px; z-index: 100; background-color: transparent; }
         .bottom-btn-group-inner { display: flex; gap: 8px; width: 100%; }
@@ -91,7 +91,7 @@
 
         .log-entry-item { padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background-color: #f9fafb; position: relative; display: flex; flex-direction: column; gap: 8px; }
         .log-entry-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .btn-delete-log-item { background: none; color: #ef4444; font-size: 16px; padding: 4px 8px; position: absolute; top: 4px; right: 4px; }
+        .btn-delete-log-item { background: none; color: #D9006C; font-size: 16px; padding: 4px 8px; position: absolute; top: 4px; right: 4px; }
 
         /* 月曆元件樣式 */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -131,6 +131,11 @@
             -webkit-touch-callout: default;
         }
 
+        /* 點擊記錄卡內容區域不觸發選取checkbox */
+        .view-box-card .view-box-content {
+            cursor: default;
+        }
+
         /* 品項列表支援長按複製 */
         #listItems .item-label span,
         #listCategories .item-label span {
@@ -152,7 +157,7 @@
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
             <button id="btnSiteInfo" onclick="navigateTo('siteInfo')" class="btn-slate">案場資訊</button>
             <button id="btnPunchTop" onclick="navigateTo('punch')" class="btn-slate">打卡</button>
-            <button id="btnHomeManage" onclick="navigateTo('manage')" class="btn-slate">⚙️ 設定</button>
+            <button id="btnHomeManage" onclick="navigateTo('manage')" class="btn-slate">設定</button>
         </div>
     </header>
 
@@ -166,13 +171,18 @@
                     <div class="calendar-header">
                         <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 0; font-size:12px; width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">←</button>
                         <div style="display:flex; flex-direction:row; align-items:center; gap:6px; flex:1; justify-content:center;">
-                            <button onclick="goToToday()" class="btn-slate" style="padding: 3px 10px; font-size:18px; border-radius:18px;">今天</button>
+                            <button onclick="goToToday()" class="btn-slate" style="padding: 9px 12px; font-size:12px; border-radius:18px;">今天</button>
                             <span id="homeCalendarTitle" style="display:none;"></span>
-                            <span id="homeCalendarDateDisplay" style="font-size:18px; color:#ffffff; font-weight:500; background-color:#222222; padding:3px 10px; border-radius:18px; white-space:nowrap;"></span>
+                            <span id="homeCalendarDateDisplay" style="font-size:12px; color:#ffffff; font-weight:500; background-color:#222222; padding:9px 12px; border-radius:18px; white-space:nowrap;"></span>
                         </div>
                         <button onclick="changeHomeMonth(1)" class="btn-slate" style="padding: 0; font-size:12px; width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">→</button>
                     </div>
                     <div class="calendar-grid" id="homeCalendarGrid"></div>
+                </div>
+
+                <!-- 無資料時顯示匯入備份按鈕 -->
+                <div id="homeImportBtnWrap" class="hidden" style="flex-shrink: 0; text-align: center; padding: 8px 0;">
+                    <button onclick="document.getElementById('importFile').click()" style="background-color:#374151; color:white; font-size:14px; font-weight:bold; padding:12px 24px; border-radius:12px; width:100%;">📥 匯入系統備份</button>
                 </div>
 
                 <!-- 單日記錄內嵌區 -->
@@ -342,7 +352,7 @@
             <div class="alert-box alert-amber" style="line-height: 1.6;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div><strong>預計送貨地點：</strong> <span id="cartSiteName"></span></div>
-                    <button onclick="clearOnlyOrder()" style="background-color:#ef4444; color:white; border-radius:8px; padding:4px 10px; font-size:12px; font-weight:bold; flex-shrink:0;">清除訂單</button>
+                    <button onclick="clearOnlyOrder()" style="background-color:#D9006C; color:white; border-radius:8px; padding:4px 10px; font-size:12px; font-weight:bold; flex-shrink:0;">清除訂單</button>
                 </div>
             </div>
             <div class="list-container">
@@ -425,7 +435,7 @@
                 <div id="progressDetailWrap" style="display:none; flex-direction:column; gap:0;">
                     <div id="progressBlocksContainer" style="display:flex; flex-direction:column; gap:0;"></div>
                     <div id="siteInfoEditActions" style="display:none; flex-direction:row; gap:8px; padding:8px 0 4px;">
-                        <button onclick="deleteSiteFromInfo()" style="flex:1; height:44px; background:#ef4444; color:white; border-radius:8px; font-size:13px; font-weight:bold;">刪除案場</button>
+                        <button onclick="deleteSiteFromInfo()" style="flex:1; height:44px; background:#D9006C; color:white; border-radius:8px; font-size:13px; font-weight:bold;">刪除案場</button>
                         <button onclick="addProgressBlock()" style="flex:1; height:44px; background:#374151; color:white; border-radius:8px; font-size:13px; font-weight:bold;">＋ 新增計價進度表</button>
                     </div>
                 </div>
@@ -462,7 +472,7 @@
 
         <section id="pageManage" class="page" style="overflow-y: auto;">
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1;">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統還原</h3>
+                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統</h3>
                 <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📥 匯入系統備份檔(JSON)</button>
                 <button onclick="exportJSON()" class="btn-slate" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📤 匯出系統備份</button>
                 <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
@@ -524,7 +534,7 @@
                 <!-- 日期選擇 -->
                 <div>
                     <label style="font-size:13px; font-weight:bold; color:#4b5563; display:block; margin-bottom:4px;">紀錄日期：</label>
-                    <input type="date" id="editLogDate" style="width:120px; border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-size:14px; background:white;">
+                    <input type="date" id="editLogDate" style="width:180px; border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-size:14px; background:white;">
                 </div>
                 <!-- 案場選擇 -->
                 <div>
@@ -676,6 +686,7 @@
                         currentState.siteId = null;
                         currentState.siteName = '';
                         navigateTo('sites');
+                        updateHomeImportBtn();
                     } else { alert('匯入失敗：JSON 結構格式不正確。'); }
                 } catch (err) { alert('讀取檔案失敗。'); }
             };
@@ -699,6 +710,25 @@
         function getTargetDateStr() {
             const now = new Date();
             return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        function updateHomeImportBtn() {
+            const btn = document.getElementById('homeImportBtnWrap');
+            if (!btn) return;
+            // 檢查是否完全無任何記錄（施工日誌、打卡、工地記事、訂單）
+            let hasAny = false;
+            if (db.dailyRecords) {
+                for (const d in db.dailyRecords) {
+                    const r = db.dailyRecords[d];
+                    if (r && (r.log || r.notes || r.order)) { hasAny = true; break; }
+                }
+            }
+            if (!hasAny && db.punches) {
+                for (const sId in db.punches) {
+                    if (db.punches[sId] && Object.keys(db.punches[sId]).length > 0) { hasAny = true; break; }
+                }
+            }
+            btn.classList.toggle('hidden', hasAny);
         }
 
         // ================= 月曆控制模組 =================
@@ -849,7 +879,7 @@
                                 <button type="button" onclick="event.preventDefault();event.stopPropagation();openInlineEdit('${prefix}','${idx}','${dateStr}')" style="background:#374151;color:white;font-size:11px;padding:3px 8px;border-radius:6px;flex-shrink:0;">編輯</button>
                             </div>
                         </div>
-                        <div class="view-box-content" id="${prefix}_content_${idx}">${item.text}</div>
+                        <div class="view-box-content" id="${prefix}_content_${idx}" onclick="event.preventDefault();event.stopPropagation();">${item.text}</div>
                     `;
                     inlineContent.appendChild(card);
                 });
@@ -886,7 +916,7 @@
                             <button type="button" onclick="event.preventDefault();event.stopPropagation();openInlineEditPunch('${dateStr}')" style="background:#374151;color:white;font-size:11px;padding:3px 8px;border-radius:6px;flex-shrink:0;">編輯</button>
                         </div>
                     </div>
-                    <div class="view-box-content" id="inlineChkPunch_content">${punchDisplayText}</div>
+                    <div class="view-box-content" id="inlineChkPunch_content" onclick="event.preventDefault();event.stopPropagation();">${punchDisplayText}</div>
                 `;
                 inlineContent.appendChild(card);
             }
@@ -905,6 +935,7 @@
                 chk.addEventListener('change', updateHomeBottomBtns);
             });
             updateHomeBottomBtns();
+            updateHomeImportBtn();
         }
 
         function updateHomeBottomBtns() {
@@ -1114,6 +1145,7 @@
                 alert('所選取的勾選紀錄已成功刪除！');
                 showInlineDayView(dateStr);
                 uncheckAllInline();
+                updateHomeImportBtn();
             }
         }
 
@@ -1467,6 +1499,7 @@
             if (newName) {
                 const site = db.sites.find(s => s.id === _siSelectedSiteId);
                 if (site && site.name !== newName) {
+                    const oldName = site.name;
                     site.name = newName;
                     if (currentState.siteId === _siSelectedSiteId) {
                         currentState.siteName = newName;
@@ -1475,6 +1508,21 @@
                             if (el) el.innerText = newName;
                         });
                     }
+                    // 更新所有 dailyRecords 內的案場名稱文字
+                    Object.keys(db.dailyRecords).forEach(dateStr => {
+                        const rec = db.dailyRecords[dateStr];
+                        if (!rec) return;
+                        ['log','notes','order'].forEach(type => {
+                            if (!rec[type]) return;
+                            const arr = Array.isArray(rec[type]) ? rec[type] : [rec[type]];
+                            arr.forEach(entry => {
+                                if (entry && entry.text) {
+                                    entry.text = entry.text.split(oldName).join(newName);
+                                }
+                            });
+                            rec[type] = arr;
+                        });
+                    });
                     renderSiteInfoList();
                     renderPageSiteSelector('logSiteGroup', 'log');
                     renderPageSiteSelector('categoriesSiteGroup', 'categories');
@@ -1541,7 +1589,7 @@
                     <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
                         <span style="font-size:13px; font-weight:600; color:#1f2937;">${totalPct}</span>
                         <button class="progress-block-delete-btn" onclick="_deleteProgressBlock(${bIdx})"
-                            style="background:#ef4444; color:white; font-size:12px; font-weight:bold; padding:5px 12px; border-radius:8px;">刪除</button>
+                            style="background:#D9006C; color:white; font-size:12px; font-weight:bold; padding:5px 12px; border-radius:8px;">刪除</button>
                     </div>
                 `;
                 // 失焦立即儲存名稱
@@ -1640,7 +1688,7 @@
                         style="font-size:13px; padding:8px 10px; border:1px solid #d1d5db; border-radius:8px; background:white; text-align:right; -webkit-user-select:text; user-select:text; height:40px;">
                     <span class="modal-pct-cell" style="font-size:12px; color:#374151; text-align:right; padding-right:2px;">${pct}</span>
                     <button type="button" onclick="_removeModalItem(this)"
-                        style="background:none; color:#ef4444; font-size:18px; padding:0; line-height:1; font-weight:bold;">×</button>
+                        style="background:none; color:#D9006C; font-size:18px; padding:0; line-height:1; font-weight:bold;">×</button>
                 `;
             } else {
                 div.innerHTML = `
@@ -2218,7 +2266,7 @@
                         <span style="font-size:14px;">${itemObj.name}</span>
                     </div>
                     <input type="number" inputmode="decimal" pattern="[0-9]*" value="${cart[itemId].qty}" onfocus="if(!currentState.siteId){this.blur();alert('⚠️ 請先選擇送貨地點！');return;}" oninput="changeCartQty('${itemId}', this.value)" class="cart-qty-input" placeholder="數量">
-                    <button onclick="removeCartItem('${itemId}')" style="background:none; color:#ef4444; font-size:14px;">❌</button>
+                    <button onclick="removeCartItem('${itemId}')" style="background:none; color:#D9006C; font-size:14px;">❌</button>
                 `;
                 list.appendChild(div);
             });
@@ -2757,7 +2805,7 @@
                         <span style="font-size:14px;">${it.itemName}</span>
                     </div>
                     <input type="number" inputmode="decimal" pattern="[0-9]*" value="${it.qty}" oninput="_editOrderItems[${idx}].qty=this.value" class="cart-qty-input" placeholder="數量/單位">
-                    <button onclick="removeEditOrderItem(${idx})" style="background:none;color:#ef4444;font-size:14px;">❌</button>
+                    <button onclick="removeEditOrderItem(${idx})" style="background:none;color:#D9006C;font-size:14px;">❌</button>
                 `;
                 list.appendChild(div);
             });
@@ -3021,6 +3069,7 @@
             const todayEl = document.querySelector('.calendar-day.today');
             if (todayEl) todayEl.classList.add('selected');
             showInlineDayView(todayStr);
+            updateHomeImportBtn();
 
             new Sortable(document.getElementById('manageListCategories'), {
                 animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost',
