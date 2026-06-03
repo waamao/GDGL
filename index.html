@@ -567,7 +567,7 @@
             </div>
             <div style="padding:4px 16px 4px;">
                 <label style="font-size:13px; font-weight:bold; color:#4b5563; display:block; margin-bottom:4px;">訂購日期：</label>
-                <input type="date" id="editOrderDate" style="width:120px; border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-size:14px; background:white;">
+                <input type="date" id="editOrderDate" style="width:180px; border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-size:14px; background:white;">
             </div>
             <div style="flex:1; overflow-y:auto; padding:0 16px 8px;">
                 <h3 style="font-size:14px; color:#4b5563; margin:8px 0 4px;">已選材料明細：</h3>
@@ -2096,7 +2096,7 @@
                 if (siList && !siList._sortableInit) {
                     siList._sortableInit = true;
                     new Sortable(siList, {
-                        animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost',
+                        animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', threshold: 5,
                         onEnd: function() {
                             const sorted = [];
                             siList.querySelectorAll('.manage-item').forEach(el => {
@@ -3072,7 +3072,7 @@
             updateHomeImportBtn();
 
             new Sortable(document.getElementById('manageListCategories'), {
-                animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost',
+                animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', threshold: 5,
                 onEnd: function () {
                     const sorted = [];
                     document.querySelectorAll('#manageListCategories .manage-item').forEach(el => {
