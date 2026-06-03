@@ -170,10 +170,13 @@
                 <div class="card" style="padding: 8px; flex-shrink: 0;">
                     <div class="calendar-header">
                         <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 0; font-size:12px; width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">←</button>
-                        <div style="display:flex; flex-direction:row; align-items:center; gap:6px; flex:1; justify-content:center;">
+                        <div style="display:flex; flex-direction:row; align-items:center; gap:6px; flex:1; justify-content:center; position:relative;">
                             <button onclick="goToToday()" class="btn-slate" style="padding: 9px 12px; font-size:12px; border-radius:18px;">今天</button>
                             <span id="homeCalendarTitle" style="display:none;"></span>
-                            <span id="homeCalendarDateDisplay" style="font-size:12px; color:#ffffff; font-weight:500; background-color:#222222; padding:9px 12px; border-radius:18px; white-space:nowrap;"></span>
+                            <span id="homeCalendarDateDisplay" onclick="toggleCalendarMonthPicker(event)" style="font-size:12px; color:#ffffff; font-weight:500; background-color:#222222; padding:9px 12px; border-radius:18px; white-space:nowrap; cursor:pointer; position:relative;"></span>
+                            <!-- 月份下拉選擇器 -->
+                            <div id="calendarMonthPickerDropdown" style="display:none; position:absolute; z-index:500; background:white; border:1px solid #d1d5db; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); padding:8px 0; min-width:160px; max-height:260px; overflow-y:auto; top:36px; left:50%; transform:translateX(-50%);">
+                            </div>
                         </div>
                         <button onclick="changeHomeMonth(1)" class="btn-slate" style="padding: 0; font-size:12px; width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">→</button>
                     </div>
@@ -478,9 +481,8 @@
                 <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">系統</h3>
                 <button onclick="document.getElementById('importFile').click()" class="btn-amber" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📥 匯入系統備份檔(JSON)</button>
                 <button onclick="exportJSON()" class="btn-slate" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px;">📤 匯出系統備份</button>
-                <div id="lastExportInfo" style="font-size: 12px; color: #6b7280; padding: 4px 2px; min-height: 18px;"></div>
                 <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
-                    <input type="month" id="inputExportOrderMonth" style="flex:1; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; background-color: white;">
+                    <select id="inputExportOrderMonth" style="flex:1; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; background-color: white;"></select>
                     <button onclick="exportOrderExcel()" class="btn-slate" style="flex-shrink:0; padding: 10px 14px; font-size: 13px; border-radius: 8px;">📊 匯出Excel</button>
                 </div>
             </div>
@@ -705,15 +707,6 @@
             if (db.sites.length === 0 && db.categories.length === 0 && db.items.length === 0) {
                 if(!confirm('目前系統內無資料，確定要匯出空白的備份檔嗎？')) return;
             }
-            // 記錄匯出時間
-            const now = new Date();
-            const pad = n => String(n).padStart(2, '0');
-            const exportTimeStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-            if (!db.config) db.config = { scriptUrl: '' };
-            db.config.lastExportAt = exportTimeStr;
-            saveToLocalStorage();
-            updateLastExportInfo();
-
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
             const downloadAnchorLine = document.createElement('a');
             downloadAnchorLine.setAttribute("href", dataStr);
@@ -721,27 +714,6 @@
             document.body.appendChild(downloadAnchorLine);
             downloadAnchorLine.click();
             downloadAnchorLine.remove();
-        }
-
-        function updateLastExportInfo() {
-            const el = document.getElementById('lastExportInfo');
-            if (!el) return;
-            const t = db.config && db.config.lastExportAt;
-            if (!t) {
-                el.textContent = '⚠️ 尚未匯出備份，請盡快備份！';
-                el.style.cssText = 'font-size:12px; color:#dc2626; font-weight:bold; padding:6px 8px; min-height:18px; background:#fef2f2; border:1px solid #fca5a5; border-radius:6px;';
-                return;
-            }
-            const lastDate = new Date(t.replace(' ', 'T'));
-            const diffDays = (Date.now() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
-            if (diffDays >= 3) {
-                const days = Math.floor(diffDays);
-                el.textContent = `⚠️ 已 ${days} 天未備份（上次：${t}）`;
-                el.style.cssText = 'font-size:12px; color:#dc2626; font-weight:bold; padding:6px 8px; min-height:18px; background:#fef2f2; border:1px solid #fca5a5; border-radius:6px;';
-            } else {
-                el.textContent = `✅ 上次備份：${t}`;
-                el.style.cssText = 'font-size:12px; color:#6b7280; padding:4px 2px; min-height:18px;';
-            }
         }
 
         function getTargetDateStr() {
@@ -1402,7 +1374,81 @@
             return html;
         }
 
-        // ---- 渲染案場清單 ----
+        // ---- 月曆標題月份下拉選擇器 ----
+        function toggleCalendarMonthPicker(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('calendarMonthPickerDropdown');
+            if (dropdown.style.display !== 'none') {
+                dropdown.style.display = 'none';
+                return;
+            }
+            // 建立選項：前36月 ~ 後12月
+            dropdown.innerHTML = '';
+            const now = new Date();
+            const curVal = `${homeCalYear}-${String(homeCalMonth+1).padStart(2,'0')}`;
+            for (let offset = -36; offset <= 12; offset++) {
+                const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+                const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                const label = `${d.getFullYear()}年${String(d.getMonth()+1).padStart(2,'0')}月`;
+                const item = document.createElement('div');
+                item.innerText = label;
+                item.style.cssText = `padding:10px 18px; font-size:14px; cursor:pointer; white-space:nowrap; background:${val===curVal?'#1f2937':'white'}; color:${val===curVal?'#ffffff':'#1f2937'};`;
+                item.addEventListener('mouseenter', function() { if(val!==curVal) this.style.background='#f3f4f6'; });
+                item.addEventListener('mouseleave', function() { if(val!==curVal) this.style.background='white'; });
+                item.addEventListener('click', function(ev) {
+                    ev.stopPropagation();
+                    dropdown.style.display = 'none';
+                    const [y, m] = val.split('-').map(Number);
+                    homeCalYear = y;
+                    homeCalMonth = m - 1;
+                    initHomeCalendar();
+                    // 若回到本月，選今天；否則選1號
+                    const todayReal = new Date();
+                    if (y === todayReal.getFullYear() && m - 1 === todayReal.getMonth()) {
+                        const todayStr = getTargetDateStr();
+                        document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+                        const todayEl = document.querySelector('.calendar-day.today');
+                        if (todayEl) todayEl.classList.add('selected');
+                        selectedHomeDateStr = todayStr;
+                        updateCalendarDateDisplay(todayStr);
+                        showInlineDayView(todayStr);
+                    } else {
+                        const firstDateStr = `${y}-${String(m).padStart(2,'0')}-01`;
+                        document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+                        const allDays = document.querySelectorAll('.calendar-day:not(.empty)');
+                        if (allDays.length > 0) allDays[0].classList.add('selected');
+                        selectedHomeDateStr = firstDateStr;
+                        updateCalendarDateDisplay(firstDateStr);
+                        showInlineDayView(firstDateStr);
+                    }
+                });
+                dropdown.appendChild(item);
+            }
+            dropdown.style.display = 'block';
+            // 捲動到當前月份
+            const selItem = Array.from(dropdown.children).find((_, i) => {
+                const d = new Date(now.getFullYear(), now.getMonth() - 36 + i, 1);
+                return d.getFullYear()===homeCalYear && d.getMonth()===homeCalMonth;
+            });
+            if (selItem) setTimeout(()=>{ selItem.scrollIntoView({block:'center'}); }, 10);
+        }
+
+        // 點外部關閉月份選擇器
+        document.addEventListener('click', function() {
+            const d = document.getElementById('calendarMonthPickerDropdown');
+            if (d) d.style.display = 'none';
+        });
+
+        // ---- 設定頁匯出月份下拉選單 ----
+        function _populateExportMonthSelect() {
+            const sel = document.getElementById('inputExportOrderMonth');
+            if (!sel) return;
+            const now = new Date();
+            const curVal = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            sel.innerHTML = _buildMonthOptions(curVal);
+        }
+
+
         function renderSiteInfoList(sortMode) {
             if (sortMode === undefined) sortMode = _siteInfoSortMode;
             const box = document.getElementById('siteInfoList');
@@ -2162,10 +2208,8 @@
                 document.getElementById('inputScriptUrl').value = db.config?.scriptUrl || '';
                 const chkDisable = document.getElementById('chkDisableUpload');
                 if(chkDisable) chkDisable.checked = db.config?.disableUpload || false;
-                const now = new Date();
-                const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-                const exportMonthEl = document.getElementById('inputExportOrderMonth');
-                if (exportMonthEl && !exportMonthEl.value) exportMonthEl.value = thisMonth;
+                // 填充匯出月份下拉選單，預設當月
+                _populateExportMonthSelect();
                 // 重置排序模式
                 _categorySortMode = false;
                 const catSortBtn = document.getElementById('btnCategorySort');
@@ -2173,7 +2217,6 @@
                 if (_categorySortable) _categorySortable.option('disabled', true);
                 renderManageCategories(false);
                 renderManageCategoryDropdown();
-                updateLastExportInfo();
                 document.getElementById('pageManage').scrollTop = 0;
                 document.getElementById('manageListCategories').scrollTop = 0;
             } else if (page === 'siteInfo') {
