@@ -275,40 +275,23 @@
         </section>
 
     <!-- 案場資訊 彈窗 -->
-    <div id="siteInfoModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center;">
-        <div style="background:white; border-radius:14px; padding:0; width:calc(100% - 32px); max-width:416px; display:flex; flex-direction:column; max-height:90vh; overflow:hidden;">
+    <div id="siteInfoModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:flex-start; justify-content:center;" onclick="if(event.target===this)closeSiteInfoModal();">
+        <div id="siteInfoModalInner" style="background:white; border-radius:14px; padding:0; width:calc(100% - 32px); max-width:416px; display:flex; flex-direction:column; max-height:80vh; overflow:hidden;">
             <div style="padding:12px 16px 8px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; gap:8px;">
                 <span style="font-size:14px; font-weight:bold; color:#1f2937; flex:1; min-width:0;">案場資訊</span>
-                <button onclick="closeSiteInfoModal()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 18px; border-radius:8px; flex-shrink:0;">✕ 關閉</button>
+                <button onclick="enterMainInfoEdit()" id="btnMainInfoEdit" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">編輯</button>
+                <button onclick="saveMainInfo()" id="btnMainInfoSave" style="display:none; background:#000000; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">儲存</button>
             </div>
             <div style="flex:1; overflow-y:auto; padding:12px 16px; display:flex; flex-direction:column; gap:12px;">
-                <div class="card" style="flex-shrink:0; padding:10px 14px;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                        <span style="font-size:13px; font-weight:bold; color:#4b5563;">選擇案場：</span>
-                        <div style="display:flex; gap:6px; align-items:center;">
-                            <button id="btnSiteInfoSort" onclick="toggleSiteInfoSort()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">排序</button>
-                            <button onclick="(function(){var w=document.getElementById('addSiteInlineWrap');var show=w.style.display==='none'||w.style.display==='';w.style.display=show?'block':'none';if(show)document.getElementById('inputNewSiteInfo').focus();})()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增</button>
-                        </div>
-                    </div>
-                    <div id="addSiteInlineWrap" style="display:none; margin-bottom:8px;">
-                        <div style="display:flex; gap:8px;">
-                            <input type="text" id="inputNewSiteInfo" placeholder="輸入案場名稱..." style="-webkit-user-select:text; user-select:text; flex:1;">
-                            <button onclick="confirmAddSiteInfo()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">確定</button>
-                            <button onclick="cancelAddSiteInfo()" style="background:#111111; color:white; font-size:13px; font-weight:bold; padding:6px 10px; border-radius:8px; flex-shrink:0;">✕</button>
-                        </div>
-                    </div>
-                    <div id="siteInfoList" style="display:flex; flex-direction:column; gap:4px; max-height:180px; overflow-y:auto;"></div>
+                <div>
+                    <label style="font-size:13px; font-weight:bold; color:#4b5563; display:block; margin-bottom:4px;">選擇案場：</label>
+                    <select id="siteInfoSiteSelect" onchange="selectSiteInfoSite(this.value)" style="width:100%; border:1px solid #d1d5db; border-radius:8px; padding:8px 10px; font-size:14px; background:white; color:#1f2937;"></select>
                 </div>
 
                 <div id="siteInfoDetailWrap" style="display:none;">
                     <div class="card" style="margin-bottom:0;">
-                        <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid #e5e7eb; margin-bottom:10px; gap:8px;">
+                        <div style="display:flex; align-items:center; padding-bottom:8px; border-bottom:1px solid #e5e7eb; margin-bottom:10px; gap:8px;">
                             <div id="siteInfoViewSiteName" style="font-size:14px; font-weight:700; color:#1f2937; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
-                            <input type="text" id="inputSiteInfoName" placeholder="案場名稱..."
-                                style="display:none; flex:1; min-width:0; border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-size:14px; font-weight:700; color:#1f2937; background:white; -webkit-user-select:text; user-select:text;">
-                            <button onclick="enterMainInfoEdit()" id="btnMainInfoEdit" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">編輯</button>
-                            <button onclick="deleteSiteFromInfo()" id="btnDeleteSiteInEdit" style="display:none; background:#D9006C; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">刪除案場</button>
-                            <button onclick="saveMainInfo()" id="btnMainInfoSave" style="display:none; background:#000000; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">儲存</button>
                         </div>
                         <div id="mainInfoViewArea" style="display:flex; flex-direction:column; gap:8px;">
                             <div>
@@ -385,6 +368,23 @@
                     <select id="inputExportOrderMonth" style="flex:1; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px; background-color: #F0F0F0;"></select>
                     <button onclick="exportOrderExcel()" class="btn-slate" style="flex-shrink:0; padding: 10px 14px; font-size: 13px; border-radius: 8px;">📊 訂單Excel</button>
                 </div>
+            </div>
+            <div class="card">
+                <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e5e7eb; padding-bottom:4px; margin-bottom:8px;">
+                    <h3 style="font-size: 14px; margin: 0; color: #374151;">案場維護</h3>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <button id="btnSiteInfoSort" onclick="toggleSiteInfoSort()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">排序</button>
+                        <button onclick="(function(){var w=document.getElementById('addSiteInlineWrap');var show=w.style.display==='none'||w.style.display==='';w.style.display=show?'block':'none';if(show)document.getElementById('inputNewSiteInfo').focus();})()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增</button>
+                    </div>
+                </div>
+                <div id="addSiteInlineWrap" style="display:none; margin-bottom:8px;">
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="inputNewSiteInfo" placeholder="輸入案場名稱..." style="-webkit-user-select:text; user-select:text; flex:1;">
+                        <button onclick="confirmAddSiteInfo()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">確定</button>
+                        <button onclick="cancelAddSiteInfo()" style="background:#111111; color:white; font-size:13px; font-weight:bold; padding:6px 10px; border-radius:8px; flex-shrink:0;">✕</button>
+                    </div>
+                </div>
+                <div id="siteInfoList" class="scroll-box"></div>
             </div>
             <div class="card">
                 <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e5e7eb; padding-bottom:4px; margin-bottom:0;">
@@ -1508,25 +1508,89 @@
                 const div = document.createElement('div');
                 div.className = 'manage-item';
                 div.setAttribute('data-id', site.id);
-                div.style.cssText = 'cursor:pointer; border-radius:8px;';
-                const isSel = site.id === _siSelectedSiteId;
-                if (isSel && !sortMode) { div.style.background = '#111111'; div.style.borderColor = '#111111'; }
                 if (sortMode) {
                     div.innerHTML = `
                         <span class="manage-text" style="font-size:14px; font-weight:600; color:#1f2937;">${site.name}</span>
                         <span class="drag-handle" style="flex-shrink:0; color:#374151; font-size:16px; padding:4px 0 4px 24px;">☰</span>
                     `;
                 } else {
-                    div.innerHTML = `<span class="manage-text" style="font-size:14px; font-weight:600; color:${isSel?'#ffffff':'#1f2937'};">${site.name}</span>`;
-                    div.addEventListener('click', () => selectSiteInfoSite(site.id));
+                    div.innerHTML = `
+                        <span class="manage-text" style="font-size:14px; font-weight:600; color:#1f2937;">${site.name}</span>
+                        <div class="manage-btns">
+                            <button class="btn-rename" onclick="renameSiteFromManage('${site.id}')">改名</button>
+                            <button class="btn-del" onclick="deleteSiteFromManage('${site.id}')">刪除</button>
+                        </div>
+                    `;
                 }
                 box.appendChild(div);
             });
         }
 
-        function selectSiteInfoSite(siteId) {
-            _siSelectedSiteId = siteId;
+        function renameSiteFromManage(siteId) {
+            const site = db.sites.find(s => s.id === siteId);
+            if (!site) return;
+            const newName = prompt('請輸入案場新名稱：', site.name);
+            if (!newName || !newName.trim()) return;
+            const trimmed = newName.trim();
+            if (db.sites.some(s => s.id !== siteId && s.name === trimmed)) return alert(`案場「${trimmed}」已存在，請使用不同名稱。`);
+            const oldName = site.name;
+            site.name = trimmed;
+            if (currentState.siteId === siteId) currentState.siteName = trimmed;
+            // 同步歷史記錄文字
+            Object.keys(db.dailyRecords).forEach(dateStr => {
+                const rec = db.dailyRecords[dateStr];
+                if (!rec) return;
+                ['log','order'].forEach(type => {
+                    if (!rec[type]) return;
+                    const arr = Array.isArray(rec[type]) ? rec[type] : [rec[type]];
+                    arr.forEach(entry => { if (entry && entry.text) entry.text = entry.text.split(oldName).join(trimmed); });
+                    rec[type] = arr;
+                });
+            });
+            saveToLocalStorage();
             renderSiteInfoList();
+            // 同步刷新彈窗下拉選單
+            const sel = document.getElementById('siteInfoSiteSelect');
+            if (sel) {
+                Array.from(sel.options).forEach(opt => { if (opt.value === siteId) opt.textContent = trimmed; });
+            }
+            // 若目前選中此案場，更新顯示名稱
+            if (_siSelectedSiteId === siteId) {
+                const nameEl = document.getElementById('siteInfoViewSiteName');
+                if (nameEl) nameEl.innerText = trimmed;
+            }
+        }
+
+        function deleteSiteFromManage(siteId) {
+            const site = db.sites.find(s => s.id === siteId);
+            if (!site) return;
+            if (!confirm(`確定要刪除案場「${site.name}」嗎？`)) return;
+            db.sites = db.sites.filter(s => s.id !== siteId);
+            if (db.siteInfo && db.siteInfo[siteId]) delete db.siteInfo[siteId];
+            if (currentState.siteId === siteId) { currentState.siteId = null; currentState.siteName = ''; }
+            saveToLocalStorage();
+            renderSiteInfoList();
+            // 同步刷新彈窗下拉選單
+            const sel = document.getElementById('siteInfoSiteSelect');
+            if (sel) {
+                const opt = sel.querySelector(`option[value="${siteId}"]`);
+                if (opt) opt.remove();
+                // 若刪的是目前選中的案場，清空詳細區
+                if (_siSelectedSiteId === siteId) {
+                    _siSelectedSiteId = null;
+                    document.getElementById('siteInfoDetailWrap').style.display = 'none';
+                    document.getElementById('progressDetailWrap').style.display = 'none';
+                    sel.value = '';
+                }
+            }
+        }
+
+        function selectSiteInfoSite(siteId) {
+            if (!siteId) return;
+            _siSelectedSiteId = siteId;
+            // 同步下拉選單
+            const sel = document.getElementById('siteInfoSiteSelect');
+            if (sel && sel.value !== siteId) sel.value = siteId;
             document.getElementById('siteInfoDetailWrap').style.display = '';
             document.getElementById('progressDetailWrap').style.display = 'flex';
             _renderAllSiteInfo();
@@ -1606,8 +1670,6 @@
             document.getElementById('mainInfoEditArea').style.display  = 'none';
             document.getElementById('btnMainInfoEdit').style.display   = '';
             document.getElementById('btnMainInfoSave').style.display   = 'none';
-            const _delBtnView = document.getElementById('btnDeleteSiteInEdit');
-            if (_delBtnView) _delBtnView.style.display = 'none';
             document.getElementById('siteInfoEditActions').style.display = 'none';
         }
 
@@ -1625,11 +1687,6 @@
         function enterMainInfoEdit() {
             if (!db.siteInfo) db.siteInfo = {};
             const info = db.siteInfo[_siSelectedSiteId] || {};
-            const site = db.sites.find(s => s.id === _siSelectedSiteId);
-            document.getElementById('siteInfoViewSiteName').style.display = 'none';
-            const nameInput = document.getElementById('inputSiteInfoName');
-            nameInput.value = site ? site.name : '';
-            nameInput.style.display = '';
             document.getElementById('inputSiteInfoAddress').value = info.caseAddress   || '';
             document.getElementById('inputSiteInfoNotes').value   = info.notes         || '';
             document.getElementById('inputSiteInfoTotal').value   = info.contractTotal || '';
@@ -1637,46 +1694,25 @@
             document.getElementById('mainInfoEditArea').style.display  = 'flex';
             document.getElementById('btnMainInfoEdit').style.display   = 'none';
             document.getElementById('btnMainInfoSave').style.display   = '';
-            const delBtn = document.getElementById('btnDeleteSiteInEdit');
-            if (delBtn) delBtn.style.display = '';
             document.getElementById('siteInfoEditActions').style.display = 'flex';
             _renderAllProgressBlocks();
         }
 
         function saveMainInfo() {
-            const newName       = document.getElementById('inputSiteInfoName').value.trim();
             const caseAddress   = document.getElementById('inputSiteInfoAddress').value.trim();
             const notes         = document.getElementById('inputSiteInfoNotes').value.trim();
             const contractTotal = document.getElementById('inputSiteInfoTotal').value.trim();
-            if (newName) {
-                const site = db.sites.find(s => s.id === _siSelectedSiteId);
-                if (site && site.name !== newName) {
-                    const oldName = site.name;
-                    site.name = newName;
-                    if (currentState.siteId === _siSelectedSiteId) currentState.siteName = newName;
-                    Object.keys(db.dailyRecords).forEach(dateStr => {
-                        const rec = db.dailyRecords[dateStr];
-                        if (!rec) return;
-                        ['log','order'].forEach(type => {
-                            if (!rec[type]) return;
-                            const arr = Array.isArray(rec[type]) ? rec[type] : [rec[type]];
-                            arr.forEach(entry => {
-                                if (entry && entry.text) entry.text = entry.text.split(oldName).join(newName);
-                            });
-                            rec[type] = arr;
-                        });
-                    });
-                    renderSiteInfoList();
-                    renderPageSiteSelector('logSiteGroup');
-                    renderPunchSites();
-                }
-            }
             if (!db.siteInfo) db.siteInfo = {};
             if (!db.siteInfo[_siSelectedSiteId]) db.siteInfo[_siSelectedSiteId] = {};
             db.siteInfo[_siSelectedSiteId].caseAddress   = caseAddress;
             db.siteInfo[_siSelectedSiteId].notes         = notes;
             db.siteInfo[_siSelectedSiteId].contractTotal = contractTotal;
             saveToLocalStorage();
+            document.getElementById('mainInfoViewArea').style.display = '';
+            document.getElementById('mainInfoEditArea').style.display = 'none';
+            document.getElementById('btnMainInfoEdit').style.display  = '';
+            document.getElementById('btnMainInfoSave').style.display  = 'none';
+            document.getElementById('siteInfoEditActions').style.display = 'none';
             _renderMainInfoView();
             _renderAllProgressBlocks();
         }
@@ -1915,22 +1951,7 @@
             }, 50);
         }
 
-        function deleteSiteFromInfo() {
-            if (!_siSelectedSiteId) return;
-            const site = db.sites.find(s => s.id === _siSelectedSiteId);
-            if (!site) return;
-            if (!confirm(`確定要刪除案場「${site.name}」嗎？`)) return;
-            db.sites = db.sites.filter(s => s.id !== _siSelectedSiteId);
-            if (db.siteInfo && db.siteInfo[_siSelectedSiteId]) delete db.siteInfo[_siSelectedSiteId];
-            if (currentState.siteId === _siSelectedSiteId) { currentState.siteId = null; currentState.siteName = ''; }
-            _siSelectedSiteId = null;
-            saveToLocalStorage();
-            const delBtn = document.getElementById('btnDeleteSiteInEdit');
-            if (delBtn) delBtn.style.display = 'none';
-            document.getElementById('siteInfoDetailWrap').style.display = 'none';
-            document.getElementById('progressDetailWrap').style.display = 'none';
-            renderSiteInfoList();
-        }
+        function deleteSiteFromInfo() { deleteSiteFromManage(_siSelectedSiteId); }
 
         function showAddSiteInline() {
             document.getElementById('addSiteInlineWrap').style.display = '';
@@ -1949,6 +1970,14 @@
             saveToLocalStorage();
             document.getElementById('addSiteInlineWrap').style.display = 'none';
             renderSiteInfoList();
+            // 同步刷新彈窗下拉選單
+            const sel = document.getElementById('siteInfoSiteSelect');
+            if (sel) {
+                const opt = document.createElement('option');
+                opt.value = newSite.id; opt.textContent = newSite.name;
+                sel.appendChild(opt);
+                sel.value = newSite.id;
+            }
             selectSiteInfoSite(newSite.id);
         }
 
@@ -2090,17 +2119,36 @@
 
         function openSiteInfoModal() {
             const modal = document.getElementById('siteInfoModal');
+            const inner = document.getElementById('siteInfoModalInner');
+            // 對齊月曆上緣：header 高度 + main padding (16px)
+            const header = document.querySelector('header');
+            const calCard = document.querySelector('#pageSites .card');
+            let topOffset = 16;
+            if (header) topOffset = header.getBoundingClientRect().bottom + 16;
+            inner.style.marginTop = topOffset + 'px';
             modal.style.display = 'flex';
             document.getElementById('siteInfoDetailWrap').style.display = 'none';
             document.getElementById('progressDetailWrap').style.display = 'none';
-            document.getElementById('addSiteInlineWrap').style.display = 'none';
             _siSelectedSiteId = null;
+            // 填充下拉選單
+            const sel = document.getElementById('siteInfoSiteSelect');
+            sel.innerHTML = '<option value="">— 選擇案場 —</option>';
+            db.sites.forEach(site => {
+                const opt = document.createElement('option');
+                opt.value = site.id;
+                opt.textContent = site.name;
+                sel.appendChild(opt);
+            });
+            // 同步設定頁案場列表
             _siteInfoSortMode = false;
             const sortBtn = document.getElementById('btnSiteInfoSort');
             if (sortBtn) { sortBtn.innerText = '排序'; sortBtn.style.background = '#111111'; }
             if (_siteInfoSortable) _siteInfoSortable.option('disabled', true);
             renderSiteInfoList();
-            if (db.sites.length > 0) selectSiteInfoSite(db.sites[0].id);
+            if (db.sites.length > 0) {
+                sel.value = db.sites[0].id;
+                selectSiteInfoSite(db.sites[0].id);
+            }
         }
 
         function closeSiteInfoModal() {
