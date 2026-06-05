@@ -147,8 +147,6 @@
         </div>
         <h1 id="appTitle" class="header-title"></h1>
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
-            
-            <button id="btnPunchTop" onclick="openPunchModal()" class="btn-slate">打卡</button>
             <button id="btnHomeManage" onclick="navigateTo('manage')" class="btn-slate" style="position:relative;">設定<span id="manageRedDot" style="display:none; position:absolute; top:4px; right:4px; width:8px; height:8px; border-radius:50%; background:#ef4444; box-shadow:0 0 0 2px #000;"></span></button>
         </div>
     </header>
@@ -261,43 +259,47 @@
                         <label style="font-size: 13px; font-weight: bold; color: #4b5563;">送貨地點：</label>
                         <div id="cartSiteGroup" style="display: flex; flex-direction: column; gap: 6px;"></div>
                     </div>
-                    <div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; align-self:flex-start;">
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; align-self:flex-start;">
                         <span id="cartOrderDateDisplay" style="font-size:12px; color:#6b7280; white-space:nowrap;"></span>
-                        <button onclick="clearOnlyOrder()" style="background-color:#D9006C; color:white; border-radius:12px; padding:10px 14px; font-size:13px; font-weight:bold; flex-shrink:0;">清除訂單</button>
+                        <button id="btnSubmitCart" onclick="uploadCartToGoogleSheetOnly()" style="background:#000000; color:white; font-size:12px; font-weight:bold; padding:6px 18px; border-radius:8px; flex-shrink:0;">儲存並上傳☁️</button>
                     </div>
                 </div>
             </div>
             <div class="list-container">
-                <h3 style="font-size: 14px; color: #4b5563; margin: 4px; flex-shrink: 0;">已選材料明細：</h3>
-                <div id="listCartItems" class="scroll-list-body" style="max-height: calc(10 * (44px + 8px)); overflow-y: auto;"></div>
-            </div>
-            <div class="bottom-btn-group">
-                <div class="bottom-btn-group-inner">
-                    <button id="btnSubmitCart" onclick="uploadCartToGoogleSheetOnly()" class="btn-green large-bottom-btn">儲存並上傳☁️</button>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin:4px; flex-shrink:0; gap:8px;">
+                    <h3 style="font-size: 14px; color: #4b5563; margin: 0;">已選材料明細：</h3>
+                    <button onclick="clearOnlyOrder()" style="background-color:#D9006C; color:white; border-radius:8px; padding:6px 18px; font-size:12px; font-weight:bold; flex-shrink:0;">清除訂單</button>
                 </div>
+                <div id="listCartItems" class="scroll-list-body" style="max-height: calc(10 * (44px + 8px)); overflow-y: auto;"></div>
             </div>
         </section>
 
-        <section id="pageSiteInfo" class="page">
-            <div class="card" style="flex-shrink:0; padding:10px 14px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:13px; font-weight:bold; color:#4b5563;">選擇案場：</span>
-                    <div style="display:flex; gap:6px; align-items:center;">
-                        <button id="btnSiteInfoSort" onclick="toggleSiteInfoSort()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">排序</button>
-                        <button onclick="(function(){var w=document.getElementById('addSiteInlineWrap');var show=w.style.display==='none'||w.style.display==='';w.style.display=show?'block':'none';if(show)document.getElementById('inputNewSiteInfo').focus();})()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增</button>
-                    </div>
-                </div>
-                <div id="addSiteInlineWrap" style="display:none; margin-bottom:8px;">
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="inputNewSiteInfo" placeholder="輸入案場名稱..." style="-webkit-user-select:text; user-select:text; flex:1;">
-                        <button onclick="confirmAddSiteInfo()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">確定</button>
-                        <button onclick="cancelAddSiteInfo()" style="background:#111111; color:white; font-size:13px; font-weight:bold; padding:6px 10px; border-radius:8px; flex-shrink:0;">✕</button>
-                    </div>
-                </div>
-                <div id="siteInfoList" style="display:flex; flex-direction:column; gap:4px; max-height:180px; overflow-y:auto;"></div>
+    <!-- 案場資訊 彈窗 -->
+    <div id="siteInfoModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:14px; padding:0; width:calc(100% - 32px); max-width:416px; display:flex; flex-direction:column; max-height:90vh; overflow:hidden;">
+            <div style="padding:12px 16px 8px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <span style="font-size:14px; font-weight:bold; color:#1f2937; flex:1; min-width:0;">案場資訊</span>
+                <button onclick="closeSiteInfoModal()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 18px; border-radius:8px; flex-shrink:0;">✕ 關閉</button>
             </div>
+            <div style="flex:1; overflow-y:auto; padding:12px 16px; display:flex; flex-direction:column; gap:12px;">
+                <div class="card" style="flex-shrink:0; padding:10px 14px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                        <span style="font-size:13px; font-weight:bold; color:#4b5563;">選擇案場：</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button id="btnSiteInfoSort" onclick="toggleSiteInfoSort()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">排序</button>
+                            <button onclick="(function(){var w=document.getElementById('addSiteInlineWrap');var show=w.style.display==='none'||w.style.display==='';w.style.display=show?'block':'none';if(show)document.getElementById('inputNewSiteInfo').focus();})()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增</button>
+                        </div>
+                    </div>
+                    <div id="addSiteInlineWrap" style="display:none; margin-bottom:8px;">
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="inputNewSiteInfo" placeholder="輸入案場名稱..." style="-webkit-user-select:text; user-select:text; flex:1;">
+                            <button onclick="confirmAddSiteInfo()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">確定</button>
+                            <button onclick="cancelAddSiteInfo()" style="background:#111111; color:white; font-size:13px; font-weight:bold; padding:6px 10px; border-radius:8px; flex-shrink:0;">✕</button>
+                        </div>
+                    </div>
+                    <div id="siteInfoList" style="display:flex; flex-direction:column; gap:4px; max-height:180px; overflow-y:auto;"></div>
+                </div>
 
-            <div style="flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:0; padding-bottom:24px;">
                 <div id="siteInfoDetailWrap" style="display:none;">
                     <div class="card" style="margin-bottom:0;">
                         <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid #e5e7eb; margin-bottom:10px; gap:8px;">
@@ -341,14 +343,15 @@
                     </div>
                 </div>
 
-                <div id="progressDetailWrap" style="display:none; flex-direction:column; gap:0;">
+                <div id="progressDetailWrap" style="display:none; flex-direction:column; gap:0; padding-bottom:24px;">
                     <div id="progressBlocksContainer" style="display:flex; flex-direction:column; gap:0;"></div>
                     <div id="siteInfoEditActions" style="display:none; flex-direction:row; gap:8px; padding:8px 0 4px;">
                         <button onclick="addProgressBlock()" style="flex:1; height:44px; background:#111111; color:white; border-radius:8px; font-size:13px; font-weight:bold;">＋ 新增計價進度表</button>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </div>
 
         <!-- 計價進度 彈窗 -->
         <div id="progressEditModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center;" onclick="if(event.target===this)document.getElementById('progressEditModal').style.display='none';">
@@ -425,11 +428,12 @@
 
     </main>
 
-    <!-- 首頁固定底部按鈕 -->
+    <!-- 固定底部導航按鈕（除設定頁外每頁顯示） -->
     <div class="bottom-btn-group" id="homeMainBtns" style="display:none;">
         <div class="bottom-btn-group-inner">
             <button class="btn-amber large-bottom-btn" style="padding:0; overflow:hidden; display:flex; border-radius:33px;">
-                <span class="home-seg" onclick="navigateTo('siteInfo')" style="border-right:1px solid rgba(255,255,255,0.25);">案場資訊</span>
+                <span class="home-seg" onclick="openPunchModal()" style="border-right:1px solid rgba(255,255,255,0.25);">出勤</span>
+                <span class="home-seg" onclick="openSiteInfoModal()" style="border-right:1px solid rgba(255,255,255,0.25);">案場資訊</span>
                 <span class="home-seg" onclick="openAddLogModal()" style="border-right:1px solid rgba(255,255,255,0.25);">工程記錄</span>
                 <span class="home-seg" onclick="navigateTo('categories')">材料訂購</span>
             </button>
@@ -448,17 +452,17 @@
         </div>
     </div>
 
-    <!-- 打卡彈窗 -->
+    <!-- 出勤彈窗 -->
     <div id="punchModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center;">
         <div style="background:white; border-radius:14px; padding:0; width:calc(100% - 32px); max-width:416px; display:flex; flex-direction:column; max-height:90vh; overflow:hidden;">
             <div style="padding:12px 16px 8px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                <span style="font-size:15px; font-weight:bold; color:#1f2937; flex:1;">打卡</span>
+                <span style="font-size:15px; font-weight:bold; color:#1f2937; flex:1;">出勤</span>
                 <button id="btnPunchDeleteInEdit" onclick="deleteFromPunchEditModal()" class="btn-red hidden" style="padding:6px 18px; font-size:12px; font-weight:bold; border-radius:8px; flex-shrink:0;">刪除</button>
                 <button onclick="saveMultiplePunchStatus('上班')" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 18px; border-radius:8px; flex-shrink:0;">儲存</button>
             </div>
             <div style="flex:1; overflow-y:auto; padding:12px 16px; display:flex; flex-direction:column; gap:12px;">
                 <div>
-                    <label style="font-size:13px; font-weight:bold; color:#4b5563; display:block; margin-bottom:4px;">選擇打卡日期：</label>
+                    <label style="font-size:13px; font-weight:bold; color:#4b5563; display:block; margin-bottom:4px;">選擇出勤日期：</label>
                     <input type="date" id="inputPunchDate" onchange="syncPunchDateChange()" style="width:180px; border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-size:14px; background:white; box-sizing:border-box;">
                 </div>
                 <div>
@@ -1252,7 +1256,7 @@
             box.replaceWith(sel);
         }
 
-        // ================= 打卡 =================
+        // ================= 出勤 =================
         function renderPunchSites() {
             const box = document.getElementById('punchSitesGroup');
             box.innerHTML = '';
@@ -1321,7 +1325,7 @@
 
         function saveMultiplePunchStatus(status) {
             const dateStr = document.getElementById('inputPunchDate').value;
-            if (!dateStr) return alert('請先選擇打卡日期！');
+            if (!dateStr) return alert('請先選擇出勤日期！');
             const chks = document.querySelectorAll('.punch-site-chk');
             const overtime = document.getElementById('inputOvertimeHours').value.trim();
             let note = overtime ? `加班${overtime}小時` : '';
@@ -1356,7 +1360,7 @@
             const container = document.getElementById('logItemsContainer');
             Array.from(container.children).forEach((div, i) => {
                 const lbl = div.querySelector('.log-item-label');
-                if (lbl) lbl.innerText = `●`;
+                if (lbl) lbl.innerText = `輸入事項：`;
             });
         }
 
@@ -1367,7 +1371,7 @@
             div.className = 'log-page-entry-item';
             div.innerHTML = `
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
-                    <label style="font-size:10px; font-weight:normal; color:#4b5563; margin:0; line-height:2;" class="log-item-label">●</label>
+                    <label style="font-size:13px; font-weight:bold; color:#4b5563; margin:0; line-height:2;" class="log-item-label">輸入事項：</label>
                     <button type="button" class="btn-delete-log-item" style="position:static;" onclick="removeLogItemRow(this)">移除</button>
                 </div>
                 <div>
@@ -2002,16 +2006,14 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('btnBack').classList.remove('hidden');
             document.getElementById('btnHomeTop').classList.add('hidden');
-            document.getElementById('homeMainBtns').style.display = 'none';
+            document.getElementById('homeMainBtns').style.display = page === 'manage' ? 'none' : '';
 
             if (page === 'sites') {
                 document.getElementById('pageSites').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('btnBack').classList.add('hidden');
-                document.getElementById('btnHomeTop').classList.add('hidden');
                 document.getElementById('homeTitle').classList.remove('hidden');
                 initHomeCalendar();
-                document.getElementById('homeMainBtns').style.display = '';
                 if (selectedHomeDateStr) {
                     document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
                     document.querySelectorAll('.calendar-day:not(.empty)').forEach(el => {
@@ -2034,8 +2036,6 @@
                 document.getElementById('pageCategories').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('homeTitle').classList.add('hidden');
-                document.getElementById('btnHomeTop').classList.remove('hidden');
-                document.getElementById('homeMainBtns').style.display = '';
                 document.getElementById('inputOrderDate').value = getTargetDateStr();
                 document.getElementById('globalSearchBar').value = '';
                 currentState.siteId = null;
@@ -2046,13 +2046,11 @@
                 const listCatEl = document.getElementById('listCategories');
                 if (listCatEl) listCatEl.scrollTop = 0;
             } else if (page === 'items') {
-                // 已整合進 categories 頁，導向到 categories 並顯示品項
                 currentState.page = 'categories';
                 document.getElementById('pageCategories').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('homeTitle').classList.add('hidden');
                 document.getElementById('btnHomeTop').classList.remove('hidden');
-                document.getElementById('homeMainBtns').style.display = '';
                 document.getElementById('globalSearchBar').value = '';
                 _catPageMode = 'items';
                 closeQuickAddInline();
@@ -2072,7 +2070,6 @@
                 document.getElementById('pageManage').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('homeTitle').classList.add('hidden');
-                document.getElementById('btnHomeTop').classList.add('hidden');
                 document.getElementById('inputScriptUrl').value = db.config?.scriptUrl || '';
                 _populateExportMonthSelect();
                 _refreshLastExportDisplay();
@@ -2085,30 +2082,34 @@
                 document.getElementById('pageManage').scrollTop = 0;
                 document.getElementById('manageListCategories').scrollTop = 0;
             } else if (page === 'siteInfo') {
-                document.getElementById('pageSiteInfo').classList.add('active');
-                document.getElementById('appTitle').innerText = '';
-                document.getElementById('homeTitle').classList.add('hidden');
-                document.getElementById('btnHomeTop').classList.add('hidden');
-                _siSelectedSiteId = null;
-                document.getElementById('siteInfoDetailWrap').style.display  = 'none';
-                document.getElementById('progressDetailWrap').style.display  = 'none';
-                document.getElementById('addSiteInlineWrap').style.display   = 'none';
-                _siteInfoSortMode = false;
-                const sortBtn = document.getElementById('btnSiteInfoSort');
-                if (sortBtn) { sortBtn.innerText = '排序'; sortBtn.style.background = '#111111'; }
-                if (_siteInfoSortable) _siteInfoSortable.option('disabled', true);
-                renderSiteInfoList();
-                if (db.sites.length > 0) selectSiteInfoSite(db.sites[0].id);
-                const siScroll = document.querySelector('#pageSiteInfo > div:last-child');
-                if (siScroll) siScroll.scrollTop = 0;
-                document.getElementById('siteInfoList').scrollTop = 0;
+                openSiteInfoModal();
+                return;
             }
             updateCartBadge();
         }
 
+        function openSiteInfoModal() {
+            const modal = document.getElementById('siteInfoModal');
+            modal.style.display = 'flex';
+            document.getElementById('siteInfoDetailWrap').style.display = 'none';
+            document.getElementById('progressDetailWrap').style.display = 'none';
+            document.getElementById('addSiteInlineWrap').style.display = 'none';
+            _siSelectedSiteId = null;
+            _siteInfoSortMode = false;
+            const sortBtn = document.getElementById('btnSiteInfoSort');
+            if (sortBtn) { sortBtn.innerText = '排序'; sortBtn.style.background = '#111111'; }
+            if (_siteInfoSortable) _siteInfoSortable.option('disabled', true);
+            renderSiteInfoList();
+            if (db.sites.length > 0) selectSiteInfoSite(db.sites[0].id);
+        }
+
+        function closeSiteInfoModal() {
+            document.getElementById('siteInfoModal').style.display = 'none';
+        }
+
         document.getElementById('btnBack').addEventListener('click', (e) => {
             const p = currentState.page;
-            if (p === 'manage' || p === 'log' || p === 'punch' || p === 'siteInfo') navigateTo('sites');
+            if (p === 'manage' || p === 'log' || p === 'punch') navigateTo('sites');
             else if (p === 'categories') {
                 if (_catPageMode === 'items') {
                     backToCategories();
@@ -2118,7 +2119,6 @@
             }
             else if (p === 'items') navigateTo('categories');
             else if (p === 'cart') {
-                // 返回品項模式
                 currentState.page = 'categories';
                 document.getElementById('pageCart').classList.remove('active');
                 document.getElementById('pageCategories').classList.add('active');
@@ -2156,7 +2156,7 @@
                 if (dx < THRESHOLD || dy > MAX_Y) return;
                 // 觸發返回
                 const p = currentState.page;
-                if (p === 'manage' || p === 'log' || p === 'punch' || p === 'siteInfo') navigateTo('sites');
+                if (p === 'manage' || p === 'log' || p === 'punch') navigateTo('sites');
                 else if (p === 'categories') {
                     if (_catPageMode === 'items') backToCategories();
                     else navigateTo('sites');
@@ -2200,11 +2200,12 @@
                     list.appendChild(div);
                 });
             } else if (_catPageMode === 'items') {
-                // 品項模式
+                // 品項模式：顯示首頁按鈕
+                document.getElementById('btnHomeTop').classList.remove('hidden');
                 renderItemsInline();
             } else {
-                // 分類模式
-                _catPageMode = 'categories';
+                // 分類模式：隱藏首頁按鈕
+                document.getElementById('btnHomeTop').classList.add('hidden');
                 header.innerText = '選擇材料分類：';
                 
                 document.getElementById('btnQuickAddInSearch').style.display = '';
@@ -2251,6 +2252,7 @@
 
         function backToCategories() {
             _catPageMode = 'categories';
+            document.getElementById('btnHomeTop').classList.add('hidden');
             closeQuickAddInline();
             renderCategories();
         }
@@ -2417,7 +2419,7 @@
                 () => {
                     if (!hasUrl) { _askLineAndClearCart(cartTextWithDate, dateStr); return; }
                     const btn = document.getElementById('btnSubmitCart');
-                    if (btn) { btn.innerText = '⏳ 同步中...'; btn.disabled = true; }
+                    if (btn) { btn.textContent = '⏳ 同步中...'; btn.disabled = true; }
                     const payload = {
                         AM: currentState.siteName,
                         items: data.items.map(item => ({ cat: item.catName, PX: item.itemName, SL: item.qty }))
@@ -2426,7 +2428,7 @@
                     .then(() => { alert('訂單數據已成功發送至 Google 試算表！'); })
                     .catch(() => { alert('傳送失敗，請確認網路連線與網址設定。'); })
                     .finally(() => {
-                        if (btn) { btn.innerText = '儲存並上傳☁️'; btn.disabled = false; }
+                        if (btn) { btn.textContent = '儲存並上傳☁️'; btn.disabled = false; }
                         _askLineAndClearCart(cartTextWithDate, dateStr);
                     });
                 },
@@ -2714,7 +2716,7 @@
             div.innerHTML = `
                 <button type="button" class="btn-delete-log-item" onclick="removeNewLogItemRow(this)">移除</button>
                 <div style="margin-top:8px;">
-                    <label style="font-size:10px;font-weight:normal;display:block;margin-bottom:4px;color:#4b5563;line-height:2;" class="log-item-label">●</label>
+                    <label style="font-size:13px;font-weight:bold;display:block;margin-bottom:4px;color:#4b5563;line-height:2;" class="log-item-label">輸入事項：</label>
                     <textarea class="log-item-input" rows="2" style="width:100%;resize:none;overflow:hidden;line-height:1.6;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;font-size:14px;background:white;-webkit-user-select:text;user-select:text;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${itemValue}</textarea>
                 </div>
                 <div class="log-entry-row">
@@ -2838,7 +2840,7 @@
             const container = document.getElementById('editLogItemsContainer');
             Array.from(container.children).forEach((div, i) => {
                 const lbl = div.querySelector('.log-item-label');
-                if (lbl) lbl.innerText = `●`;
+                if (lbl) lbl.innerText = `輸入事項：`;
             });
         }
 
@@ -2850,7 +2852,7 @@
             div.innerHTML = `
                 <button type="button" class="btn-delete-log-item" onclick="removeEditLogItemRow(this)">移除</button>
                 <div style="margin-top:8px;">
-                    <label style="font-size:10px;font-weight:normal;display:block;margin-bottom:4px;color:#4b5563;line-height:2;" class="log-item-label">●</label>
+                    <label style="font-size:13px;font-weight:bold;display:block;margin-bottom:4px;color:#4b5563;line-height:2;" class="log-item-label">輸入事項：</label>
                     <textarea class="log-item-input" rows="2" style="width:100%;resize:none;overflow:hidden;line-height:1.6;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;font-size:14px;background:white;-webkit-user-select:text;user-select:text;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${itemValue}</textarea>
                 </div>
                 <div class="log-entry-row">
