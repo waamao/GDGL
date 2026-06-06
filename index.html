@@ -221,6 +221,16 @@
             <div class="list-container" style="flex: 1; min-height: 0;">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin:4px; flex-shrink:0; gap:8px;">
                     <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 0;">選擇材料分類：</h3>
+                    <div id="catEditBtnGroup" style="display:flex; gap:6px; align-items:center;">
+                        <button id="btnCatSortInline" onclick="toggleCatInlineSort()" style="display:none; background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">排序</button>
+                        <button id="btnCatAddInline" onclick="addCategoryInline()" style="display:none; background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增分類</button>
+                        <button id="btnCatEdit" onclick="enterCatEditMode()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">編輯</button>
+                        <button id="btnCatSave" onclick="exitCatEditMode()" style="display:none; background:#000000; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">儲存</button>
+                    </div>
+                    <div id="itemEditBtnGroup" style="display:none; gap:6px; align-items:center;">
+                        <button id="btnItemEdit" onclick="enterItemEditMode()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">編輯</button>
+                        <button id="btnItemSave" onclick="exitItemEditMode()" style="display:none; background:#000000; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">儲存</button>
+                    </div>
                 </div>
                 <div id="listCategories" class="scroll-list-body" style="padding-bottom: 63px; max-height: calc(9 * (44px + 8px) - 8px); overflow-y: auto;"></div>
             </div>
@@ -373,44 +383,18 @@
                         <button onclick="cancelAddSiteInfo()" style="background:#111111; color:white; font-size:13px; font-weight:bold; padding:6px 10px; border-radius:8px; flex-shrink:0;">✕</button>
                     </div>
                 </div>
-                <div id="siteInfoList" class="scroll-box"></div>
-            </div>
-            <div class="card">
-                <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e5e7eb; padding-bottom:4px; margin-bottom:0;">
-                    <h3 style="font-size: 14px; margin: 0; color: #374151;">材料分類維護</h3>
-                    <div style="display:flex; gap:6px; align-items:center;">
-                        <button id="btnCategorySort" onclick="toggleCategorySort()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">排序</button>
-                        <button onclick="(function(){var w=document.getElementById('addCategoryWrap');w.style.display=w.style.display==='none'?'flex':'none';if(w.style.display==='flex')document.getElementById('inputNewCategory').focus();})()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增</button>
-                    </div>
-                </div>
-                <div id="addCategoryWrap" class="flex-row" style="display:none;">
-                    <input type="text" id="inputNewCategory" placeholder="如：水泥類、五金類">
-                    <button onclick="addCategory()" class="btn-green" style="flex-shrink: 0;">確定</button>
-                    <button onclick="document.getElementById('addCategoryWrap').style.display='none'; document.getElementById('inputNewCategory').value='';" style="background:#111111; color:white; font-size:13px; font-weight:bold; padding:6px 10px; border-radius:8px; flex-shrink:0;">✕</button>
-                </div>
-                <div id="manageListCategories" class="scroll-box"></div>
-            </div>
-            <div class="card">
-                <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e5e7eb; padding-bottom:4px; margin-bottom:8px;">
-                    <h3 style="font-size: 14px; margin: 0; color: #374151;">材料品項維護</h3>
-                    <button onclick="(function(){var w=document.getElementById('addManageItemWrap');w.style.display=w.style.display==='none'?'flex':'none';if(w.style.display==='flex')document.getElementById('inputNewManageItem').focus();})()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">新增</button>
-                </div>
-                <div style="display:flex; gap:6px; align-items:center; margin-bottom: 8px;">
-                    <select id="manageSelectCategory" onchange="renderManageItems()" style="flex:1; min-width:0; padding: 8px; font-size: 13px;">
-                        <option value="">請先選擇分類...</option>
-                    </select>
-                </div>
-                <div id="addManageItemWrap" class="flex-row" style="display:none;">
-                    <input type="text" id="inputNewManageItem" placeholder="輸入新品項名稱">
-                    <button onclick="addManageItem()" class="btn-green" style="flex-shrink: 0;">確定</button>
-                    <button onclick="document.getElementById('addManageItemWrap').style.display='none'; document.getElementById('inputNewManageItem').value='';" style="background:#111111; color:white; font-size:13px; font-weight:bold; padding:6px 10px; border-radius:8px; flex-shrink:0;">✕</button>
-                </div>
-                <div id="manageListItems" class="scroll-box"></div>
+                <div id="siteInfoList" style="overflow-y: auto; display: flex; flex-direction: column; gap: 4px; max-height: calc(4.5 * (36px + 4px) - 4px);"></div>
             </div>
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1; margin-bottom: 40px;">
-                <h3 style="font-size: 14px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; color: #0f172a;">Apps Script 連動網址設定</h3>
+                <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #cbd5e1; padding-bottom:4px; margin-bottom:8px;">
+                    <h3 style="font-size: 14px; margin: 0; color: #0f172a;">Apps Script 連動網址設定</h3>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <button id="btnScriptUrlEdit" onclick="enterScriptUrlEdit()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">編輯</button>
+                        <button id="btnScriptUrlSave" onclick="exitScriptUrlEdit()" style="display:none; background:#000000; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">儲存</button>
+                    </div>
+                </div>
                 <div class="flex-row">
-                    <textarea id="inputScriptUrl" rows="2" oninput="saveScriptUrl()" placeholder="請貼上 https://script.google.com/... 網址" style="width:100%; border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-size:14px; background-color:#F0F0F0; resize:none; line-height:1.6; word-break:break-all; -webkit-user-select:text; user-select:text;"></textarea>
+                    <textarea id="inputScriptUrl" oninput="saveScriptUrl(); _autoGrowTextarea(this);" placeholder="請貼上 https://script.google.com/... 網址" disabled style="width:100%; border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-size:14px; background-color:#e5e7eb; resize:none; line-height:1.6; word-break:break-all; overflow-wrap:anywhere; white-space:pre-wrap; -webkit-user-select:none; user-select:none; color:#6b7280; overflow:hidden; min-height:40px;"></textarea>
                 </div>
             </div>
         </section>
@@ -653,6 +637,32 @@
             if (!db.config) db.config = { scriptUrl: '' };
             db.config.scriptUrl = url;
             saveToLocalStorage();
+        }
+
+        function enterScriptUrlEdit() {
+            const ta = document.getElementById('inputScriptUrl');
+            ta.disabled = false;
+            ta.style.backgroundColor = '#F0F0F0';
+            ta.style.color = '';
+            ta.style.webkitUserSelect = 'text';
+            ta.style.userSelect = 'text';
+            _autoGrowTextarea(ta);
+            ta.focus();
+            document.getElementById('btnScriptUrlEdit').style.display = 'none';
+            document.getElementById('btnScriptUrlSave').style.display = '';
+        }
+
+        function exitScriptUrlEdit() {
+            saveScriptUrl();
+            const ta = document.getElementById('inputScriptUrl');
+            ta.disabled = true;
+            ta.style.backgroundColor = '#e5e7eb';
+            ta.style.color = '#6b7280';
+            ta.style.webkitUserSelect = 'none';
+            ta.style.userSelect = 'none';
+            _autoGrowTextarea(ta);
+            document.getElementById('btnScriptUrlEdit').style.display = '';
+            document.getElementById('btnScriptUrlSave').style.display = 'none';
         }
 
         function updateCartBadge() {
@@ -2086,6 +2096,18 @@
                 currentState.siteId = null;
                 currentState.siteName = '';
                 _catPageMode = 'categories';
+                _catInlineEditMode = false;
+                _itemInlineEditMode = false;
+                document.getElementById('btnCatEdit').style.display = '';
+                document.getElementById('btnCatSave').style.display = 'none';
+                document.getElementById('btnCatSortInline').style.display = 'none';
+                document.getElementById('btnCatAddInline').style.display = 'none';
+                document.getElementById('btnCatSortInline').innerText = '排序';
+                document.getElementById('btnCatSortInline').style.background = '#111111';
+                document.getElementById('itemEditBtnGroup').style.display = 'none';
+                document.getElementById('btnItemEdit').style.display = '';
+                document.getElementById('btnItemSave').style.display = 'none';
+                if (_catInlineSortable) { _catInlineSortable.option('disabled', true); }
                 cancelCatPick();
                 closeQuickAddInline();
                 renderCategories();
@@ -2116,7 +2138,14 @@
                 document.getElementById('pageManage').classList.add('active');
                 document.getElementById('appTitle').innerText = '';
                 document.getElementById('homeTitle').classList.add('hidden');
-                document.getElementById('inputScriptUrl').value = db.config?.scriptUrl || '';
+                const _ta = document.getElementById('inputScriptUrl');
+                _ta.value = db.config?.scriptUrl || '';
+                _ta.disabled = true;
+                _ta.style.backgroundColor = '#e5e7eb';
+                _ta.style.color = '#6b7280';
+                _autoGrowTextarea(_ta);
+                document.getElementById('btnScriptUrlEdit').style.display = '';
+                document.getElementById('btnScriptUrlSave').style.display = 'none';
                 _populateExportMonthSelect();
                 _refreshLastExportDisplay();
                 _categorySortMode = false;
@@ -2185,6 +2214,28 @@
 
         // 若剛收起鍵盤，短暫忽略背景點擊關閉視窗
         let _justBlurredKeyboard = false;
+        let _isKeyboardOpen = false;
+
+        document.addEventListener('focusin', function(e) {
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') && !t.disabled && t.type !== 'date' && t.type !== 'month') {
+                _isKeyboardOpen = true;
+            }
+        });
+        document.addEventListener('focusout', function() {
+            setTimeout(() => {
+                const a = document.activeElement;
+                if (!a || (a.tagName !== 'INPUT' && a.tagName !== 'TEXTAREA') || a.disabled) {
+                    _isKeyboardOpen = false;
+                }
+            }, 100);
+        });
+
+        function _autoGrowTextarea(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
+
         function _blurActiveInput() {
             const active = document.activeElement;
             if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT')) {
@@ -2197,6 +2248,7 @@
         }
 
         document.getElementById('btnBack').addEventListener('click', (e) => {
+            if (_isKeyboardOpen) { _blurActiveInput(); return; }
             const p = currentState.page;
             if (p === 'manage' || p === 'log' || p === 'punch') navigateTo('sites');
             else if (p === 'categories') {
@@ -2245,6 +2297,7 @@
                 _backSwipeActive = false;
                 if (currentState.page === 'sites') return;
                 if (_isModalOpen()) return;
+                if (_isKeyboardOpen) return;
                 const dx = e.changedTouches[0].clientX - _backSwipeStartX;
                 const dy = Math.abs(e.changedTouches[0].clientY - _backSwipeStartY);
                 if (dx < THRESHOLD || dy > MAX_Y) return;
@@ -2264,6 +2317,103 @@
         // ================= 材料選單與訂購 =================
         // 追蹤目前分類頁狀態：'categories' 或 'items'
         let _catPageMode = 'categories';
+        let _catInlineEditMode = false;
+        let _catInlineSortable = null;
+
+        function enterCatEditMode() {
+            _catInlineEditMode = true;
+            document.getElementById('btnCatEdit').style.display = 'none';
+            document.getElementById('btnCatSave').style.display = '';
+            document.getElementById('btnCatSortInline').style.display = '';
+            document.getElementById('btnCatAddInline').style.display = '';
+            renderCategories();
+        }
+
+        function exitCatEditMode() {
+            _catInlineEditMode = false;
+            if (_catInlineSortable) { _catInlineSortable.option('disabled', true); }
+            document.getElementById('btnCatEdit').style.display = '';
+            document.getElementById('btnCatSave').style.display = 'none';
+            document.getElementById('btnCatSortInline').style.display = 'none';
+            document.getElementById('btnCatAddInline').style.display = 'none';
+            document.getElementById('btnCatSortInline').innerText = '排序';
+            document.getElementById('btnCatSortInline').style.background = '#111111';
+            renderCategories();
+        }
+
+        function addCategoryInline() {
+            const newName = prompt('請輸入新分類名稱：');
+            if (!newName || !newName.trim()) return;
+            if (db.categories.some(c => c.name === newName.trim())) {
+                return alert('分類「' + newName.trim() + '」已存在，請使用不同名稱。');
+            }
+            db.categories.push({ id: Date.now().toString(), name: newName.trim() });
+            saveToLocalStorage();
+            renderCategories();
+            renderManageCategoryDropdown();
+            const list = document.getElementById('listCategories');
+            if (list) setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50);
+        }
+
+        function toggleCatInlineSort() {
+            const btn = document.getElementById('btnCatSortInline');
+            const list = document.getElementById('listCategories');
+            if (!_catInlineSortable) {
+                _catInlineSortable = new Sortable(list, {
+                    animation: 150,
+                    handle: '.cat-inline-drag-handle',
+                    ghostClass: 'sortable-ghost',
+                    disabled: true,
+                    onEnd: function() {
+                        const items = list.querySelectorAll('.cat-inline-item');
+                        const newOrder = [];
+                        items.forEach(el => {
+                            const catId = el.getAttribute('data-cat-id');
+                            const cat = db.categories.find(c => c.id === catId);
+                            if (cat) newOrder.push(cat);
+                        });
+                        db.categories = newOrder;
+                        saveToLocalStorage();
+                    }
+                });
+            }
+            const isOn = btn.innerText === '完成排序';
+            if (isOn) {
+                _catInlineSortable.option('disabled', true);
+                btn.innerText = '排序';
+                btn.style.background = '#111111';
+            } else {
+                _catInlineSortable.option('disabled', false);
+                btn.innerText = '完成排序';
+                btn.style.background = '#D9006C';
+            }
+        }
+
+        function renameCategoryInline(catId) {
+            const cat = db.categories.find(c => c.id === catId);
+            if (!cat) return;
+            const newName = prompt('請輸入新名稱：', cat.name);
+            if (!newName || !newName.trim()) return;
+            if (newName.trim() === cat.name) return;
+            if (db.categories.some(c => c.id !== catId && c.name === newName.trim())) {
+                return alert('分類「' + newName.trim() + '」已存在，請使用不同名稱。');
+            }
+            cat.name = newName.trim();
+            saveToLocalStorage();
+            renderCategories();
+            renderManageCategoryDropdown();
+        }
+
+        function deleteCategoryInline(catId) {
+            const cat = db.categories.find(c => c.id === catId);
+            if (!cat) return;
+            if (!confirm('確定要刪除分類「' + cat.name + '」及其所有品項嗎？此操作無法復原。')) return;
+            db.categories = db.categories.filter(c => c.id !== catId);
+            db.items = db.items.filter(i => i.catId !== catId);
+            saveToLocalStorage();
+            renderCategories();
+            renderManageCategoryDropdown();
+        }
 
         function renderCategories() {
             const list = document.getElementById('listCategories');
@@ -2274,6 +2424,8 @@
                 // 分類選擇模式：一律顯示分類列表供點選，忽略搜尋關鍵字
                 document.getElementById('btnHomeTop').classList.add('hidden');
                 document.getElementById('btnQuickAddInSearch').style.display = 'none';
+                document.getElementById('catEditBtnGroup').style.display = 'none';
+                document.getElementById('itemEditBtnGroup').style.display = 'none';
                 header.innerText = '請點選要加入的分類：';
                 list.innerHTML = db.categories.length === 0 ? '<p class="text-muted text-center">目前無分類，請先至設定新增。</p>' : '';
                 db.categories.forEach(cat => {
@@ -2301,7 +2453,8 @@
                 // 搜尋模式：顯示品項結果
                 _catPageMode = 'search';
                 header.innerText = '🔍 全品項搜尋結果：';
-                
+                document.getElementById('catEditBtnGroup').style.display = 'none';
+                document.getElementById('itemEditBtnGroup').style.display = 'none';
                 document.getElementById('btnQuickAddInSearch').style.display = '';
                 list.innerHTML = '';
                 const filteredItems = db.items.filter(item => item.name.toLowerCase().includes(keyword)).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
@@ -2323,10 +2476,45 @@
                 });
             } else if (_catPageMode === 'items') {
                 // 品項模式：顯示首頁按鈕
+                document.getElementById('catEditBtnGroup').style.display = 'none';
                 document.getElementById('btnHomeTop').classList.remove('hidden');
                 renderItemsInline();
+            } else if (_catInlineEditMode) {
+                // 編輯模式：顯示排序符號、更名、刪除
+                document.getElementById('catEditBtnGroup').style.display = '';
+                document.getElementById('itemEditBtnGroup').style.display = 'none';
+                document.getElementById('btnHomeTop').classList.add('hidden');
+                header.innerText = '分類編輯模式：';
+                document.getElementById('btnQuickAddInSearch').style.display = 'none';
+                list.innerHTML = db.categories.length === 0 ? '<p class="text-muted text-center">目前無分類，請先至後台新增。</p>' : '';
+                db.categories.forEach(cat => {
+                    const div = document.createElement('div');
+                    div.className = 'list-item cat-inline-item';
+                    div.setAttribute('data-cat-id', cat.id);
+                    div.style.gap = '8px';
+                    div.innerHTML =
+                        '<span class="cat-inline-drag-handle" style="font-size:18px; color:#9ca3af; cursor:move; flex-shrink:0; padding:0 4px; user-select:none;">☰</span>' +
+                        '<span style="font-weight:500; color:#1f2937; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + cat.name + '</span>' +
+                        '<div style="display:flex; gap:6px; flex-shrink:0;">' +
+                        '<button onclick="renameCategoryInline(\'' + cat.id + '\')" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 10px; border-radius:8px;">更名</button>' +
+                        '<button onclick="deleteCategoryInline(\'' + cat.id + '\')" style="background:#D9006C; color:white; font-size:12px; font-weight:bold; padding:6px 10px; border-radius:8px;">刪除</button>' +
+                        '</div>';
+                    list.appendChild(div);
+                });
+                // 重新綁定 Sortable（list 已重建）
+                if (_catInlineSortable) {
+                    _catInlineSortable.destroy();
+                    _catInlineSortable = null;
+                }
+                const sortBtn = document.getElementById('btnCatSortInline');
+                if (sortBtn && sortBtn.innerText === '完成排序') {
+                    sortBtn.innerText = '排序';
+                    sortBtn.style.background = '#111111';
+                }
             } else {
                 // 分類模式：隱藏首頁按鈕
+                document.getElementById('catEditBtnGroup').style.display = '';
+                document.getElementById('itemEditBtnGroup').style.display = 'none';
                 document.getElementById('btnHomeTop').classList.add('hidden');
                 header.innerText = '選擇材料分類：';
                 
@@ -2344,7 +2532,7 @@
                             _confirmAddName = name;
                             _confirmAddCatId = cat.id;
                             _confirmAddCatName = cat.name;
-                            document.getElementById('confirmAddMsg').innerText = `是否新增「${name}」至「${cat.name}」分類？`;
+                            document.getElementById('confirmAddMsg').innerText = '是否新增「' + name + '」至「' + cat.name + '」分類？';
                             document.getElementById('confirmAddModal').style.display = 'flex';
                             return;
                         }
@@ -2353,7 +2541,7 @@
                         _catPageMode = 'items';
                         renderCategories();
                     };
-                    div.innerHTML = `<span style="font-weight:500; color:#1f2937;">${cat.name}</span> <span style="color:#4b5563; font-size:12px; font-weight:bold;">進入 →</span>`;
+                    div.innerHTML = '<span style="font-weight:500; color:#1f2937;">' + cat.name + '</span> <span style="color:#4b5563; font-size:12px; font-weight:bold;">進入 →</span>';
                     list.appendChild(div);
                 });
             }
@@ -2362,30 +2550,98 @@
         function renderItemsInline() {
             const list = document.getElementById('listCategories');
             const header = document.getElementById('categoryListHeader');
-            header.innerText = '選擇材料品項（勾選並輸入數量）：';
-            
-            document.getElementById('btnQuickAddInSearch').style.display = '';
-            list.innerHTML = '';
-            const filteredItems = db.items.filter(item => item.catId === currentState.catId).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
-            list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">此分類下暫無材料品項。</p>' : '';
-            filteredItems.forEach(item => {
-                const inCart = !!cart[item.id];
-                const div = document.createElement('div');
-                div.className = "list-item";
-                div.innerHTML = `
-                    <label class="item-label">
-                        <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="item-checkbox">
-                        <span>${item.name}</span>
-                    </label>
-                    <input type="number" inputmode="decimal" pattern="[0-9]*" value="${inCart ? cart[item.id].qty : ''}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量">
-                `;
-                list.appendChild(div);
-            });
+
+            // 顯示品項編輯按鈕組，隱藏分類編輯按鈕組
+            document.getElementById('catEditBtnGroup').style.display = 'none';
+            document.getElementById('itemEditBtnGroup').style.display = 'flex';
+
+            if (_itemInlineEditMode) {
+                header.innerText = '品項編輯模式：';
+                document.getElementById('btnQuickAddInSearch').style.display = 'none';
+                list.innerHTML = '';
+                const filteredItems = db.items.filter(item => item.catId === currentState.catId).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
+                list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">此分類下暫無材料品項。</p>' : '';
+                filteredItems.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'list-item';
+                    div.style.gap = '8px';
+                    div.innerHTML =
+                        '<span style="font-weight:500; color:#1f2937; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + item.name + '</span>' +
+                        '<div style="display:flex; gap:6px; flex-shrink:0;">' +
+                        '<button onclick="renameItemInline(\'' + item.id + '\')" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 10px; border-radius:8px;">更名</button>' +
+                        '<button onclick="deleteItemInline(\'' + item.id + '\')" style="background:#D9006C; color:white; font-size:12px; font-weight:bold; padding:6px 10px; border-radius:8px;">刪除</button>' +
+                        '</div>';
+                    list.appendChild(div);
+                });
+            } else {
+                header.innerText = '選擇材料品項（勾選並輸入數量）：';
+                document.getElementById('btnQuickAddInSearch').style.display = '';
+                list.innerHTML = '';
+                const filteredItems = db.items.filter(item => item.catId === currentState.catId).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
+                list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">此分類下暫無材料品項。</p>' : '';
+                filteredItems.forEach(item => {
+                    const inCart = !!cart[item.id];
+                    const div = document.createElement('div');
+                    div.className = "list-item";
+                    div.innerHTML = `
+                        <label class="item-label">
+                            <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="item-checkbox">
+                            <span>${item.name}</span>
+                        </label>
+                        <input type="number" inputmode="decimal" pattern="[0-9]*" value="${inCart ? cart[item.id].qty : ''}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量">
+                    `;
+                    list.appendChild(div);
+                });
+            }
+        }
+
+        let _itemInlineEditMode = false;
+
+        function enterItemEditMode() {
+            _itemInlineEditMode = true;
+            document.getElementById('btnItemEdit').style.display = 'none';
+            document.getElementById('btnItemSave').style.display = '';
+            renderItemsInline();
+        }
+
+        function exitItemEditMode() {
+            _itemInlineEditMode = false;
+            document.getElementById('btnItemEdit').style.display = '';
+            document.getElementById('btnItemSave').style.display = 'none';
+            renderItemsInline();
+        }
+
+        function renameItemInline(itemId) {
+            const item = db.items.find(i => i.id === itemId);
+            if (!item) return;
+            const newName = prompt('請輸入新名稱：', item.name);
+            if (!newName || !newName.trim()) return;
+            if (newName.trim() === item.name) return;
+            if (db.items.some(i => i.id !== itemId && i.catId === item.catId && i.name === newName.trim())) {
+                return alert('品項「' + newName.trim() + '」在此分類中已存在，請使用不同名稱。');
+            }
+            item.name = newName.trim();
+            saveToLocalStorage();
+            renderItemsInline();
+        }
+
+        function deleteItemInline(itemId) {
+            const item = db.items.find(i => i.id === itemId);
+            if (!item) return;
+            if (!confirm('確定要刪除品項「' + item.name + '」嗎？')) return;
+            db.items = db.items.filter(i => i.id !== itemId);
+            delete cart[itemId];
+            saveToLocalStorage();
+            renderItemsInline();
         }
 
         function backToCategories() {
             if (_catPickMode) cancelCatPick();
             _catPageMode = 'categories';
+            _itemInlineEditMode = false;
+            document.getElementById('itemEditBtnGroup').style.display = 'none';
+            document.getElementById('btnItemEdit').style.display = '';
+            document.getElementById('btnItemSave').style.display = 'none';
             document.getElementById('btnHomeTop').classList.add('hidden');
             document.getElementById('homeMainBtns').style.display = 'none';
             document.getElementById('orderCartBtns').style.display = '';
