@@ -21,12 +21,8 @@
         
         button { border: none; cursor: pointer; border-radius: 8px; font-weight: bold; padding: 8px 12px; font-size: 12px; transition: background-color 0.2s; }
         button:active { opacity: 0.8; }
-        .btn-blue { background-color: #111111; color: white; }
-        .btn-red { background-color: #D9006C; color: white; }
+        .btn-blue, .btn-amber, .btn-slate { background-color: #111111; color: white; }
         .btn-green { background-color: #000000; color: white; }
-        .btn-amber { background-color: #111111; color: white; }
-        .btn-slate { background-color: #111111; color: white; }
-        .btn-line { background-color: #06C755; color: white; }
         
         header button { border-radius: 33px !important; }
         #btnBack, #btnHomeTop { font-size: 12px; padding: 8px 12px; }
@@ -113,7 +109,6 @@
         .day-dots { display: flex; gap: 2px; justify-content: flex-start; overflow: hidden; position: absolute; bottom: 2px; left: 2px; right: 2px; }
         .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
         .dot-log { background-color: #ef4444; }
-        .dot-memo { background-color: #ef4444; }
         .dot-notes { background-color: #aaaaaa; }
         .dot-punch { background-color: #f5c518; }
         .dot-order { background-color: #7ec8e3; }
@@ -163,7 +158,7 @@
                         <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 0; font-size:12px; width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">←</button>
                         <div style="display:flex; flex-direction:row; align-items:center; gap:6px; flex:1; justify-content:center; position:relative;">
                             <button onclick="goToToday()" class="btn-slate" style="padding: 6px 12px; font-size:12px; border-radius:18px;">今天</button>
-                            <span id="homeCalendarDateDisplay" onclick="toggleCalendarMonthPicker(event)" style="font-size:12px; color:#ffffff; font-weight:500; background-color:#111111; padding:9px 12px; border-radius:18px; white-space:nowrap; cursor:pointer; position:relative;"></span>
+                            <span id="homeCalendarDateDisplay" onclick="toggleCalendarMonthPicker(event)" style="font-size:12px; color:#ffffff; font-weight:500; background-color:#111111; padding:6px 12px; border-radius:18px; white-space:nowrap; cursor:pointer; position:relative;"></span>
                             <div id="calendarMonthPickerDropdown" style="display:none; position:absolute; z-index:500; background:white; border:1px solid #d1d5db; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); padding:8px 0; min-width:160px; max-height:260px; overflow-y:auto; top:36px; left:50%; transform:translateX(-50%);"></div>
                         </div>
                         <button onclick="changeHomeMonth(1)" class="btn-slate" style="padding: 0; font-size:12px; width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">→</button>
@@ -222,7 +217,6 @@
                 <div style="display:flex; align-items:center; justify-content:space-between; margin:4px; flex-shrink:0; gap:8px;">
                     <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 0;">選擇材料分類：</h3>
                     <div id="catEditBtnGroup" style="display:flex; gap:6px; align-items:center;">
-                        <button id="btnCatSortInline" onclick="toggleCatInlineSort()" style="display:none; background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">排序</button>
                         <button id="btnCatAddInline" onclick="addCategoryInline()" style="display:none; background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增分類</button>
                         <button id="btnCatEdit" onclick="enterCatEditMode()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">編輯</button>
                         <button id="btnCatSave" onclick="exitCatEditMode()" style="display:none; background:#000000; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">儲存</button>
@@ -373,17 +367,10 @@
                     <h3 style="font-size: 14px; margin: 0; color: #374151;">案場維護</h3>
                     <div style="display:flex; gap:6px; align-items:center;">
                         <button id="btnSiteInfoSort" onclick="toggleSiteInfoSort()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">排序</button>
-                        <button onclick="(function(){var w=document.getElementById('addSiteInlineWrap');var show=w.style.display==='none'||w.style.display==='';w.style.display=show?'block':'none';if(show)document.getElementById('inputNewSiteInfo').focus();})()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增</button>
+                        <button onclick="confirmAddSiteInfo()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增</button>
                     </div>
                 </div>
-                <div id="addSiteInlineWrap" style="display:none; margin-bottom:8px;">
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="inputNewSiteInfo" placeholder="輸入案場名稱..." style="-webkit-user-select:text; user-select:text; flex:1;">
-                        <button onclick="confirmAddSiteInfo()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">確定</button>
-                        <button onclick="cancelAddSiteInfo()" style="background:#111111; color:white; font-size:13px; font-weight:bold; padding:6px 10px; border-radius:8px; flex-shrink:0;">✕</button>
-                    </div>
-                </div>
-                <div id="siteInfoList" style="overflow-y: auto; display: flex; flex-direction: column; gap: 4px; max-height: calc(4.5 * (36px + 4px) - 4px);"></div>
+                <div id="siteInfoList" style="display: flex; flex-direction: column; gap: 4px;"></div>
             </div>
             <div class="card" style="background-color: #f8fafc; border: 1px solid #cbd5e1; margin-bottom: 40px;">
                 <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #cbd5e1; padding-bottom:4px; margin-bottom:8px;">
@@ -677,7 +664,7 @@
                 updateCartBadge();
                 if (document.getElementById('globalSearchBar')) document.getElementById('globalSearchBar').value = '';
                 if (currentState.page === 'categories') renderCategories();
-                else if (currentState.page === 'items') renderItems();
+                else if (currentState.page === 'items') renderItemsInline();
                 else if (currentState.page === 'cart') { renderCart(); return; }
             }
         }
@@ -723,15 +710,25 @@
             if (db.sites.length === 0 && db.categories.length === 0 && db.items.length === 0) {
                 if (!confirm('目前系統內無資料，確定要匯出空白的備份檔嗎？')) return;
             }
+            const now = new Date();
+            const pad = v => String(v).padStart(2, '0');
+            const y = now.getFullYear();
+            const mo = pad(now.getMonth() + 1);
+            const d = pad(now.getDate());
+            const h = pad(now.getHours());
+            const mi = pad(now.getMinutes());
+            const s = pad(now.getSeconds());
+
+            const fileName = `GDGL_${y}${mo}${d}_${h}${mi}${s}.json`;
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
             const a = document.createElement('a');
             a.setAttribute("href", dataStr);
-            a.setAttribute("download", "工地管理系統_data.json");
+            a.setAttribute("download", fileName);
             document.body.appendChild(a);
             a.click();
             a.remove();
-            const now = new Date();
-            const ts = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+            const ts = `${y}/${mo}/${d} ${h}:${mi}:${s}`;
             try {
                 localStorage.setItem('_lastExportTime', ts);
                 localStorage.removeItem('_hasUnbackedChanges');
@@ -1081,8 +1078,6 @@
                         }
                     }
                 }, 80);
-            } else {
-                _afterShowCheckId = null;
             }
 
             updateHomeImportBtn();
@@ -1301,17 +1296,25 @@
         function syncPunchDateChange() {
             const dateStr = document.getElementById('inputPunchDate').value;
             if (!dateStr) return;
-            const checkedBefore = new Set();
-            document.querySelectorAll('.punch-site-chk:checked').forEach(el => checkedBefore.add(el.value));
+
+            // 若是編輯模式（從月曆卡片點編輯進來），保留目前的勾選與加班時數不重置
+            if (_editCtx && _editCtx.type === 'punch') {
+                // 只重新 render 案場清單（保留勾選），不動加班欄位
+                const checkedBefore = new Set();
+                document.querySelectorAll('.punch-site-chk:checked').forEach(el => checkedBefore.add(el.value));
+                renderPunchSites();
+                document.querySelectorAll('.punch-site-chk').forEach(el => {
+                    if (checkedBefore.has(el.value)) el.checked = true;
+                });
+                return;
+            }
+
+            // 非編輯模式：依新日期讀取資料庫
             renderPunchSites();
-            document.querySelectorAll('.punch-site-chk').forEach(el => {
-                if (checkedBefore.has(el.value)) el.checked = true;
-            });
             document.getElementById('inputOvertimeHours').value = '';
             for (let sId in db.punches) {
                 if (db.punches[sId] && db.punches[sId][dateStr]) {
                     const rec = db.punches[sId][dateStr];
-                    // 優先用獨立 overtime 欄位，否則解析 note 裡的加班時數
                     if (rec.overtime !== undefined && rec.overtime !== '') {
                         document.getElementById('inputOvertimeHours').value = rec.overtime;
                     } else if (rec.note) {
@@ -1352,6 +1355,17 @@
             const overtime = document.getElementById('inputOvertimeHours').value.trim();
             let note = overtime ? `加班${overtime}小時` : '';
             let selectedCount = 0;
+
+            // 若是編輯模式且日期有改變，先搬移（刪除舊日期）
+            const oldDateStr = (_editCtx && _editCtx.type === 'punch') ? _editCtx.dateStr : null;
+            if (oldDateStr && oldDateStr !== dateStr) {
+                for (let sId in db.punches) {
+                    if (db.punches[sId] && db.punches[sId][oldDateStr]) {
+                        delete db.punches[sId][oldDateStr];
+                    }
+                }
+            }
+
             chks.forEach(chk => {
                 const sId = chk.value;
                 if (chk.checked) {
@@ -1366,10 +1380,9 @@
             saveToLocalStorage();
             closePunchModal();
             showToast('儲存成功');
-            const punchDate = document.getElementById('inputPunchDate').value;
-            if (punchDate) {
-                selectedHomeDateStr = punchDate;
-                const [y, m] = punchDate.split('-').map(Number);
+            if (dateStr) {
+                selectedHomeDateStr = dateStr;
+                const [y, m] = dateStr.split('-').map(Number);
                 homeCalYear = y;
                 homeCalMonth = m - 1;
             }
@@ -1388,7 +1401,6 @@
 
         function addLogItemRow(itemValue = '', floorValue = '', peopleValue = '') {
             const container = document.getElementById('logItemsContainer');
-            const itemNum = container.children.length + 1;
             const div = document.createElement('div');
             div.className = 'log-page-entry-item';
             div.innerHTML = `
@@ -1974,22 +1986,14 @@
 
         function deleteSiteFromInfo() { deleteSiteFromManage(_siSelectedSiteId); }
 
-        function showAddSiteInline() {
-            document.getElementById('addSiteInlineWrap').style.display = '';
-            document.getElementById('inputNewSiteInfo').value = '';
-            document.getElementById('inputNewSiteInfo').focus();
-        }
-        function cancelAddSiteInfo() {
-            document.getElementById('addSiteInlineWrap').style.display = 'none';
-        }
         function confirmAddSiteInfo() {
-            const name = document.getElementById('inputNewSiteInfo').value.trim();
-            if (!name) return alert('請輸入案場名稱！');
-            if (db.sites.some(s => s.name === name)) return alert(`案場「${name}」已存在，請使用不同名稱。`);
-            const newSite = { id: Date.now().toString(), name };
+            const name = prompt('請輸入案場名稱：');
+            if (!name || !name.trim()) return;
+            const trimmed = name.trim();
+            if (db.sites.some(s => s.name === trimmed)) return alert(`案場「${trimmed}」已存在，請使用不同名稱。`);
+            const newSite = { id: Date.now().toString(), name: trimmed };
             db.sites.push(newSite);
             saveToLocalStorage();
-            document.getElementById('addSiteInlineWrap').style.display = 'none';
             renderSiteInfoList();
             // 同步刷新彈窗下拉選單
             const sel = document.getElementById('siteInfoSiteSelect');
@@ -2003,8 +2007,6 @@
         }
 
         // ================= 工程記錄 =================
-        function onLogTypeChange() {}
-
         function getLogRawText() {
             const container = document.getElementById('logItemsContainer');
             const items = container.getElementsByClassName('log-page-entry-item');
@@ -2100,16 +2102,12 @@
                 _itemInlineEditMode = false;
                 document.getElementById('btnCatEdit').style.display = '';
                 document.getElementById('btnCatSave').style.display = 'none';
-                document.getElementById('btnCatSortInline').style.display = 'none';
                 document.getElementById('btnCatAddInline').style.display = 'none';
-                document.getElementById('btnCatSortInline').innerText = '排序';
-                document.getElementById('btnCatSortInline').style.background = '#111111';
                 document.getElementById('itemEditBtnGroup').style.display = 'none';
                 document.getElementById('btnItemEdit').style.display = '';
                 document.getElementById('btnItemSave').style.display = 'none';
                 if (_catInlineSortable) { _catInlineSortable.option('disabled', true); }
                 cancelCatPick();
-                closeQuickAddInline();
                 renderCategories();
                 const listCatEl = document.getElementById('listCategories');
                 if (listCatEl) listCatEl.scrollTop = 0;
@@ -2121,7 +2119,6 @@
                 document.getElementById('btnHomeTop').classList.remove('hidden');
                 document.getElementById('globalSearchBar').value = '';
                 _catPageMode = 'items';
-                closeQuickAddInline();
                 renderCategories();
             } else if (page === 'cart') {
                 document.getElementById('pageCart').classList.add('active');
@@ -2272,7 +2269,6 @@
                 document.getElementById('cartSubmitBtns').style.display = 'none';
                 document.getElementById('homeTitle').classList.add('hidden');
                 _catPageMode = 'items';
-                closeQuickAddInline();
                 renderCategories();
             }
         });
@@ -2324,7 +2320,6 @@
             _catInlineEditMode = true;
             document.getElementById('btnCatEdit').style.display = 'none';
             document.getElementById('btnCatSave').style.display = '';
-            document.getElementById('btnCatSortInline').style.display = '';
             document.getElementById('btnCatAddInline').style.display = '';
             renderCategories();
         }
@@ -2334,10 +2329,7 @@
             if (_catInlineSortable) { _catInlineSortable.option('disabled', true); }
             document.getElementById('btnCatEdit').style.display = '';
             document.getElementById('btnCatSave').style.display = 'none';
-            document.getElementById('btnCatSortInline').style.display = 'none';
             document.getElementById('btnCatAddInline').style.display = 'none';
-            document.getElementById('btnCatSortInline').innerText = '排序';
-            document.getElementById('btnCatSortInline').style.background = '#111111';
             renderCategories();
         }
 
@@ -2353,40 +2345,6 @@
             renderManageCategoryDropdown();
             const list = document.getElementById('listCategories');
             if (list) setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50);
-        }
-
-        function toggleCatInlineSort() {
-            const btn = document.getElementById('btnCatSortInline');
-            const list = document.getElementById('listCategories');
-            if (!_catInlineSortable) {
-                _catInlineSortable = new Sortable(list, {
-                    animation: 150,
-                    handle: '.cat-inline-drag-handle',
-                    ghostClass: 'sortable-ghost',
-                    disabled: true,
-                    onEnd: function() {
-                        const items = list.querySelectorAll('.cat-inline-item');
-                        const newOrder = [];
-                        items.forEach(el => {
-                            const catId = el.getAttribute('data-cat-id');
-                            const cat = db.categories.find(c => c.id === catId);
-                            if (cat) newOrder.push(cat);
-                        });
-                        db.categories = newOrder;
-                        saveToLocalStorage();
-                    }
-                });
-            }
-            const isOn = btn.innerText === '完成排序';
-            if (isOn) {
-                _catInlineSortable.option('disabled', true);
-                btn.innerText = '排序';
-                btn.style.background = '#111111';
-            } else {
-                _catInlineSortable.option('disabled', false);
-                btn.innerText = '完成排序';
-                btn.style.background = '#D9006C';
-            }
         }
 
         function renameCategoryInline(catId) {
@@ -2501,16 +2459,27 @@
                         '</div>';
                     list.appendChild(div);
                 });
-                // 重新綁定 Sortable（list 已重建）
+                // 重新綁定 Sortable（list 已重建），直接啟用拖動
                 if (_catInlineSortable) {
                     _catInlineSortable.destroy();
                     _catInlineSortable = null;
                 }
-                const sortBtn = document.getElementById('btnCatSortInline');
-                if (sortBtn && sortBtn.innerText === '完成排序') {
-                    sortBtn.innerText = '排序';
-                    sortBtn.style.background = '#111111';
-                }
+                _catInlineSortable = new Sortable(list, {
+                    animation: 150,
+                    handle: '.cat-inline-drag-handle',
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function() {
+                        const items = list.querySelectorAll('.cat-inline-item');
+                        const newOrder = [];
+                        items.forEach(el => {
+                            const catId = el.getAttribute('data-cat-id');
+                            const cat = db.categories.find(c => c.id === catId);
+                            if (cat) newOrder.push(cat);
+                        });
+                        db.categories = newOrder;
+                        saveToLocalStorage();
+                    }
+                });
             } else {
                 // 分類模式：隱藏首頁按鈕
                 document.getElementById('catEditBtnGroup').style.display = '';
@@ -2646,12 +2615,8 @@
             document.getElementById('homeMainBtns').style.display = 'none';
             document.getElementById('orderCartBtns').style.display = '';
             document.getElementById('cartSubmitBtns').style.display = 'none';
-            closeQuickAddInline();
             renderCategories();
         }
-
-        function openQuickAddInline() { /* merged into search bar */ }
-        function closeQuickAddInline() { /* merged into search bar */ }
 
         function handleItemCheck(itemId, checked) {
             if (checked) { if (!cart[itemId]) cart[itemId] = { qty: '' }; }
@@ -2753,25 +2718,6 @@
                 if (wrap) wrap.style.display = 'none';
             }
             quickAddFromSearch();
-        }
-
-        function renderItems() {
-            const list = document.getElementById('listItems');
-            const filteredItems = db.items.filter(item => item.catId === currentState.catId).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
-            list.innerHTML = filteredItems.length === 0 ? '<p class="text-muted text-center">此分類下暫無材料品項。</p>' : '';
-            filteredItems.forEach(item => {
-                const inCart = !!cart[item.id];
-                const div = document.createElement('div');
-                div.className = "list-item";
-                div.innerHTML = `
-                    <label class="item-label">
-                        <input type="checkbox" id="chk-${item.id}" ${inCart ? 'checked' : ''} onchange="handleItemCheck('${item.id}', this.checked)" class="item-checkbox">
-                        <span>${item.name}</span>
-                    </label>
-                    <input type="number" inputmode="decimal" pattern="[0-9]*" value="${inCart ? cart[item.id].qty : ''}" oninput="handleItemQty('${item.id}', this.value)" class="qty-input" placeholder="數量">
-                `;
-                list.appendChild(div);
-            });
         }
 
         function changeCartQty(itemId, qty) {
