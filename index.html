@@ -1518,12 +1518,12 @@
                 div.setAttribute('data-id', site.id);
                 if (sortMode) {
                     div.innerHTML = `
-                        <span class="manage-text" style="font-size:14px; font-weight:600; color:#1f2937;">${site.name}</span>
+                        <span class="manage-text">${site.name}</span>
                         <span class="drag-handle" style="flex-shrink:0; color:#374151; font-size:16px; padding:4px 0 4px 24px;">☰</span>
                     `;
                 } else {
                     div.innerHTML = `
-                        <span class="manage-text" style="font-size:14px; font-weight:600; color:#1f2937;">${site.name}</span>
+                        <span class="manage-text">${site.name}</span>
                         <div class="manage-btns">
                             <button class="btn-rename" onclick="renameSiteFromManage('${site.id}')">改名</button>
                             <button class="btn-del" onclick="deleteSiteFromManage('${site.id}')">刪除</button>
