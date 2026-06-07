@@ -158,7 +158,7 @@
                         <button onclick="changeHomeMonth(-1)" class="btn-slate" style="padding: 0; font-size:12px; width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">←</button>
                         <div style="display:flex; flex-direction:row; align-items:center; gap:6px; flex:1; justify-content:center; position:relative;">
                             <button onclick="goToToday()" class="btn-slate" style="padding: 6px 12px; font-size:12px; border-radius:18px;">今天</button>
-                            <span id="homeCalendarDateDisplay" onclick="toggleCalendarMonthPicker(event)" style="font-size:12px; color:#ffffff; font-weight:500; background-color:#111111; padding:6px 12px; border-radius:18px; white-space:nowrap; cursor:pointer; position:relative;"></span>
+                            <span id="homeCalendarDateDisplay" onclick="toggleCalendarMonthPicker(event)" style="font-size:12px; color:#ffffff; font-weight:500; background-color:#111111; padding:9px 12px; border-radius:18px; white-space:nowrap; cursor:pointer; position:relative;"></span>
                             <div id="calendarMonthPickerDropdown" style="display:none; position:absolute; z-index:500; background:white; border:1px solid #d1d5db; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); padding:8px 0; min-width:160px; max-height:260px; overflow-y:auto; top:36px; left:50%; transform:translateX(-50%);"></div>
                         </div>
                         <button onclick="changeHomeMonth(1)" class="btn-slate" style="padding: 0; font-size:12px; width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">→</button>
@@ -207,14 +207,16 @@
                     </div>
                 </div>
             </div>
-            <div class="card" style="padding: 12px; flex-direction: row; align-items: center; gap: 8px;">
-                <span style="color: #9ca3af;">🔍</span>
-                <input type="text" id="globalSearchBar" oninput="renderCategories()" style="border: none; padding: 4px; font-size: 14px; width: 100%; outline: none;" placeholder="搜尋全部材料品項...">
-                <button id="btnQuickAddInSearch" onclick="quickAddFromSearch()" style="display:none; background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">新增</button>
+            <div style="display:flex; align-items:center; gap:8px; padding: 0; flex-shrink:0;">
+                <div class="card" style="padding: 8px 12px; flex-direction: row; align-items: center; gap: 8px; flex:1;">
+                    <span style="color: #9ca3af;">🔍</span>
+                    <input type="text" id="globalSearchBar" oninput="renderCategories()" style="border: none; padding: 4px; font-size: 14px; width: 100%; outline: none;" placeholder="搜尋全部材料品項...">
+                    <button id="btnQuickAddInSearch" onclick="quickAddFromSearch()" style="display:none; background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; flex-shrink:0;">新增</button>
+                </div>
             </div>
 
             <div class="list-container" style="flex: 1; min-height: 0;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin:4px; flex-shrink:0; gap:8px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin:4px; flex-shrink:0;">
                     <h3 id="categoryListHeader" style="font-size: 14px; color: #4b5563; margin: 0;">選擇材料分類：</h3>
                     <div id="catEditBtnGroup" style="display:flex; gap:6px; align-items:center;">
                         <button id="btnCatAddInline" onclick="addCategoryInline()" style="display:none; background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增分類</button>
@@ -366,8 +368,9 @@
                 <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e5e7eb; padding-bottom:4px; margin-bottom:8px;">
                     <h3 style="font-size: 14px; margin: 0; color: #374151;">案場維護</h3>
                     <div style="display:flex; gap:6px; align-items:center;">
-                        <button id="btnSiteInfoSort" onclick="toggleSiteInfoSort()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">排序</button>
-                        <button onclick="confirmAddSiteInfo()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增</button>
+                        <button id="btnSiteInfoAdd" onclick="confirmAddSiteInfo()" style="display:none; background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">新增案場</button>
+                        <button id="btnSiteInfoEdit" onclick="enterSiteInfoEditMode()" style="background:#111111; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">編輯</button>
+                        <button id="btnSiteInfoSave" onclick="exitSiteInfoEditMode()" style="display:none; background:#000000; color:white; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px;">儲存</button>
                     </div>
                 </div>
                 <div id="siteInfoList" style="display: flex; flex-direction: column; gap: 4px;"></div>
@@ -1530,8 +1533,8 @@
             sel.innerHTML = _buildMonthOptions(curVal);
         }
 
-        function renderSiteInfoList(sortMode) {
-            if (sortMode === undefined) sortMode = _siteInfoSortMode;
+        function renderSiteInfoList(editMode) {
+            if (editMode === undefined) editMode = _siteInfoEditMode;
             const box = document.getElementById('siteInfoList');
             box.innerHTML = '';
             if (db.sites.length === 0) {
@@ -1542,19 +1545,17 @@
                 const div = document.createElement('div');
                 div.className = 'manage-item';
                 div.setAttribute('data-id', site.id);
-                if (sortMode) {
+                if (editMode) {
                     div.innerHTML = `
-                        <span class="manage-text">${site.name}</span>
-                        <span class="drag-handle" style="flex-shrink:0; color:#374151; font-size:16px; padding:4px 0 4px 24px;">☰</span>
-                    `;
-                } else {
-                    div.innerHTML = `
+                        <span class="drag-handle" style="flex-shrink:0; color:#9ca3af; font-size:16px; padding:4px 8px 4px 0; cursor:move;">☰</span>
                         <span class="manage-text">${site.name}</span>
                         <div class="manage-btns">
-                            <button class="btn-rename" onclick="renameSiteFromManage('${site.id}')">改名</button>
+                            <button class="btn-rename" onclick="renameSiteFromManage('${site.id}')">更名</button>
                             <button class="btn-del" onclick="deleteSiteFromManage('${site.id}')">刪除</button>
                         </div>
                     `;
+                } else {
+                    div.innerHTML = `<span class="manage-text">${site.name}</span>`;
                 }
                 box.appendChild(div);
             });
@@ -1630,39 +1631,46 @@
             _renderAllSiteInfo();
         }
 
-        let _siteInfoSortMode = false;
+        let _siteInfoEditMode = false;
         let _siteInfoSortable = null;
 
-        function toggleSiteInfoSort() {
-            const btn = document.getElementById('btnSiteInfoSort');
+        function enterSiteInfoEditMode() {
+            _siteInfoEditMode = true;
+            document.getElementById('btnSiteInfoEdit').style.display = 'none';
+            document.getElementById('btnSiteInfoSave').style.display = '';
+            document.getElementById('btnSiteInfoAdd').style.display = '';
+            renderSiteInfoList(true);
             const siList = document.getElementById('siteInfoList');
-            if (!_siteInfoSortMode) {
-                _siteInfoSortMode = true;
-                btn.innerText = '儲存';
-                btn.style.background = '#000000';
-                renderSiteInfoList(true);
-                if (!_siteInfoSortable) {
-                    _siteInfoSortable = new Sortable(siList, {
-                        animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', threshold: 5,
-                        onEnd: function() {}
+            if (_siteInfoSortable) { _siteInfoSortable.destroy(); _siteInfoSortable = null; }
+            _siteInfoSortable = new Sortable(siList, {
+                animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', threshold: 5,
+                onEnd: function() {
+                    const sorted = [];
+                    siList.querySelectorAll('.manage-item').forEach(el => {
+                        const s = db.sites.find(s => s.id === el.getAttribute('data-id'));
+                        if (s) sorted.push(s);
                     });
+                    db.sites = sorted;
+                    saveToLocalStorage();
                 }
-                _siteInfoSortable.option('disabled', false);
-            } else {
-                _siteInfoSortMode = false;
-                btn.innerText = '排序';
-                btn.style.background = '#111111';
-                const sorted = [];
-                siList.querySelectorAll('.manage-item').forEach(el => {
-                    const s = db.sites.find(s => s.id === el.getAttribute('data-id'));
-                    if (s) sorted.push(s);
-                });
-                db.sites = sorted;
-                saveToLocalStorage();
-                if (_siteInfoSortable) _siteInfoSortable.option('disabled', true);
-                renderSiteInfoList();
-                if (_siSelectedSiteId) selectSiteInfoSite(_siSelectedSiteId);
-            }
+            });
+        }
+
+        function exitSiteInfoEditMode() {
+            _siteInfoEditMode = false;
+            document.getElementById('btnSiteInfoEdit').style.display = '';
+            document.getElementById('btnSiteInfoSave').style.display = 'none';
+            document.getElementById('btnSiteInfoAdd').style.display = 'none';
+            const siList = document.getElementById('siteInfoList');
+            const sorted = [];
+            siList.querySelectorAll('.manage-item').forEach(el => {
+                const s = db.sites.find(s => s.id === el.getAttribute('data-id'));
+                if (s) sorted.push(s);
+            });
+            db.sites = sorted;
+            saveToLocalStorage();
+            if (_siteInfoSortable) { _siteInfoSortable.destroy(); _siteInfoSortable = null; }
+            renderSiteInfoList(false);
         }
 
         function _fmtAmount(v) {
@@ -2149,11 +2157,12 @@
                 const catSortBtn = document.getElementById('btnCategorySort');
                 if (catSortBtn) { catSortBtn.innerText = '排序'; catSortBtn.style.background = '#111111'; }
                 if (_categorySortable) _categorySortable.option('disabled', true);
-                _siteInfoSortMode = false;
-                const siSortBtn = document.getElementById('btnSiteInfoSort');
-                if (siSortBtn) { siSortBtn.innerText = '排序'; siSortBtn.style.background = '#111111'; }
-                if (_siteInfoSortable) _siteInfoSortable.option('disabled', true);
-                renderSiteInfoList();
+                _siteInfoEditMode = false;
+                document.getElementById('btnSiteInfoEdit').style.display = '';
+                document.getElementById('btnSiteInfoSave').style.display = 'none';
+                document.getElementById('btnSiteInfoAdd').style.display = 'none';
+                if (_siteInfoSortable) { _siteInfoSortable.destroy(); _siteInfoSortable = null; }
+                renderSiteInfoList(false);
                 renderManageCategories(false);
                 renderManageCategoryDropdown();
                 document.getElementById('pageManage').scrollTop = 0;
@@ -2188,11 +2197,12 @@
                 sel.appendChild(opt);
             });
             // 同步設定頁案場列表
-            _siteInfoSortMode = false;
-            const sortBtn = document.getElementById('btnSiteInfoSort');
-            if (sortBtn) { sortBtn.innerText = '排序'; sortBtn.style.background = '#111111'; }
-            if (_siteInfoSortable) _siteInfoSortable.option('disabled', true);
-            renderSiteInfoList();
+            _siteInfoEditMode = false;
+            document.getElementById('btnSiteInfoEdit').style.display = '';
+            document.getElementById('btnSiteInfoSave').style.display = 'none';
+            document.getElementById('btnSiteInfoAdd').style.display = 'none';
+            if (_siteInfoSortable) { _siteInfoSortable.destroy(); _siteInfoSortable = null; }
+            renderSiteInfoList(false);
             if (db.sites.length > 0) {
                 sel.value = db.sites[0].id;
                 selectSiteInfoSite(db.sites[0].id);
@@ -2901,7 +2911,7 @@
                 } else {
                     div.innerHTML = `<span class="manage-text">${cat.name}</span>
                         <div class="manage-btns" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
-                            <button onclick="renameCategory('${cat.id}', '${cat.name}')" class="btn-rename">改名</button>
+                            <button onclick="renameCategory('${cat.id}', '${cat.name}')" class="btn-rename">更名</button>
                             <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="btn-del">刪除</button>
                         </div>`;
                 }
@@ -2959,7 +2969,7 @@
                 div.className = "manage-item";
                 div.innerHTML = `<span class="manage-text">${item.name}</span>
                     <div class="manage-btns">
-                        <button class="btn-rename-item btn-rename">改名</button>
+                        <button class="btn-rename-item btn-rename">更名</button>
                         <button class="btn-delete-item btn-del">刪除</button>
                     </div>`;
                 div.querySelector('.btn-rename-item').addEventListener('click', () => renameManageItem(item.id, item.name));
